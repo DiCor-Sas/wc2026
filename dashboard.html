@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WC 2026 Predictions Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0d1f0f;
+      --bg2:     #152818;
+      --bg3:     #1c3320;
+      --card:    #1e3d22;
+      --border:  #2e5c34;
+      --accent:  #4caf50;
+      --accent2: #81c784;
+      --gold:    #ffd54f;
+      --silver:  #b0bec5;
+      --bronze:  #a0714f;
+      --text:    #e8f5e9;
+      --muted:   #a5d6a7;
+      --red:     #ef5350;
+      --yellow:  #ffca28;
+      --radius:  8px;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; padding-bottom: 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg,#0a1a0c 0%,#1b3d1e 50%,#0a1a0c 100%);
+      border-bottom: 2px solid var(--border);
+      padding: 1.5rem 1rem; text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.3rem,4vw,2rem); font-weight: 800;
+      letter-spacing: .05em; color: var(--accent); text-transform: uppercase;
+    }
+    header p { color: var(--muted); font-size: .82rem; margin-top: .3rem; }
+
+    /* ── Layout ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
+    section { margin-top: 2rem; }
+    .section-title {
+      font-size: .68rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent2);
+      border-left: 3px solid var(--accent); padding-left: .6rem; margin-bottom: 1rem;
+    }
+
+    /* ── Top predictions ── */
+    .top-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
+    @media(min-width:600px){ .top-grid { grid-template-columns: repeat(4,1fr); } }
+    .pred-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem .8rem;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .pred-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    }
+    .pred-card.winner::before { background: var(--gold); }
+    .pred-card.runner::before { background: var(--silver); }
+    .pred-card.third::before  { background: var(--bronze); }
+    .pred-card.boot::before   { background: var(--accent); }
+    .pred-medal  { font-size:1.4rem; display:block; margin-bottom:.3rem; }
+    .pred-label  { font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
+    .pred-team   { font-size:1rem; font-weight:800; }
+    .pred-pct    { font-size:1.5rem; font-weight:900; margin-top:.25rem; line-height:1; }
+    .pred-card.winner .pred-pct { color: var(--gold); }
+    .pred-card.runner .pred-pct { color: var(--silver); }
+    .pred-card.third  .pred-pct { color: var(--bronze); }
+    .pred-card.boot   .pred-pct { color: var(--accent2); }
+    .pred-sub { font-size:.68rem; color:var(--muted); margin-top:.2rem; }
+
+    /* ── Round of 32 ko-cards ── */
+    .ko-round-label {
+      font-size:.65rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); margin:1.4rem 0 .55rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .ko-round-label::after { content:''; flex:1; height:1px; background:var(--border); }
+    .ko-grid { display:grid; grid-template-columns:1fr; gap:.6rem; }
+    @media(min-width:600px){ .ko-grid { grid-template-columns:1fr 1fr; } }
+    .ko-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:.75rem .85rem;
+    }
+    .ko-card.final-card { border-color:var(--gold); background:#1e3020; }
+    .ko-head {
+      font-size:.6rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:.55rem; display:flex; flex-wrap:wrap; gap:.25rem; align-items:center;
+    }
+    .ko-slot {
+      background:var(--bg3); border:1px solid var(--border); border-radius:3px;
+      padding:1px 5px; color:var(--accent2); font-size:.58rem; text-transform:none; letter-spacing:0;
+    }
+    .ko-matchup { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:.35rem; margin-bottom:.5rem; }
+    .ko-team { display:flex; flex-direction:column; }
+    .ko-right { align-items:flex-end; text-align:right; }
+    .ko-name { font-size:.88rem; font-weight:800; line-height:1.2; }
+    .ko-wt .ko-name { color:var(--accent2); }
+    .ko-stat { font-size:.58rem; color:var(--muted); margin-top:.15rem; line-height:1.3; }
+    .ko-vs { font-size:.65rem; font-weight:700; color:var(--muted); padding:0 .2rem; }
+    .ko-bar-row { display:flex; border-radius:4px; overflow:hidden; height:16px; margin-bottom:.45rem; }
+    .ko-bar-seg { display:flex; align-items:center; min-width:20px; }
+    .ko-bar-l { background:linear-gradient(90deg,var(--accent2),var(--accent)); justify-content:flex-end; }
+    .ko-bar-r { background:linear-gradient(90deg,#e57373,var(--red)); justify-content:flex-start; }
+    .ko-bar-lbl { font-size:.58rem; font-weight:700; padding:0 3px; color:#0d1f0f; white-space:nowrap; }
+    .ko-bar-lbl-r { color:#fff; }
+    .ko-predicted { font-size:.65rem; font-weight:700; color:var(--accent); border-top:1px solid var(--border); padding-top:.35rem; margin-top:.1rem; }
+    .final-card .ko-predicted { color:var(--gold); }
+
+    /* ── Bracket tree (R16 → Final) ── */
+    .bracket-note { font-size:.72rem; color:var(--muted); margin-bottom:1rem; }
+    .bracket-scroll { overflow-x:auto; padding-bottom:.5rem; }
+    .bracket {
+      display:grid; grid-template-columns:repeat(4,minmax(148px,1fr));
+      gap:0; min-width:600px;
+    }
+    .b-round { display:flex; flex-direction:column; }
+    .b-round-title {
+      font-size:.58rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent2); text-align:center; padding:.4rem 0;
+      background:var(--bg2); border-bottom:1px solid var(--border);
+      border-right:1px solid var(--border);
+    }
+    .b-round:first-child .b-round-title { border-left:1px solid var(--border); }
+    .b-slots {
+      flex:1; display:flex; flex-direction:column; justify-content:space-around;
+      padding:.5rem .45rem; border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border); background:var(--bg2);
+    }
+    .b-round:first-child .b-slots { border-left:1px solid var(--border); }
+    .b-match { margin:.22rem 0; }
+    .b-team {
+      background:var(--card); border:1px solid var(--border); border-radius:4px;
+      padding:.28rem .48rem; font-size:.72rem; font-weight:700;
+      display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;
+    }
+    .b-team.likely      { border-color:var(--accent); color:var(--accent2); }
+    .b-team.winner-team { border-color:var(--gold); color:var(--gold); background:#1e3322; }
+    .b-team-pct { font-size:.62rem; font-weight:600; color:var(--muted); }
+    .b-team.likely .b-team-pct      { color:var(--accent); }
+    .b-team.winner-team .b-team-pct { color:var(--gold); }
+    .b-divider { height:1px; background:var(--border); margin:.22rem 0; opacity:.4; }
+
+    /* Third-place mini-card under Final column */
+    .tp-card {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:var(--radius); padding:.55rem .6rem; margin-top:.8rem;
+    }
+    .tp-title {
+      font-size:.58rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:.4rem; text-align:center;
+    }
+
+    /* ── Group stage ── */
+    .day-header { display:flex; align-items:center; gap:.6rem; margin:1.4rem 0 .6rem; }
+    .day-header-date {
+      font-size:.72rem; font-weight:800; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--accent); white-space:nowrap;
+    }
+    .day-header-line { flex:1; height:1px; background:var(--border); }
+    .match-grid { display:grid; grid-template-columns:1fr; gap:.6rem; }
+    @media(min-width:640px){ .match-grid { grid-template-columns:1fr 1fr; } }
+    .match-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:.75rem .85rem;
+    }
+    .match-meta {
+      font-size:.6rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .match-meta .group-badge {
+      display:inline-block; background:var(--bg3); border:1px solid var(--border);
+      border-radius:3px; padding:0 4px; margin-right:4px; color:var(--accent2);
+    }
+    .match-teams {
+      display:grid; grid-template-columns:1fr auto 1fr;
+      align-items:center; gap:.4rem; margin-bottom:.55rem;
+    }
+    .match-team { font-size:.88rem; font-weight:700; line-height:1.2; }
+    .match-team.right { text-align:right; }
+    .match-score {
+      background:var(--bg3); border:1px solid var(--border); border-radius:5px;
+      padding:.2rem .55rem; font-size:.95rem; font-weight:900; color:var(--accent); white-space:nowrap;
+    }
+    .match-bars { display:grid; grid-template-columns:1fr auto 1fr; gap:.35rem; align-items:center; }
+    .bar-wrap { position:relative; height:16px; border-radius:3px; overflow:hidden; background:var(--bg); }
+    .bar-fill { position:absolute; top:0; bottom:0; border-radius:3px; }
+    .bar-fill.left  { right:0; background:linear-gradient(90deg,var(--accent2),var(--accent)); }
+    .bar-fill.right { left:0; background:linear-gradient(90deg,#e57373,var(--red)); }
+    .bar-pct { font-size:.6rem; font-weight:700; position:absolute; top:50%; transform:translateY(-50%); }
+    .bar-pct.lp { right:3px; color:#0d1f0f; }
+    .bar-pct.rp { left:3px; color:#fff; }
+    .draw-pill {
+      background:var(--bg3); border:1px solid var(--border); border-radius:99px;
+      font-size:.58rem; font-weight:700; color:var(--yellow);
+      padding:.12rem .38rem; text-align:center; white-space:nowrap;
+    }
+
+    footer { text-align:center; margin-top:2.5rem; font-size:.68rem; color:#4a6e4d; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#127942; FIFA World Cup 2026 &mdash; Predictions</h1>
+  <p>Monte Carlo simulation &mdash; 10,000 runs &bull; Full 48-team format with Round of 32 &bull; June 1, 2026</p>
+</header>
+
+<div class="container">
+
+<!-- ═══════ SECTION 1 — TOP PREDICTIONS ══════ -->
+<section>
+  <div class="section-title">Top Predictions</div>
+  <div class="top-grid">
+    <div class="pred-card winner">
+      <span class="pred-medal">&#127942;</span>
+      <div class="pred-label">Tournament Winner</div>
+      <div class="pred-team">Spain</div>
+      <div class="pred-pct">8.67%</div>
+      <div class="pred-sub">867 / 10,000 simulations</div>
+    </div>
+    <div class="pred-card runner">
+      <span class="pred-medal">&#129352;</span>
+      <div class="pred-label">Runner-Up</div>
+      <div class="pred-team">Argentina</div>
+      <div class="pred-pct">6.14%</div>
+      <div class="pred-sub">Most likely finalist #2</div>
+    </div>
+    <div class="pred-card third">
+      <span class="pred-medal">&#129353;</span>
+      <div class="pred-label">Third Place</div>
+      <div class="pred-team">France</div>
+      <div class="pred-pct">5.84%</div>
+      <div class="pred-sub">Most likely 3rd-place finish</div>
+    </div>
+    <div class="pred-card boot">
+      <span class="pred-medal">&#9917;</span>
+      <div class="pred-label">Golden Boot</div>
+      <div class="pred-team">K. Mbapp&#233;</div>
+      <div class="pred-pct">12.4%</div>
+      <div class="pred-sub">France &bull; Top scorer pick</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SECTION 2 — ROUND OF 32 ══════ -->
+<section>
+  <div class="section-title">Round of 32 &mdash; All 16 Matches</div>
+  <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;">
+    "Reaches X%" = probability this team plays in this slot across all 10,000 simulations.
+    "Wins if reached Y%" = conditional win probability when they do play.
+  </p>
+  <div class="ko-round-label">Left Side of Bracket (feeds Semi-Final 1)</div>
+  <div class="ko-grid">
+<div class="ko-card">
+  <div class="ko-head">M73 &middot; SoFi Stadium, LA &middot; <span class="ko-slot">2nd-A vs 2nd-B</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Switzerland</div>
+      <div class="ko-stat">Reaches&nbsp;31% &bull; Wins&nbsp;if&nbsp;reached&nbsp;53%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">South Korea</div>
+      <div class="ko-stat">Reaches&nbsp;31% &bull; Wins&nbsp;if&nbsp;reached&nbsp;49%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:52%"><span class="ko-bar-lbl">16.4%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:48%"><span class="ko-bar-lbl ko-bar-lbl-r">14.9%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Switzerland advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M74 &middot; Gillette Stadium, Boston &middot; <span class="ko-slot">1st-E vs 3rd(A/B/C/D/F)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Germany</div>
+      <div class="ko-stat">Reaches&nbsp;54% &bull; Wins&nbsp;if&nbsp;reached&nbsp;64%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Ecuador</div>
+      <div class="ko-stat">Reaches&nbsp;28% &bull; Wins&nbsp;if&nbsp;reached&nbsp;55%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:70%"><span class="ko-bar-lbl">34.9%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:30%"><span class="ko-bar-lbl ko-bar-lbl-r">15.2%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Germany advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M75 &middot; Estadio BBVA, Monterrey &middot; <span class="ko-slot">1st-F vs 2nd-C</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Netherlands</div>
+      <div class="ko-stat">Reaches&nbsp;58% &bull; Wins&nbsp;if&nbsp;reached&nbsp;57%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Morocco</div>
+      <div class="ko-stat">Reaches&nbsp;43% &bull; Wins&nbsp;if&nbsp;reached&nbsp;52%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:60%"><span class="ko-bar-lbl">33.0%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:40%"><span class="ko-bar-lbl ko-bar-lbl-r">22.4%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Netherlands advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M76 &middot; NRG Stadium, Houston &middot; <span class="ko-slot">1st-C vs 2nd-F</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Brazil</div>
+      <div class="ko-stat">Reaches&nbsp;54% &bull; Wins&nbsp;if&nbsp;reached&nbsp;69%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Morocco</div>
+      <div class="ko-stat">Reaches&nbsp;37% &bull; Wins&nbsp;if&nbsp;reached&nbsp;68%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:60%"><span class="ko-bar-lbl">37.3%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:40%"><span class="ko-bar-lbl ko-bar-lbl-r">25.1%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Brazil advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M77 &middot; MetLife Stadium, NJ &middot; <span class="ko-slot">1st-I vs 3rd(C/D/F/G/H)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">France</div>
+      <div class="ko-stat">Reaches&nbsp;66% &bull; Wins&nbsp;if&nbsp;reached&nbsp;75%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Scotland</div>
+      <div class="ko-stat">Reaches&nbsp;28% &bull; Wins&nbsp;if&nbsp;reached&nbsp;24%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:88%"><span class="ko-bar-lbl">49.7%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:12%"><span class="ko-bar-lbl ko-bar-lbl-r">6.6%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;France advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M78 &middot; AT&T Stadium, Dallas &middot; <span class="ko-slot">2nd-E vs 2nd-I</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Senegal</div>
+      <div class="ko-stat">Reaches&nbsp;46% &bull; Wins&nbsp;if&nbsp;reached&nbsp;67%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Ecuador</div>
+      <div class="ko-stat">Reaches&nbsp;35% &bull; Wins&nbsp;if&nbsp;reached&nbsp;39%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:69%"><span class="ko-bar-lbl">31.0%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:31%"><span class="ko-bar-lbl ko-bar-lbl-r">13.7%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Senegal advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M79 &middot; Estadio Azteca, Mexico City &middot; <span class="ko-slot">1st-A vs 3rd(C/E/F/H/I)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Mexico</div>
+      <div class="ko-stat">Reaches&nbsp;44% &bull; Wins&nbsp;if&nbsp;reached&nbsp;72%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">UEFA Play-off D</div>
+      <div class="ko-stat">Reaches&nbsp;26% &bull; Wins&nbsp;if&nbsp;reached&nbsp;63%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:66%"><span class="ko-bar-lbl">31.6%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:34%"><span class="ko-bar-lbl ko-bar-lbl-r">16.6%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Mexico advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M80 &middot; Mercedes-Benz Stadium &middot; <span class="ko-slot">1st-L vs 3rd(E/H/I/J/K)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">England</div>
+      <div class="ko-stat">Reaches&nbsp;61% &bull; Wins&nbsp;if&nbsp;reached&nbsp;77%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Croatia</div>
+      <div class="ko-stat">Reaches&nbsp;29% &bull; Wins&nbsp;if&nbsp;reached&nbsp;76%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:68%"><span class="ko-bar-lbl">46.8%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:32%"><span class="ko-bar-lbl ko-bar-lbl-r">22.0%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;England advances</div>
+</div>
+  </div>
+  <div class="ko-round-label">Right Side of Bracket (feeds Semi-Final 2)</div>
+  <div class="ko-grid">
+<div class="ko-card">
+  <div class="ko-head">M81 &middot; Levi's Stadium, SF &middot; <span class="ko-slot">1st-D vs 3rd(B/E/F/I/J)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">USA</div>
+      <div class="ko-stat">Reaches&nbsp;49% &bull; Wins&nbsp;if&nbsp;reached&nbsp;66%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">UEFA Play-off C</div>
+      <div class="ko-stat">Reaches&nbsp;23% &bull; Wins&nbsp;if&nbsp;reached&nbsp;56%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:72%"><span class="ko-bar-lbl">32.6%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:28%"><span class="ko-bar-lbl ko-bar-lbl-r">12.7%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;USA advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M82 &middot; Lumen Field, Seattle &middot; <span class="ko-slot">1st-G vs 3rd(A/E/H/I/J)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Belgium</div>
+      <div class="ko-stat">Reaches&nbsp;59% &bull; Wins&nbsp;if&nbsp;reached&nbsp;65%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Iran</div>
+      <div class="ko-stat">Reaches&nbsp;32% &bull; Wins&nbsp;if&nbsp;reached&nbsp;59%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:67%"><span class="ko-bar-lbl">38.4%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:33%"><span class="ko-bar-lbl ko-bar-lbl-r">18.9%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Belgium advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M83 &middot; BMO Field, Toronto &middot; <span class="ko-slot">2nd-K vs 2nd-L</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Croatia</div>
+      <div class="ko-stat">Reaches&nbsp;45% &bull; Wins&nbsp;if&nbsp;reached&nbsp;60%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Colombia</div>
+      <div class="ko-stat">Reaches&nbsp;39% &bull; Wins&nbsp;if&nbsp;reached&nbsp;51%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:57%"><span class="ko-bar-lbl">26.8%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:43%"><span class="ko-bar-lbl ko-bar-lbl-r">19.9%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Croatia advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M84 &middot; SoFi Stadium, LA &middot; <span class="ko-slot">1st-H vs 2nd-J</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Spain</div>
+      <div class="ko-stat">Reaches&nbsp;70% &bull; Wins&nbsp;if&nbsp;reached&nbsp;76%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Austria</div>
+      <div class="ko-stat">Reaches&nbsp;38% &bull; Wins&nbsp;if&nbsp;reached&nbsp;31%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:82%"><span class="ko-bar-lbl">53.8%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:18%"><span class="ko-bar-lbl ko-bar-lbl-r">12.1%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Spain advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M85 &middot; BC Place, Vancouver &middot; <span class="ko-slot">1st-B vs 3rd(E/F/G/I/J)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">UEFA Play-off A</div>
+      <div class="ko-stat">Reaches&nbsp;44% &bull; Wins&nbsp;if&nbsp;reached&nbsp;65%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Switzerland</div>
+      <div class="ko-stat">Reaches&nbsp;29% &bull; Wins&nbsp;if&nbsp;reached&nbsp;64%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:60%"><span class="ko-bar-lbl">28.4%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:40%"><span class="ko-bar-lbl ko-bar-lbl-r">18.9%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;UEFA Play-off A advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M86 &middot; Hard Rock Stadium, Miami &middot; <span class="ko-slot">1st-J vs 2nd-H</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Argentina</div>
+      <div class="ko-stat">Reaches&nbsp;74% &bull; Wins&nbsp;if&nbsp;reached&nbsp;73%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Uruguay</div>
+      <div class="ko-stat">Reaches&nbsp;48% &bull; Wins&nbsp;if&nbsp;reached&nbsp;35%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:76%"><span class="ko-bar-lbl">53.7%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:24%"><span class="ko-bar-lbl ko-bar-lbl-r">16.8%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Argentina advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M87 &middot; Arrowhead Stadium, KC &middot; <span class="ko-slot">1st-K vs 3rd(D/E/I/J/L)</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Portugal</div>
+      <div class="ko-stat">Reaches&nbsp;60% &bull; Wins&nbsp;if&nbsp;reached&nbsp;72%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">Colombia</div>
+      <div class="ko-stat">Reaches&nbsp;37% &bull; Wins&nbsp;if&nbsp;reached&nbsp;64%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:65%"><span class="ko-bar-lbl">43.3%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:35%"><span class="ko-bar-lbl ko-bar-lbl-r">23.8%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Portugal advances</div>
+</div>
+<div class="ko-card">
+  <div class="ko-head">M88 &middot; AT&T Stadium, Dallas &middot; <span class="ko-slot">2nd-D vs 2nd-G</span></div>
+  <div class="ko-matchup">
+    <div class="ko-team ko-wt">
+      <div class="ko-name">Iran</div>
+      <div class="ko-stat">Reaches&nbsp;36% &bull; Wins&nbsp;if&nbsp;reached&nbsp;52%</div>
+    </div>
+    <div class="ko-vs">vs</div>
+    <div class="ko-team ko-right">
+      <div class="ko-name">UEFA Play-off C</div>
+      <div class="ko-stat">Reaches&nbsp;28% &bull; Wins&nbsp;if&nbsp;reached&nbsp;51%</div>
+    </div>
+  </div>
+  <div class="ko-bar-row">
+    <div class="ko-bar-seg ko-bar-l" style="width:57%"><span class="ko-bar-lbl">19.0%</span></div>
+    <div class="ko-bar-seg ko-bar-r" style="width:43%"><span class="ko-bar-lbl ko-bar-lbl-r">14.2%</span></div>
+  </div>
+  <div class="ko-predicted">&#10003;&nbsp;Iran advances</div>
+</div>
+  </div>
+</section>
+
+<!-- ═══════ SECTION 3 — BRACKET TREE R16 → FINAL ══════ -->
+<section>
+  <div class="section-title">Knockout Bracket &mdash; Round of 16 through Final</div>
+  <p class="bracket-note">
+    Projected bracket path based on 10,000 simulations. Percentages = probability of winning that match slot overall.
+    Highlighted team is the projected winner at each stage. Scroll right on small screens.
+  </p>
+  <div class="bracket-scroll">
+    <div class="bracket">
+
+      <!-- Column 1: Round of 16 -->
+      <div class="b-round">
+        <div class="b-round-title">Round of 16</div>
+        <div class="b-slots">
+          <div class="b-match">
+  <div class="b-team likely"><span>France</span><span class="b-team-pct">32.8%</span></div>
+  <div class="b-team"><span>Germany</span><span class="b-team-pct">15.2%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Netherlands</span><span class="b-team-pct">21.1%</span></div>
+  <div class="b-team"><span>Morocco</span><span class="b-team-pct">15.1%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">36.1%</span></div>
+  <div class="b-team"><span>Croatia</span><span class="b-team-pct">12.0%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Belgium</span><span class="b-team-pct">21.1%</span></div>
+  <div class="b-team"><span>USA</span><span class="b-team-pct">20.0%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Brazil</span><span class="b-team-pct">24.2%</span></div>
+  <div class="b-team"><span>Senegal</span><span class="b-team-pct">13.7%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>England</span><span class="b-team-pct">30.9%</span></div>
+  <div class="b-team"><span>Mexico</span><span class="b-team-pct">14.6%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">38.1%</span></div>
+  <div class="b-team"><span>Iran</span><span class="b-team-pct">6.9%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Portugal</span><span class="b-team-pct">27.9%</span></div>
+  <div class="b-team"><span>UEFA Play-off A</span><span class="b-team-pct">13.0%</span></div>
+</div>
+        </div>
+      </div>
+
+      <!-- Column 2: Quarter-finals -->
+      <div class="b-round">
+        <div class="b-round-title">Quarter-finals</div>
+        <div class="b-slots">
+          <div class="b-match">
+  <div class="b-team likely"><span>France</span><span class="b-team-pct">18.9%</span></div>
+  <div class="b-team"><span>Netherlands</span><span class="b-team-pct">10.1%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">24.9%</span></div>
+  <div class="b-team"><span>Belgium</span><span class="b-team-pct">9.1%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>England</span><span class="b-team-pct">16.2%</span></div>
+  <div class="b-team"><span>Brazil</span><span class="b-team-pct">13.5%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">23.0%</span></div>
+  <div class="b-team"><span>Portugal</span><span class="b-team-pct">14.0%</span></div>
+</div>
+        </div>
+      </div>
+
+      <!-- Column 3: Semi-finals -->
+      <div class="b-round">
+        <div class="b-round-title">Semi-finals</div>
+        <div class="b-slots">
+          <div class="b-match">
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">13.6%</span></div>
+  <div class="b-team"><span>France</span><span class="b-team-pct">10.3%</span></div>
+</div>
+<div class="b-divider"></div>
+<div class="b-match">
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">11.9%</span></div>
+  <div class="b-team"><span>England</span><span class="b-team-pct">9.8%</span></div>
+</div>
+        </div>
+      </div>
+
+      <!-- Column 4: Final + 3rd place -->
+      <div class="b-round">
+        <div class="b-round-title">Final &middot; MetLife Stadium, NJ</div>
+        <div class="b-slots">
+          <div class="b-match">
+  <div class="b-team winner-team"><span>&#127942;&nbsp;Spain</span><span class="b-team-pct">8.7%</span></div>
+  <div class="b-team"><span>Argentina</span><span class="b-team-pct">7.3%</span></div>
+</div>
+          <div class="tp-card">
+            <div class="tp-title">3rd-Place Match &middot; Hard Rock Stadium, Miami</div>
+            <div class="b-match">
+  <div class="b-team likely"><span>&#129353;&nbsp;France</span><span class="b-team-pct">5.8%</span></div>
+  <div class="b-team"><span>England</span><span class="b-team-pct">4.9%</span></div>
+</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SECTION 4 — GROUP STAGE ══════ -->
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — ALL 72 GROUP STAGE MATCHES
+════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Group Stage — All 72 Matches (Chronological)</div>
+
+  <!-- Helper macro: each .match-card uses this structure:
+       meta | teams+score | bars                          -->
+
+  <!-- ───── June 11 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 11</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Azteca, Mexico City</div>
+      <div class="match-teams">
+        <span class="match-team">Mexico</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">South Africa</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:72%"><span class="bar-pct lp">72%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Estadio Akron, Zapopan</div>
+      <div class="match-teams">
+        <span class="match-team">South Korea</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Czech Republic</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:38%"><span class="bar-pct lp">38%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:32%"><span class="bar-pct rp">32%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 12 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 12</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>BMO Field, Toronto</div>
+      <div class="match-teams">
+        <span class="match-team">Canada</span>
+        <span class="match-score">1 – 0</span>
+        <span class="match-team right">Bosnia &amp; Herz.</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:52%"><span class="bar-pct lp">52%</span></div></div>
+        <div class="draw-pill">D 28%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:20%"><span class="bar-pct rp">20%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>SoFi Stadium, Inglewood</div>
+      <div class="match-teams">
+        <span class="match-team">USA</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Paraguay</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:68%"><span class="bar-pct lp">68%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:12%"><span class="bar-pct rp">12%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 13 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 13</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>Levi's Stadium, Santa Clara</div>
+      <div class="match-teams">
+        <span class="match-team">Qatar</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Switzerland</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:12%"><span class="bar-pct lp">12%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:66%"><span class="bar-pct rp">66%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>MetLife Stadium, East Rutherford</div>
+      <div class="match-teams">
+        <span class="match-team">Brazil</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Morocco</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:52%"><span class="bar-pct lp">52%</span></div></div>
+        <div class="draw-pill">D 23%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:25%"><span class="bar-pct rp">25%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>Gillette Stadium, Foxborough</div>
+      <div class="match-teams">
+        <span class="match-team">Haiti</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Scotland</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:10%"><span class="bar-pct lp">10%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:68%"><span class="bar-pct rp">68%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>BC Place, Vancouver</div>
+      <div class="match-teams">
+        <span class="match-team">Australia</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Turkey</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:34%"><span class="bar-pct lp">34%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:36%"><span class="bar-pct rp">36%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 14 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 14</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>NRG Stadium, Houston</div>
+      <div class="match-teams">
+        <span class="match-team">Germany</span>
+        <span class="match-score">4 – 0</span>
+        <span class="match-team right">Curaçao</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:88%"><span class="bar-pct lp">88%</span></div></div>
+        <div class="draw-pill">D 10%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:2%"><span class="bar-pct rp">2%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>Lincoln Financial Field, Philadelphia</div>
+      <div class="match-teams">
+        <span class="match-team">Ivory Coast</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Ecuador</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:22%"><span class="bar-pct lp">22%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:48%"><span class="bar-pct rp">48%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>AT&amp;T Stadium, Arlington</div>
+      <div class="match-teams">
+        <span class="match-team">Netherlands</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Japan</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:55%"><span class="bar-pct lp">55%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:23%"><span class="bar-pct rp">23%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>Estadio BBVA, Guadalupe</div>
+      <div class="match-teams">
+        <span class="match-team">Sweden</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Tunisia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:44%"><span class="bar-pct lp">44%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:26%"><span class="bar-pct rp">26%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 15 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 15</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>Lumen Field, Seattle</div>
+      <div class="match-teams">
+        <span class="match-team">Belgium</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Egypt</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:68%"><span class="bar-pct lp">68%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:12%"><span class="bar-pct rp">12%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>SoFi Stadium, Inglewood</div>
+      <div class="match-teams">
+        <span class="match-team">Iran</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">New Zealand</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:64%"><span class="bar-pct lp">64%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:14%"><span class="bar-pct rp">14%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>Mercedes-Benz Stadium, Atlanta</div>
+      <div class="match-teams">
+        <span class="match-team">Spain</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Cape Verde</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:85%"><span class="bar-pct lp">85%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:3%"><span class="bar-pct rp">3%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>Hard Rock Stadium, Miami</div>
+      <div class="match-teams">
+        <span class="match-team">Saudi Arabia</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Uruguay</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:14%"><span class="bar-pct lp">14%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:64%"><span class="bar-pct rp">64%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 16 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 16</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>MetLife Stadium, East Rutherford</div>
+      <div class="match-teams">
+        <span class="match-team">France</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Senegal</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:55%"><span class="bar-pct lp">55%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:23%"><span class="bar-pct rp">23%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>Gillette Stadium, Foxborough</div>
+      <div class="match-teams">
+        <span class="match-team">Iraq</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Norway</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:20%"><span class="bar-pct lp">20%</span></div></div>
+        <div class="draw-pill">D 28%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:52%"><span class="bar-pct rp">52%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>Arrowhead Stadium, Kansas City</div>
+      <div class="match-teams">
+        <span class="match-team">Argentina</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Algeria</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:82%"><span class="bar-pct lp">82%</span></div></div>
+        <div class="draw-pill">D 14%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:4%"><span class="bar-pct rp">4%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>Levi's Stadium, Santa Clara</div>
+      <div class="match-teams">
+        <span class="match-team">Austria</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Jordan</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:60%"><span class="bar-pct lp">60%</span></div></div>
+        <div class="draw-pill">D 24%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:16%"><span class="bar-pct rp">16%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 17 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 17</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>NRG Stadium, Houston</div>
+      <div class="match-teams">
+        <span class="match-team">Portugal</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">DR Congo</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:82%"><span class="bar-pct lp">82%</span></div></div>
+        <div class="draw-pill">D 14%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:4%"><span class="bar-pct rp">4%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>Estadio Azteca, Mexico City</div>
+      <div class="match-teams">
+        <span class="match-team">Uzbekistan</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Colombia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:5%"><span class="bar-pct lp">5%</span></div></div>
+        <div class="draw-pill">D 15%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:80%"><span class="bar-pct rp">80%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>AT&amp;T Stadium, Arlington</div>
+      <div class="match-teams">
+        <span class="match-team">England</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Croatia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:58%"><span class="bar-pct lp">58%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:20%"><span class="bar-pct rp">20%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>BMO Field, Toronto</div>
+      <div class="match-teams">
+        <span class="match-team">Ghana</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Panama</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:36%"><span class="bar-pct lp">36%</span></div></div>
+        <div class="draw-pill">D 32%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:32%"><span class="bar-pct rp">32%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 18 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 18</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Mercedes-Benz Stadium, Atlanta</div>
+      <div class="match-teams">
+        <span class="match-team">Czech Republic</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">South Africa</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:70%"><span class="bar-pct lp">70%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Estadio Akron, Zapopan</div>
+      <div class="match-teams">
+        <span class="match-team">Mexico</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">South Korea</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:68%"><span class="bar-pct lp">68%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:12%"><span class="bar-pct rp">12%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>SoFi Stadium, Inglewood</div>
+      <div class="match-teams">
+        <span class="match-team">Switzerland</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Bosnia &amp; Herz.</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:64%"><span class="bar-pct lp">64%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:14%"><span class="bar-pct rp">14%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>BC Place, Vancouver</div>
+      <div class="match-teams">
+        <span class="match-team">Canada</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Qatar</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:72%"><span class="bar-pct lp">72%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 19 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 19</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>Gillette Stadium, Foxborough</div>
+      <div class="match-teams">
+        <span class="match-team">Scotland</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Morocco</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:5%"><span class="bar-pct lp">5%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:77%"><span class="bar-pct rp">77%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>Lincoln Financial Field, Philadelphia</div>
+      <div class="match-teams">
+        <span class="match-team">Brazil</span>
+        <span class="match-score">4 – 0</span>
+        <span class="match-team right">Haiti</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:88%"><span class="bar-pct lp">88%</span></div></div>
+        <div class="draw-pill">D 10%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:2%"><span class="bar-pct rp">2%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>Lumen Field, Seattle</div>
+      <div class="match-teams">
+        <span class="match-team">USA</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Australia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:62%"><span class="bar-pct lp">62%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:16%"><span class="bar-pct rp">16%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>Levi's Stadium, Santa Clara</div>
+      <div class="match-teams">
+        <span class="match-team">Turkey</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Paraguay</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:65%"><span class="bar-pct lp">65%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:13%"><span class="bar-pct rp">13%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 20 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 20</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>BMO Field, Toronto</div>
+      <div class="match-teams">
+        <span class="match-team">Germany</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Ivory Coast</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:72%"><span class="bar-pct lp">72%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>Arrowhead Stadium, Kansas City</div>
+      <div class="match-teams">
+        <span class="match-team">Ecuador</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Curaçao</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:78%"><span class="bar-pct lp">78%</span></div></div>
+        <div class="draw-pill">D 16%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:6%"><span class="bar-pct rp">6%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>NRG Stadium, Houston</div>
+      <div class="match-teams">
+        <span class="match-team">Netherlands</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Sweden</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:62%"><span class="bar-pct lp">62%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:16%"><span class="bar-pct rp">16%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>Estadio BBVA, Guadalupe</div>
+      <div class="match-teams">
+        <span class="match-team">Tunisia</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Japan</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:16%"><span class="bar-pct lp">16%</span></div></div>
+        <div class="draw-pill">D 25%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:59%"><span class="bar-pct rp">59%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 21 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 21</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>SoFi Stadium, Inglewood</div>
+      <div class="match-teams">
+        <span class="match-team">Belgium</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Iran</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:58%"><span class="bar-pct lp">58%</span></div></div>
+        <div class="draw-pill">D 24%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:18%"><span class="bar-pct rp">18%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>BC Place, Vancouver</div>
+      <div class="match-teams">
+        <span class="match-team">New Zealand</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Egypt</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:24%"><span class="bar-pct lp">24%</span></div></div>
+        <div class="draw-pill">D 34%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:42%"><span class="bar-pct rp">42%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>Mercedes-Benz Stadium, Atlanta</div>
+      <div class="match-teams">
+        <span class="match-team">Spain</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Saudi Arabia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:80%"><span class="bar-pct lp">80%</span></div></div>
+        <div class="draw-pill">D 14%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:6%"><span class="bar-pct rp">6%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>Hard Rock Stadium, Miami</div>
+      <div class="match-teams">
+        <span class="match-team">Uruguay</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Cape Verde</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:76%"><span class="bar-pct lp">76%</span></div></div>
+        <div class="draw-pill">D 16%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:8%"><span class="bar-pct rp">8%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 22 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 22</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>Lincoln Financial Field, Philadelphia</div>
+      <div class="match-teams">
+        <span class="match-team">France</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Iraq</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:84%"><span class="bar-pct lp">84%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:4%"><span class="bar-pct rp">4%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>MetLife Stadium, East Rutherford</div>
+      <div class="match-teams">
+        <span class="match-team">Norway</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Senegal</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:14%"><span class="bar-pct lp">14%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:64%"><span class="bar-pct rp">64%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>AT&amp;T Stadium, Arlington</div>
+      <div class="match-teams">
+        <span class="match-team">Argentina</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Austria</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:80%"><span class="bar-pct lp">80%</span></div></div>
+        <div class="draw-pill">D 14%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:6%"><span class="bar-pct rp">6%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>Levi's Stadium, Santa Clara</div>
+      <div class="match-teams">
+        <span class="match-team">Jordan</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Algeria</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:34%"><span class="bar-pct lp">34%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:36%"><span class="bar-pct rp">36%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 23 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 23</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>NRG Stadium, Houston</div>
+      <div class="match-teams">
+        <span class="match-team">Portugal</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Uzbekistan</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:84%"><span class="bar-pct lp">84%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:4%"><span class="bar-pct rp">4%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>Estadio Akron, Zapopan</div>
+      <div class="match-teams">
+        <span class="match-team">Colombia</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">DR Congo</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:76%"><span class="bar-pct lp">76%</span></div></div>
+        <div class="draw-pill">D 16%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:8%"><span class="bar-pct rp">8%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>Gillette Stadium, Foxborough</div>
+      <div class="match-teams">
+        <span class="match-team">England</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Ghana</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:70%"><span class="bar-pct lp">70%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>BMO Field, Toronto</div>
+      <div class="match-teams">
+        <span class="match-team">Panama</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Croatia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:12%"><span class="bar-pct lp">12%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:66%"><span class="bar-pct rp">66%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 24 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 24</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Estadio Azteca, Mexico City</div>
+      <div class="match-teams">
+        <span class="match-team">Czech Republic</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Mexico</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:16%"><span class="bar-pct lp">16%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:62%"><span class="bar-pct rp">62%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">A</span>Estadio BBVA, Guadalupe</div>
+      <div class="match-teams">
+        <span class="match-team">South Africa</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">South Korea</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:8%"><span class="bar-pct lp">8%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:74%"><span class="bar-pct rp">74%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>BC Place, Vancouver</div>
+      <div class="match-teams">
+        <span class="match-team">Switzerland</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Canada</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:52%"><span class="bar-pct lp">52%</span></div></div>
+        <div class="draw-pill">D 25%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:23%"><span class="bar-pct rp">23%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">B</span>Lumen Field, Seattle</div>
+      <div class="match-teams">
+        <span class="match-team">Bosnia &amp; Herz.</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Qatar</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:72%"><span class="bar-pct lp">72%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>Hard Rock Stadium, Miami</div>
+      <div class="match-teams">
+        <span class="match-team">Scotland</span>
+        <span class="match-score">0 – 3</span>
+        <span class="match-team right">Brazil</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:4%"><span class="bar-pct lp">4%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:84%"><span class="bar-pct rp">84%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">C</span>Mercedes-Benz Stadium, Atlanta</div>
+      <div class="match-teams">
+        <span class="match-team">Morocco</span>
+        <span class="match-score">3 – 0</span>
+        <span class="match-team right">Haiti</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:85%"><span class="bar-pct lp">85%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:3%"><span class="bar-pct rp">3%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 25 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 25</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>SoFi Stadium, Inglewood</div>
+      <div class="match-teams">
+        <span class="match-team">Turkey</span>
+        <span class="match-score">1 – 2</span>
+        <span class="match-team right">USA</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:28%"><span class="bar-pct lp">28%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:50%"><span class="bar-pct rp">50%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">D</span>Levi's Stadium, Santa Clara</div>
+      <div class="match-teams">
+        <span class="match-team">Paraguay</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Australia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:24%"><span class="bar-pct lp">24%</span></div></div>
+        <div class="draw-pill">D 34%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:42%"><span class="bar-pct rp">42%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>Lincoln Financial Field, Philadelphia</div>
+      <div class="match-teams">
+        <span class="match-team">Curaçao</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Ivory Coast</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:5%"><span class="bar-pct lp">5%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:75%"><span class="bar-pct rp">75%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">E</span>MetLife Stadium, East Rutherford</div>
+      <div class="match-teams">
+        <span class="match-team">Ecuador</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Germany</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:20%"><span class="bar-pct lp">20%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:58%"><span class="bar-pct rp">58%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>AT&amp;T Stadium, Arlington</div>
+      <div class="match-teams">
+        <span class="match-team">Japan</span>
+        <span class="match-score">2 – 1</span>
+        <span class="match-team right">Sweden</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:52%"><span class="bar-pct lp">52%</span></div></div>
+        <div class="draw-pill">D 25%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:23%"><span class="bar-pct rp">23%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">F</span>Arrowhead Stadium, Kansas City</div>
+      <div class="match-teams">
+        <span class="match-team">Tunisia</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Netherlands</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:10%"><span class="bar-pct lp">10%</span></div></div>
+        <div class="draw-pill">D 20%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:70%"><span class="bar-pct rp">70%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 26 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 26</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>Lumen Field, Seattle</div>
+      <div class="match-teams">
+        <span class="match-team">Egypt</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Iran</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:34%"><span class="bar-pct lp">34%</span></div></div>
+        <div class="draw-pill">D 32%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:34%"><span class="bar-pct rp">34%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">G</span>BC Place, Vancouver</div>
+      <div class="match-teams">
+        <span class="match-team">New Zealand</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">Belgium</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:8%"><span class="bar-pct lp">8%</span></div></div>
+        <div class="draw-pill">D 16%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:76%"><span class="bar-pct rp">76%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>NRG Stadium, Houston</div>
+      <div class="match-teams">
+        <span class="match-team">Cape Verde</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Saudi Arabia</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:15%"><span class="bar-pct lp">15%</span></div></div>
+        <div class="draw-pill">D 25%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:60%"><span class="bar-pct rp">60%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">H</span>Estadio Akron, Zapopan</div>
+      <div class="match-teams">
+        <span class="match-team">Uruguay</span>
+        <span class="match-score">0 – 1</span>
+        <span class="match-team right">Spain</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:22%"><span class="bar-pct lp">22%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:56%"><span class="bar-pct rp">56%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>Gillette Stadium, Foxborough</div>
+      <div class="match-teams">
+        <span class="match-team">Norway</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">France</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:10%"><span class="bar-pct lp">10%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:72%"><span class="bar-pct rp">72%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">I</span>BMO Field, Toronto</div>
+      <div class="match-teams">
+        <span class="match-team">Senegal</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Iraq</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:72%"><span class="bar-pct lp">72%</span></div></div>
+        <div class="draw-pill">D 18%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:10%"><span class="bar-pct rp">10%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───── June 27 ───── -->
+  <div class="day-header">
+    <span class="day-header-date">June 27</span>
+    <div class="day-header-line"></div>
+  </div>
+  <div class="match-grid">
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>Arrowhead Stadium, Kansas City</div>
+      <div class="match-teams">
+        <span class="match-team">Algeria</span>
+        <span class="match-score">1 – 1</span>
+        <span class="match-team right">Austria</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:36%"><span class="bar-pct lp">36%</span></div></div>
+        <div class="draw-pill">D 30%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:34%"><span class="bar-pct rp">34%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">J</span>AT&amp;T Stadium, Arlington</div>
+      <div class="match-teams">
+        <span class="match-team">Jordan</span>
+        <span class="match-score">0 – 3</span>
+        <span class="match-team right">Argentina</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:4%"><span class="bar-pct lp">4%</span></div></div>
+        <div class="draw-pill">D 12%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:84%"><span class="bar-pct rp">84%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>Hard Rock Stadium, Miami</div>
+      <div class="match-teams">
+        <span class="match-team">Colombia</span>
+        <span class="match-score">1 – 2</span>
+        <span class="match-team right">Portugal</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:28%"><span class="bar-pct lp">28%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:50%"><span class="bar-pct rp">50%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">K</span>Mercedes-Benz Stadium, Atlanta</div>
+      <div class="match-teams">
+        <span class="match-team">DR Congo</span>
+        <span class="match-score">1 – 0</span>
+        <span class="match-team right">Uzbekistan</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:62%"><span class="bar-pct lp">62%</span></div></div>
+        <div class="draw-pill">D 24%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:14%"><span class="bar-pct rp">14%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>MetLife Stadium, East Rutherford</div>
+      <div class="match-teams">
+        <span class="match-team">Panama</span>
+        <span class="match-score">0 – 2</span>
+        <span class="match-team right">England</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:6%"><span class="bar-pct lp">6%</span></div></div>
+        <div class="draw-pill">D 16%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:78%"><span class="bar-pct rp">78%</span></div></div>
+      </div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-meta"><span class="group-badge">L</span>Lincoln Financial Field, Philadelphia</div>
+      <div class="match-teams">
+        <span class="match-team">Croatia</span>
+        <span class="match-score">2 – 0</span>
+        <span class="match-team right">Ghana</span>
+      </div>
+      <div class="match-bars">
+        <div class="bar-wrap"><div class="bar-fill left" style="width:66%"><span class="bar-pct lp">66%</span></div></div>
+        <div class="draw-pill">D 22%</div>
+        <div class="bar-wrap"><div class="bar-fill right" style="width:12%"><span class="bar-pct rp">12%</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+</div>
+
+<footer>
+  <p>Based on 10,000 Monte Carlo simulations &bull; Full 48-team format with Round of 32 &bull; Match schedule per official FIFA WC 2026 draw</p>
+
+<footer>
+  <p>Based on 10,000 Monte Carlo simulations &bull; Full 48-team format with Round of 32 &bull; Bracket assertion verified: Final and 3rd-place teams are always distinct &bull; Match schedule per official FIFA WC 2026 draw</p>
+</footer>
+
+</body>
+</html>

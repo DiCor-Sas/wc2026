@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "/Users/diegofelipecortessastoque/Desktop/wc2026"],
+      "port": 5500
+    }
+  ]
+}

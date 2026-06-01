@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/opt/homebrew/bin/brew install *)",
+      "WebSearch",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(python3 -c \"import pip; pip.main\\(['install','duckdb','--quiet']\\)\")",
+      "Bash(python3 -m pip install duckdb --quiet)",
+      "Bash(python3 run_predictions.py)",
+      "Bash(python3 -m pip install numpy scipy --quiet)",
+      "Bash(python3 -m pip install pandas scikit-learn --quiet)"
+    ]
+  }
+}
