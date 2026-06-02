@@ -144,43 +144,41 @@ def _poisson_pmf(lam, k):
 
 
 def _most_probable_score(lam1, lam2, max_goals=5):
-    best_p, best_s = 0, (1, 1)
+    scores = {}
     for g1 in range(max_goals + 1):
         for g2 in range(max_goals + 1):
-            p = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
-            if p > best_p:
-                best_p, best_s = p, (g1, g2)
+            scores[(g1, g2)] = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
+    ranked = sorted(scores.items(), key=lambda x: -x[1])
+    best_s = ranked[0][0]
+    if best_s == (1, 1):
+        total_p = sum(scores.values())
+        win1 = sum(p for (g1, g2), p in scores.items() if g1 > g2) / total_p * 100
+        win2 = sum(p for (g1, g2), p in scores.items() if g2 > g1) / total_p * 100
+        if abs(win1 - win2) > 15:
+            best_s = ranked[1][0]
     return best_s
 
 
 _TEAM_STRENGTH_DATA: dict = {}
-_TEAM_STRENGTH_AVG: float = 0.0
-_STRENGTH_EXP = 3.0
-_STRENGTH_BASE = 1.5  # base goals for average-strength team
 
 
 def _load_team_strength():
-    global _TEAM_STRENGTH_DATA, _TEAM_STRENGTH_AVG
+    global _TEAM_STRENGTH_DATA
     if not _TEAM_STRENGTH_DATA:
         try:
             with open(TEAM_STRENGTH_FILE) as f:
                 _TEAM_STRENGTH_DATA = json.load(f)
-            _TEAM_STRENGTH_AVG = (
-                sum(v["final_strength"] for v in _TEAM_STRENGTH_DATA.values())
-                / len(_TEAM_STRENGTH_DATA)
-            )
         except Exception:
             pass
 
 
 def _strength_lambdas(team1, team2):
-    """Return (lam1, lam2) using per-team final_strength independent lambdas."""
+    """Return (lam1, lam2): lambda = 1.5 * (s_attack/s_defend)^2, capped [0.3, 3.5]."""
     _load_team_strength()
-    avg = _TEAM_STRENGTH_AVG or 1600.0
-    s1 = _TEAM_STRENGTH_DATA.get(team1, {}).get("final_strength", avg)
-    s2 = _TEAM_STRENGTH_DATA.get(team2, {}).get("final_strength", avg)
-    lam1 = max(0.2, min(4.0, _STRENGTH_BASE * (s1 / avg) ** _STRENGTH_EXP))
-    lam2 = max(0.2, min(4.0, _STRENGTH_BASE * (s2 / avg) ** _STRENGTH_EXP))
+    s1 = _TEAM_STRENGTH_DATA.get(team1, {}).get("final_strength", 1600.0)
+    s2 = _TEAM_STRENGTH_DATA.get(team2, {}).get("final_strength", 1600.0)
+    lam1 = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
+    lam2 = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
     return lam1, lam2
 
 

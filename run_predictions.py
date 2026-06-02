@@ -93,39 +93,37 @@ total = sum(winners.values())
 _TEAM_STRENGTH = json.load(
     open("/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json")
 )
-_AVG_STRENGTH = sum(v["final_strength"] for v in _TEAM_STRENGTH.values()) / len(_TEAM_STRENGTH)
-_BASE_GOALS = 1.5   # base goals per team for average-strength teams
-_STRENGTH_EXP = 3.0  # exponent for per-team lambda: lam = base * (s/avg)^exp
-
-
 def _poisson_pmf(lam, k):
     return (lam ** k) * math.exp(-lam) / math.factorial(k)
 
 
 def _poisson_most_probable_score(team1_name, team2_name, max_goals=5):
     """
-    Compute the most-probable (team1_goals, team2_goals) using independent
-    per-team lambdas derived from final_strength in team_strength.json.
-
-    Each team's lambda = base * (team_strength / avg_strength)^exp.
-    This allows 1-1 (equal averages), 2-1 (strong vs mid), 2-0 (strong vs weak),
-    2-2 (two strong sides), 3-0 (dominant vs weak), producing varied scorelines.
-    Returns (t1_goals, t2_goals).
+    lambda = 1.5 * (s_attack / s_defend) ^ 2.0, capped [0.3, 3.5].
+    For even matches where 1-1 is modal but win-prob diff > 15pp,
+    return the 2nd most probable scoreline instead.
     """
-    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", _AVG_STRENGTH)
-    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", _AVG_STRENGTH)
-    lam1 = _BASE_GOALS * (s1 / _AVG_STRENGTH) ** _STRENGTH_EXP
-    lam2 = _BASE_GOALS * (s2 / _AVG_STRENGTH) ** _STRENGTH_EXP
-    # clamp to [0.2, 4.0] for sensible scores
-    lam1 = max(0.2, min(4.0, lam1))
-    lam2 = max(0.2, min(4.0, lam2))
+    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
+    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
+    lam1 = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
+    lam2 = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
 
-    best_p, best_s = 0.0, (1, 0)
+    scores = {}
     for g1 in range(max_goals + 1):
         for g2 in range(max_goals + 1):
-            p = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
-            if p > best_p:
-                best_p, best_s = p, (g1, g2)
+            scores[(g1, g2)] = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
+
+    ranked = sorted(scores.items(), key=lambda x: -x[1])
+    best_s = ranked[0][0]
+
+    # Override 1-1 when one team has a clear win probability advantage
+    if best_s == (1, 1):
+        total_p = sum(scores.values())
+        win1 = sum(p for (g1, g2), p in scores.items() if g1 > g2) / total_p * 100
+        win2 = sum(p for (g1, g2), p in scores.items() if g2 > g1) / total_p * 100
+        if abs(win1 - win2) > 15:
+            best_s = ranked[1][0]
+
     return best_s
 
 
