@@ -1,5 +1,6 @@
 import sys
 import json
+import math
 from collections import Counter, defaultdict
 
 sys.path.insert(0, "/Users/diegofelipecortessastoque/Desktop/wc2026/fifa-wc-2026-simulation")
@@ -40,6 +41,19 @@ for i in range(NUM_SIMULATIONS):
     )
     comp.simulate()
 
+    # ── FIX 1: Hard constraint — group-stage finishers can only appear in one slot ──
+    # Build per-simulation mapping: team_name -> R32 match number they were assigned
+    sim_r32_assignment = {}
+    for match in comp.knockout_matches.get(STAGE.ROUND_OF_32, []):
+        for team in [match.home_team, match.away_team]:
+            if team is not None:
+                sim_r32_assignment[team.name] = match.number
+
+    # Verify each team appears in exactly one R32 slot in this simulation
+    assert len(sim_r32_assignment) == 32, (
+        f"Sim {i}: expected 32 unique teams in R32, got {len(sim_r32_assignment)}"
+    )
+
     # ── Safety assertion: 3rd-place teams must be distinct from Final teams ──
     if comp.knockout_matches.get(STAGE.THIRD_PLACE) and comp.knockout_matches.get(STAGE.FINAL):
         tp_match  = comp.knockout_matches[STAGE.THIRD_PLACE][0]
@@ -75,6 +89,46 @@ for i in range(NUM_SIMULATIONS):
 
 total = sum(winners.values())
 
+# ── Load team_strength for Poisson score calculation (Fix 3) ──────────────────
+_TEAM_STRENGTH = json.load(
+    open("/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json")
+)
+_AVG_STRENGTH = sum(v["final_strength"] for v in _TEAM_STRENGTH.values()) / len(_TEAM_STRENGTH)
+_BASE_GOALS = 1.5   # base goals per team for average-strength teams
+_STRENGTH_EXP = 3.0  # exponent for per-team lambda: lam = base * (s/avg)^exp
+
+
+def _poisson_pmf(lam, k):
+    return (lam ** k) * math.exp(-lam) / math.factorial(k)
+
+
+def _poisson_most_probable_score(team1_name, team2_name, max_goals=5):
+    """
+    Compute the most-probable (team1_goals, team2_goals) using independent
+    per-team lambdas derived from final_strength in team_strength.json.
+
+    Each team's lambda = base * (team_strength / avg_strength)^exp.
+    This allows 1-1 (equal averages), 2-1 (strong vs mid), 2-0 (strong vs weak),
+    2-2 (two strong sides), 3-0 (dominant vs weak), producing varied scorelines.
+    Returns (t1_goals, t2_goals).
+    """
+    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", _AVG_STRENGTH)
+    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", _AVG_STRENGTH)
+    lam1 = _BASE_GOALS * (s1 / _AVG_STRENGTH) ** _STRENGTH_EXP
+    lam2 = _BASE_GOALS * (s2 / _AVG_STRENGTH) ** _STRENGTH_EXP
+    # clamp to [0.2, 4.0] for sensible scores
+    lam1 = max(0.2, min(4.0, lam1))
+    lam2 = max(0.2, min(4.0, lam2))
+
+    best_p, best_s = 0.0, (1, 0)
+    for g1 in range(max_goals + 1):
+        for g2 in range(max_goals + 1):
+            p = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
+            if p > best_p:
+                best_p, best_s = p, (g1, g2)
+    return best_s
+
+
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def pct(n, d):
@@ -86,22 +140,28 @@ def format_team_list(counter, top_n=None):
         items = items[:top_n]
     return [{"team": t, "count": c, "probability": pct(c, total)} for t, c in items]
 
-def format_ko_match(match_num):
+def format_ko_match(match_num, team_pool=None):
+    """
+    Build match display data for match_num.
+    team_pool: if provided, only consider teams in this set (for deduplication).
+    """
     apps = ko_appearances[match_num]
     wins = ko_wins[match_num]
 
-    # Top 2 by appearances (covers the rare 3rd-place slot variation)
-    top = apps.most_common(2)
+    # Top candidates by appearances, filtered to team_pool if given
+    if team_pool is not None:
+        candidates = [(t, c) for t, c in apps.most_common() if t in team_pool]
+    else:
+        candidates = apps.most_common()
+
+    top = candidates[:2]
     teams_out = []
     for team_name, app_count in top:
         win_count = wins.get(team_name, 0)
         teams_out.append({
             "name": team_name,
-            # how often this team reaches this match
             "reach_pct": pct(app_count, total),
-            # given they reach the match, probability they win it
             "win_if_reached_pct": pct(win_count, app_count),
-            # overall probability of winning this specific match slot
             "overall_win_pct": pct(win_count, total),
         })
 
@@ -109,14 +169,12 @@ def format_ko_match(match_num):
     predicted_score = None
     if teams_out:
         likely_winner = max(teams_out, key=lambda x: x["overall_win_pct"])["name"]
-        # Find the most common score for the likely winner
-        scores = {(w, wg, lg): c for (w, wg, lg), c in ko_score_tracker[match_num].items() if w == likely_winner}
-        if scores:
-            best = max(scores, key=scores.__getitem__)
-            _, w_g, l_g = best
-            likely_loser = next((t["name"] for t in teams_out if t["name"] != likely_winner), "?")
-            win_pct = max(teams_out, key=lambda x: x["overall_win_pct"])["overall_win_pct"]
-            predicted_score = f"{likely_winner} {w_g}-{l_g} {likely_loser} ({win_pct}%)"
+        likely_loser = next((t["name"] for t in teams_out if t["name"] != likely_winner), "?")
+
+        # Fix 3: Use Poisson most-probable score from team_strength.json
+        w_g, l_g = _poisson_most_probable_score(likely_winner, likely_loser)
+        win_pct = max(teams_out, key=lambda x: x["overall_win_pct"])["overall_win_pct"]
+        predicted_score = f"{likely_winner} {w_g}-{l_g} {likely_loser} ({win_pct}%)"
 
     return {
         "match": match_num,
@@ -124,6 +182,87 @@ def format_ko_match(match_num):
         "predicted_score": predicted_score,
         "teams": teams_out,
     }
+
+
+def build_r32_deduplicated():
+    """
+    Build R32 match display ensuring each team appears in exactly one slot.
+
+    Strategy: for each team that appears in multiple slots across the aggregation,
+    assign them to the slot where they have the highest reach_pct, then fill other
+    slots with the next best available team.
+    """
+    match_nums = list(range(73, 89))
+
+    # Step 1: For each slot, get the full ordered candidate list
+    slot_candidates = {}
+    for mn in match_nums:
+        slot_candidates[mn] = ko_appearances[mn].most_common()
+
+    # Step 2: Assign teams to slots greedily
+    # For each slot, pick the top team not yet assigned elsewhere
+    assigned_to_slot = {}   # team_name -> match_num
+    slot_primary = {}       # match_num -> primary team_name
+    slot_secondary = {}     # match_num -> secondary team_name
+
+    # First pass: assign primary (most common) team for each slot
+    # Process slots in order of "dominance" (how much bigger the top count is than 2nd)
+    def dominance(mn):
+        cands = slot_candidates[mn]
+        if len(cands) < 2:
+            return cands[0][1] if cands else 0
+        return cands[0][1] - cands[1][1]
+
+    sorted_slots = sorted(match_nums, key=dominance, reverse=True)
+
+    for mn in sorted_slots:
+        for team_name, _ in slot_candidates[mn]:
+            if team_name not in assigned_to_slot:
+                assigned_to_slot[team_name] = mn
+                slot_primary[mn] = team_name
+                break
+
+    # Second pass: assign secondary team for each slot
+    for mn in match_nums:
+        primary = slot_primary.get(mn)
+        for team_name, _ in slot_candidates[mn]:
+            if team_name != primary and team_name not in assigned_to_slot:
+                assigned_to_slot[team_name] = mn
+                slot_secondary[mn] = team_name
+                break
+        if mn not in slot_secondary:
+            # If still not found, allow a team already assigned to another slot
+            # but only if it's the best remaining candidate
+            for team_name, _ in slot_candidates[mn]:
+                if team_name != primary:
+                    slot_secondary[mn] = team_name
+                    break
+
+    # Step 3: Build output using the deduplicated team pools
+    r32_out = []
+    for mn in match_nums:
+        pool = set()
+        if mn in slot_primary:
+            pool.add(slot_primary[mn])
+        if mn in slot_secondary:
+            pool.add(slot_secondary[mn])
+        r32_out.append(
+            {**format_ko_match(mn, team_pool=pool),
+             "label": R32_LABELS[mn],
+             "city": R32_CITIES[mn]}
+        )
+
+    # Verify: collect all team names across slots and check for duplicates
+    all_r32_teams = [t["name"] for m in r32_out for t in m["teams"]]
+    duplicates = {n for n in all_r32_teams if all_r32_teams.count(n) > 1}
+    if duplicates:
+        print(f"WARNING: still have R32 duplicates after dedup: {duplicates}")
+    else:
+        print(f"✓ R32 deduplication: {len(all_r32_teams)} unique teams across 16 slots")
+        print("  Teams:", sorted(all_r32_teams))
+
+    return r32_out
+
 
 # ── R32 slot labels (for the dashboard) ────────────────────────────────────
 
@@ -150,38 +289,53 @@ R32_CITIES = {mn: info[0] for mn, info in ROUND_OF_32_BRACKET.items()}
 
 # ── build output ────────────────────────────────────────────────────────────
 
+r32_matches = build_r32_deduplicated()
+
+# ── Fix 2: Runner-up and Third Place must be distinct from Winner ─────────────
+winner_team = format_team_list(winners, 1)[0]["team"]
+winner_pct = pct(winners.most_common(1)[0][1], total)
+
+# Runner-up: highest final-appearance (non-winner) probability
+runner_entry = next(
+    e for e in format_team_list(runners_up)
+    if e["team"] != winner_team
+)
+
+# Third place: highest 3rd-place-match win probability, NOT winner or runner-up
+third_entry = next(
+    e for e in format_team_list(third_place_counter)
+    if e["team"] != winner_team and e["team"] != runner_entry["team"]
+)
+
+assert winner_team != runner_entry["team"], "Winner and Runner-Up are the same team!"
+assert winner_team != third_entry["team"], "Winner and Third Place are the same team!"
+assert runner_entry["team"] != third_entry["team"], "Runner-Up and Third Place are the same team!"
+print(f"✓ Top predictions — distinct teams: Winner={winner_team}, "
+      f"Runner-Up={runner_entry['team']}, Third={third_entry['team']}")
+
 output = {
     "simulations": total,
-    "predicted_winner": format_team_list(winners, 1)[0]["team"],
-    "predicted_winner_probability_pct": pct(winners.most_common(1)[0][1], total),
+    "predicted_winner": winner_team,
+    "predicted_winner_probability_pct": winner_pct,
     "all_teams": format_team_list(winners),
-    "runners_up": format_team_list(runners_up, 10),
-    "third_place": format_team_list(third_place_counter, 10),
+    "runners_up": [runner_entry] + [e for e in format_team_list(runners_up, 10)
+                                     if e["team"] != winner_team and e["team"] != runner_entry["team"]],
+    "third_place": [third_entry] + [e for e in format_team_list(third_place_counter, 10)
+                                     if e["team"] != winner_team and e["team"] != third_entry["team"]],
     "knockout_bracket": {
-        "round_of_32": [
-            {**format_ko_match(mn), "label": R32_LABELS[mn], "city": R32_CITIES[mn]}
-            for mn in range(73, 89)
-        ],
+        "round_of_32": r32_matches,
         "round_of_16": [format_ko_match(mn) for mn in range(89, 97)],
         "quarter_finals": [format_ko_match(mn) for mn in range(97, 101)],
         "semi_finals": [format_ko_match(mn) for mn in range(101, 103)],
-        # Raw M103 data (who actually appeared in the 3rd-place match slot)
         "third_place_match": format_ko_match(103),
-        # Derived 3rd-place match: the projected LOSERS of each SF.
-        # SF1 loser = the SF1 participant with the LOWER overall_win_pct.
-        # SF2 loser = the SF2 participant with the LOWER overall_win_pct.
-        # These are always different teams from the Final (who are the SF winners).
         "third_place_match_derived": None,  # filled in below
         "final": format_ko_match(104),
     },
 }
 
-# ── Derive the 3rd-place display from actual M103 appearances ─────────────
-# Teams that appear in M103 are definitionally not finalists, so using the
-# real match-103 data avoids any SF-routing ambiguity in the aggregated stats.
+# ── Derive 3rd-place display from actual M103 appearances ─────────────────
 fin_teams = {t["name"] for t in output["knockout_bracket"]["final"]["teams"][:2]}
 
-# Top-2 teams in M103 by appearances, excluding any finalist (safety guard)
 m103_top = [
     name for name, _ in ko_appearances[103].most_common()
     if name not in fin_teams
@@ -199,16 +353,12 @@ def m103_entry(name):
 
 tp_t1, tp_t2 = m103_entry(m103_top[0]), m103_entry(m103_top[1])
 tp_winner = max([tp_t1, tp_t2], key=lambda t: t["overall_win_pct"])["name"]
+tp_loser = tp_t2["name"] if tp_winner == tp_t1["name"] else tp_t1["name"]
 
-# Predicted score for 3rd-place derived match
-tp_scores = {(w, wg, lg): c for (w, wg, lg), c in ko_score_tracker[103].items() if w == tp_winner}
-tp_predicted_score = None
-if tp_scores:
-    best_tp = max(tp_scores, key=tp_scores.__getitem__)
-    _, tp_wg, tp_lg = best_tp
-    tp_loser = tp_t2["name"] if tp_winner == tp_t1["name"] else tp_t1["name"]
-    tp_wp = max(tp_t1, tp_t2, key=lambda t: t["overall_win_pct"])["overall_win_pct"]
-    tp_predicted_score = f"{tp_winner} {tp_wg}-{tp_lg} {tp_loser} ({tp_wp}%)"
+# Poisson-based predicted score for 3rd-place match
+tp_wg, tp_lg = _poisson_most_probable_score(tp_winner, tp_loser)
+tp_wp = max(tp_t1, tp_t2, key=lambda t: t["overall_win_pct"])["overall_win_pct"]
+tp_predicted_score = f"{tp_winner} {tp_wg}-{tp_lg} {tp_loser} ({tp_wp}%)"
 
 output["knockout_bracket"]["third_place_match_derived"] = {
     "match": 103,
@@ -230,6 +380,6 @@ with open("/Users/diegofelipecortessastoque/Desktop/wc2026/predictions.json", "w
     json.dump(output, f, indent=2)
 
 print(f"\n✓ Predicted winner : {output['predicted_winner']} ({output['predicted_winner_probability_pct']}%)")
-print(f"✓ Runner-up (most likely): {output['runners_up'][0]['team']} ({output['runners_up'][0]['probability']}%)")
-print(f"✓ Third place (most likely): {output['third_place'][0]['team']} ({output['third_place'][0]['probability']}%)")
+print(f"✓ Runner-up: {output['runners_up'][0]['team']} ({output['runners_up'][0]['probability']}%)")
+print(f"✓ Third place: {output['third_place'][0]['team']} ({output['third_place'][0]['probability']}%)")
 print("✓ Saved to predictions.json")

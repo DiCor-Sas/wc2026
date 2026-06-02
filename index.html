@@ -54,6 +54,7 @@
     /* Top predictions */
     .top-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
     @media(min-width:600px){ .top-grid { grid-template-columns: repeat(4,1fr); } }
+    .pred-card.boot::before { background: var(--yellow); }
     .pred-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 1rem .8rem;
@@ -216,8 +217,53 @@
 
 <!-- ═══ POLLAYA PICKS (always first) ═══ -->
 <section id="pollaya">
-  <div class="section-title">&#9917; My Pollaya Picks</div>
-  <div class="pollaya-empty">No matches in the next 48 hours. First kickoff: Jun 11 2:00 PM Colombia time.</div>
+  <div class="section-title">&#9917; My Pollaya Picks &mdash; Upcoming</div>
+  <p class="pollaya-note">Score prediction earns 15 pts &bull; Winner pick 8 pts &bull; Goals per team 5 pts each</p>
+  <div class="pollaya-grid">
+
+<div class="pollaya-card">
+  <div class="pc-head">
+    <span class="pc-round">Group A MD1</span>
+    <span class="pc-time">&#128336; 11 Jun 14:00 COL</span>
+  </div>
+  <div class="pc-matchup">Mexico <span class="pc-vs">vs</span> Canada</div>
+  <div class="pc-rows">
+    <div class="pc-row"><span class="pc-lbl">&#127919; Score (15 pts)</span><span class="pc-val">1&#8209;1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#127942; Winner (8 pts)</span><span class="pc-val">Mexico &mdash; 60.2%</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals Mexico (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals Canada (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#128200; Confidence</span><span class="pc-val pc-conf conf-high">High</span></div>
+  </div>
+</div>
+<div class="pollaya-card">
+  <div class="pc-head">
+    <span class="pc-round">Group A MD1</span>
+    <span class="pc-time">&#128336; 11 Jun 17:00 COL</span>
+  </div>
+  <div class="pc-matchup">South Korea <span class="pc-vs">vs</span> South Africa</div>
+  <div class="pc-rows">
+    <div class="pc-row"><span class="pc-lbl">&#127919; Score (15 pts)</span><span class="pc-val">1&#8209;1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#127942; Winner (8 pts)</span><span class="pc-val">South Korea &mdash; 56.5%</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals South Korea (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals South Africa (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#128200; Confidence</span><span class="pc-val pc-conf conf-med">Medium</span></div>
+  </div>
+</div>
+<div class="pollaya-card">
+  <div class="pc-head">
+    <span class="pc-round">Group A MD1</span>
+    <span class="pc-time">&#128336; 11 Jun 20:00 COL</span>
+  </div>
+  <div class="pc-matchup">Czechia <span class="pc-vs">vs</span> TBD</div>
+  <div class="pc-rows">
+    <div class="pc-row"><span class="pc-lbl">&#127919; Score (15 pts)</span><span class="pc-val">1&#8209;1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#127942; Winner (8 pts)</span><span class="pc-val">TBD &mdash; 38.1%</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals Czechia (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#9917; Goals TBD (5 pts)</span><span class="pc-val">1</span></div>
+    <div class="pc-row"><span class="pc-lbl">&#128200; Confidence</span><span class="pc-val pc-conf conf-low">Low</span></div>
+  </div>
+</div>
+  </div>
 </section>
 
 <!-- ═══ SECTION 1 — TOP PREDICTIONS ═══ -->
@@ -228,30 +274,30 @@
     <div class="pred-card winner">
       <span class="pred-medal">&#127942;</span>
       <div class="pred-label">Tournament Winner</div>
-      <div class="pred-team">France</div>
-      <div class="pred-pct">10.47%</div>
-      <div class="pred-sub">1,047 / 10,000 simulations</div>
+      <div class="pred-team">Spain</div>
+      <div class="pred-pct">9.47%</div>
+      <div class="pred-sub">947 / 10,000 simulations</div>
     </div>
     <div class="pred-card runner">
       <span class="pred-medal">&#129352;</span>
       <div class="pred-label">Runner-Up</div>
-      <div class="pred-team">France</div>
-      <div class="pred-pct">9.4%</div>
+      <div class="pred-team">Argentina</div>
+      <div class="pred-pct">7.19%</div>
       <div class="pred-sub">Most likely finalist #2</div>
     </div>
     <div class="pred-card third">
       <span class="pred-medal">&#129353;</span>
       <div class="pred-label">Third Place</div>
-      <div class="pred-team">Spain</div>
-      <div class="pred-pct">8.72%</div>
+      <div class="pred-team">Netherlands</div>
+      <div class="pred-pct">5.69%</div>
       <div class="pred-sub">Most likely 3rd-place finish</div>
     </div>
-    <div class="pred-card" style="border-top:3px solid var(--accent2);">
-      <span class="pred-medal">&#9917;</span>
-      <div class="pred-label">Simulations</div>
-      <div class="pred-team" style="font-size:.85rem;">10,000 runs</div>
-      <div class="pred-pct" style="font-size:1rem;color:var(--accent2);">48 teams</div>
-      <div class="pred-sub">Full tournament MC model</div>
+    <div class="pred-card boot">
+      <span class="pred-medal">&#127966;</span>
+      <div class="pred-label">Golden Boot</div>
+      <div class="pred-team">Mikel Oyarzabal</div>
+      <div class="pred-pct" style="color:var(--yellow);">9.1</div>
+      <div class="pred-sub">Spain &bull; xG in tournament</div>
     </div>
   </div>
 </section>
@@ -262,22 +308,22 @@
   <table class="prob-table">
     <thead><tr><th>#</th><th>Team</th><th>Win Probability</th></tr></thead>
     <tbody>
-<tr><td>1</td><td>France</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:100%"></div><span class="prob-bar-lbl">10.47%</span></div></td></tr>
-<tr><td>2</td><td>Spain</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:80%"></div><span class="prob-bar-lbl">8.39%</span></div></td></tr>
-<tr><td>3</td><td>Argentina</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:69%"></div><span class="prob-bar-lbl">7.22%</span></div></td></tr>
-<tr><td>4</td><td>England</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:65%"></div><span class="prob-bar-lbl">6.84%</span></div></td></tr>
-<tr><td>5</td><td>Japan</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:63%"></div><span class="prob-bar-lbl">6.62%</span></div></td></tr>
-<tr><td>6</td><td>Netherlands</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:62%"></div><span class="prob-bar-lbl">6.48%</span></div></td></tr>
-<tr><td>7</td><td>Croatia</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:50%"></div><span class="prob-bar-lbl">5.21%</span></div></td></tr>
-<tr><td>8</td><td>Mexico</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:48%"></div><span class="prob-bar-lbl">5.02%</span></div></td></tr>
-<tr><td>9</td><td>Brazil</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:47%"></div><span class="prob-bar-lbl">4.94%</span></div></td></tr>
-<tr><td>10</td><td>Portugal</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:43%"></div><span class="prob-bar-lbl">4.51%</span></div></td></tr>
-<tr><td>11</td><td>USA</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:37%"></div><span class="prob-bar-lbl">3.91%</span></div></td></tr>
-<tr><td>12</td><td>Morocco</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:30%"></div><span class="prob-bar-lbl">3.19%</span></div></td></tr>
-<tr><td>13</td><td>Senegal</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:29%"></div><span class="prob-bar-lbl">2.99%</span></div></td></tr>
-<tr><td>14</td><td>Sweden</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:23%"></div><span class="prob-bar-lbl">2.38%</span></div></td></tr>
-<tr><td>15</td><td>Uruguay</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:20%"></div><span class="prob-bar-lbl">2.06%</span></div></td></tr>
-<tr><td>16</td><td>Germany</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:19%"></div><span class="prob-bar-lbl">1.94%</span></div></td></tr>
+<tr><td>1</td><td>Spain</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:100%"></div><span class="prob-bar-lbl">9.47%</span></div></td></tr>
+<tr><td>2</td><td>Netherlands</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:75%"></div><span class="prob-bar-lbl">7.11%</span></div></td></tr>
+<tr><td>3</td><td>Argentina</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:71%"></div><span class="prob-bar-lbl">6.76%</span></div></td></tr>
+<tr><td>4</td><td>Germany</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:61%"></div><span class="prob-bar-lbl">5.77%</span></div></td></tr>
+<tr><td>5</td><td>France</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:59%"></div><span class="prob-bar-lbl">5.54%</span></div></td></tr>
+<tr><td>6</td><td>Brazil</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:47%"></div><span class="prob-bar-lbl">4.48%</span></div></td></tr>
+<tr><td>7</td><td>Portugal</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:45%"></div><span class="prob-bar-lbl">4.24%</span></div></td></tr>
+<tr><td>8</td><td>England</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:42%"></div><span class="prob-bar-lbl">3.99%</span></div></td></tr>
+<tr><td>9</td><td>Mexico</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:41%"></div><span class="prob-bar-lbl">3.93%</span></div></td></tr>
+<tr><td>10</td><td>Colombia</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:37%"></div><span class="prob-bar-lbl">3.5%</span></div></td></tr>
+<tr><td>11</td><td>Croatia</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:36%"></div><span class="prob-bar-lbl">3.43%</span></div></td></tr>
+<tr><td>12</td><td>Morocco</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:36%"></div><span class="prob-bar-lbl">3.42%</span></div></td></tr>
+<tr><td>13</td><td>USA</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:36%"></div><span class="prob-bar-lbl">3.4%</span></div></td></tr>
+<tr><td>14</td><td>Uruguay</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:30%"></div><span class="prob-bar-lbl">2.83%</span></div></td></tr>
+<tr><td>15</td><td>Belgium</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:27%"></div><span class="prob-bar-lbl">2.56%</span></div></td></tr>
+<tr><td>16</td><td>Austria</td><td><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:24%"></div><span class="prob-bar-lbl">2.23%</span></div></td></tr>
     </tbody>
   </table>
 </section>
@@ -295,130 +341,130 @@
 <div class="ko-card">
   <div class="ko-head">M73 &middot; SoFi Stadium, LA &middot; <span class="ko-slot">2nd-A vs 2nd-B</span></div>
   <div class="ko-matchup">
-    <div class="ko-team  ko-wt">
-      <div class="ko-name">South Korea</div>
-      <div class="ko-stat">Reaches&nbsp;34.65% &bull; Wins&nbsp;if&nbsp;reached&nbsp;65.77%</div>
+    <div class="ko-team">
+      <div class="ko-name">Canada</div>
+      <div class="ko-stat">Reaches&nbsp;29.56% &bull; Wins&nbsp;if&nbsp;reached&nbsp;46.14%</div>
     </div>
     <div class="ko-vs">vs</div>
-    <div class="ko-team ko-right">
-      <div class="ko-name">Canada</div>
-      <div class="ko-stat">Reaches&nbsp;33.52% &bull; Wins&nbsp;if&nbsp;reached&nbsp;41.26%</div>
+    <div class="ko-team ko-right  ko-wt">
+      <div class="ko-name">South Korea</div>
+      <div class="ko-stat">Reaches&nbsp;28.99% &bull; Wins&nbsp;if&nbsp;reached&nbsp;56.85%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:62%"><span class="ko-bar-lbl">22.79%</span></div><div class="ko-bar-seg ko-bar-r" style="width:38%"><span class="ko-bar-lbl ko-bar-lbl-r">13.83%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;South Korea 1-0 Canada (22.79%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:45%"><span class="ko-bar-lbl">13.64%</span></div><div class="ko-bar-seg ko-bar-r" style="width:55%"><span class="ko-bar-lbl ko-bar-lbl-r">16.48%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;South Korea 1-1 Canada (16.48%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M74 &middot; Gillette Stadium, Boston &middot; <span class="ko-slot">1st-E vs 3rd(A/B/C/D/F)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Germany</div>
-      <div class="ko-stat">Reaches&nbsp;59.16% &bull; Wins&nbsp;if&nbsp;reached&nbsp;64.96%</div>
+      <div class="ko-stat">Reaches&nbsp;68.04% &bull; Wins&nbsp;if&nbsp;reached&nbsp;72.33%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Czechia</div>
-      <div class="ko-stat">Reaches&nbsp;22.25% &bull; Wins&nbsp;if&nbsp;reached&nbsp;45.84%</div>
+      <div class="ko-stat">Reaches&nbsp;19.64% &bull; Wins&nbsp;if&nbsp;reached&nbsp;35.44%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:79%"><span class="ko-bar-lbl">38.43%</span></div><div class="ko-bar-seg ko-bar-r" style="width:21%"><span class="ko-bar-lbl ko-bar-lbl-r">10.2%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Germany 1-0 Czechia (38.43%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:88%"><span class="ko-bar-lbl">49.21%</span></div><div class="ko-bar-seg ko-bar-r" style="width:12%"><span class="ko-bar-lbl ko-bar-lbl-r">6.96%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Germany 2-1 Czechia (49.21%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M75 &middot; Estadio BBVA, Monterrey &middot; <span class="ko-slot">1st-F vs 2nd-C</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Netherlands</div>
-      <div class="ko-stat">Reaches&nbsp;44.6% &bull; Wins&nbsp;if&nbsp;reached&nbsp;68.39%</div>
+      <div class="ko-stat">Reaches&nbsp;65.61% &bull; Wins&nbsp;if&nbsp;reached&nbsp;66.93%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Morocco</div>
-      <div class="ko-stat">Reaches&nbsp;43.01% &bull; Wins&nbsp;if&nbsp;reached&nbsp;33.81%</div>
+      <div class="ko-stat">Reaches&nbsp;38.34% &bull; Wins&nbsp;if&nbsp;reached&nbsp;40.82%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:68%"><span class="ko-bar-lbl">30.5%</span></div><div class="ko-bar-seg ko-bar-r" style="width:32%"><span class="ko-bar-lbl ko-bar-lbl-r">14.54%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Netherlands 1-0 Morocco (30.5%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:74%"><span class="ko-bar-lbl">43.91%</span></div><div class="ko-bar-seg ko-bar-r" style="width:26%"><span class="ko-bar-lbl ko-bar-lbl-r">15.65%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Netherlands 2-1 Morocco (43.91%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M76 &middot; NRG Stadium, Houston &middot; <span class="ko-slot">1st-C vs 2nd-F</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Brazil</div>
-      <div class="ko-stat">Reaches&nbsp;58.82% &bull; Wins&nbsp;if&nbsp;reached&nbsp;52.62%</div>
+      <div class="ko-stat">Reaches&nbsp;53.74% &bull; Wins&nbsp;if&nbsp;reached&nbsp;61.39%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Japan</div>
-      <div class="ko-stat">Reaches&nbsp;33.62% &bull; Wins&nbsp;if&nbsp;reached&nbsp;53.63%</div>
+      <div class="ko-name">Sweden</div>
+      <div class="ko-stat">Reaches&nbsp;33.01% &bull; Wins&nbsp;if&nbsp;reached&nbsp;42.47%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:63%"><span class="ko-bar-lbl">30.95%</span></div><div class="ko-bar-seg ko-bar-r" style="width:37%"><span class="ko-bar-lbl ko-bar-lbl-r">18.03%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Brazil 1-0 Japan (30.95%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:70%"><span class="ko-bar-lbl">32.99%</span></div><div class="ko-bar-seg ko-bar-r" style="width:30%"><span class="ko-bar-lbl ko-bar-lbl-r">14.02%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Brazil 2-1 Sweden (32.99%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M77 &middot; MetLife Stadium, NJ &middot; <span class="ko-slot">1st-I vs 3rd(C/D/F/G/H)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">France</div>
-      <div class="ko-stat">Reaches&nbsp;76.34% &bull; Wins&nbsp;if&nbsp;reached&nbsp;80.18%</div>
+      <div class="ko-stat">Reaches&nbsp;58.2% &bull; Wins&nbsp;if&nbsp;reached&nbsp;69.6%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Scotland</div>
-      <div class="ko-stat">Reaches&nbsp;25.46% &bull; Wins&nbsp;if&nbsp;reached&nbsp;22.11%</div>
+      <div class="ko-stat">Reaches&nbsp;22.03% &bull; Wins&nbsp;if&nbsp;reached&nbsp;31.37%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:92%"><span class="ko-bar-lbl">61.21%</span></div><div class="ko-bar-seg ko-bar-r" style="width:8%"><span class="ko-bar-lbl ko-bar-lbl-r">5.63%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;France 2-0 Scotland (61.21%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:85%"><span class="ko-bar-lbl">40.51%</span></div><div class="ko-bar-seg ko-bar-r" style="width:15%"><span class="ko-bar-lbl ko-bar-lbl-r">6.91%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;France 2-1 Scotland (40.51%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M78 &middot; AT&amp;T Stadium, Dallas &middot; <span class="ko-slot">2nd-E vs 2nd-I</span></div>
   <div class="ko-matchup">
-    <div class="ko-team  ko-wt">
-      <div class="ko-name">Senegal</div>
-      <div class="ko-stat">Reaches&nbsp;42.43% &bull; Wins&nbsp;if&nbsp;reached&nbsp;74.55%</div>
+    <div class="ko-team">
+      <div class="ko-name">Ivory Coast</div>
+      <div class="ko-stat">Reaches&nbsp;31.2% &bull; Wins&nbsp;if&nbsp;reached&nbsp;35.38%</div>
     </div>
     <div class="ko-vs">vs</div>
-    <div class="ko-team ko-right">
-      <div class="ko-name">Ecuador</div>
-      <div class="ko-stat">Reaches&nbsp;34.6% &bull; Wins&nbsp;if&nbsp;reached&nbsp;27.57%</div>
+    <div class="ko-team ko-right  ko-wt">
+      <div class="ko-name">Norway</div>
+      <div class="ko-stat">Reaches&nbsp;31.18% &bull; Wins&nbsp;if&nbsp;reached&nbsp;63.73%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:77%"><span class="ko-bar-lbl">31.63%</span></div><div class="ko-bar-seg ko-bar-r" style="width:23%"><span class="ko-bar-lbl ko-bar-lbl-r">9.54%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Senegal 1-0 Ecuador (31.63%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:36%"><span class="ko-bar-lbl">11.04%</span></div><div class="ko-bar-seg ko-bar-r" style="width:64%"><span class="ko-bar-lbl ko-bar-lbl-r">19.87%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Norway 1-1 Ivory Coast (19.87%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M79 &middot; Estadio Azteca, Mexico City &middot; <span class="ko-slot">1st-A vs 3rd(C/E/F/H/I)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Mexico</div>
-      <div class="ko-stat">Reaches&nbsp;56.23% &bull; Wins&nbsp;if&nbsp;reached&nbsp;74.3%</div>
+      <div class="ko-stat">Reaches&nbsp;49.98% &bull; Wins&nbsp;if&nbsp;reached&nbsp;69.07%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Ivory Coast</div>
-      <div class="ko-stat">Reaches&nbsp;25.29% &bull; Wins&nbsp;if&nbsp;reached&nbsp;24.95%</div>
+      <div class="ko-name">Ecuador</div>
+      <div class="ko-stat">Reaches&nbsp;19.87% &bull; Wins&nbsp;if&nbsp;reached&nbsp;32.71%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:87%"><span class="ko-bar-lbl">41.78%</span></div><div class="ko-bar-seg ko-bar-r" style="width:13%"><span class="ko-bar-lbl ko-bar-lbl-r">6.31%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Mexico 1-0 Ivory Coast (41.78%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:84%"><span class="ko-bar-lbl">34.52%</span></div><div class="ko-bar-seg ko-bar-r" style="width:16%"><span class="ko-bar-lbl ko-bar-lbl-r">6.5%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Mexico 1-1 Ecuador (34.52%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M80 &middot; Mercedes-Benz Stadium &middot; <span class="ko-slot">1st-L vs 3rd(E/H/I/J/K)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">England</div>
-      <div class="ko-stat">Reaches&nbsp;63.28% &bull; Wins&nbsp;if&nbsp;reached&nbsp;76.93%</div>
+      <div class="ko-stat">Reaches&nbsp;45.81% &bull; Wins&nbsp;if&nbsp;reached&nbsp;66.27%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Croatia</div>
-      <div class="ko-stat">Reaches&nbsp;28.61% &bull; Wins&nbsp;if&nbsp;reached&nbsp;76.27%</div>
+      <div class="ko-stat">Reaches&nbsp;40.07% &bull; Wins&nbsp;if&nbsp;reached&nbsp;66.23%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:69%"><span class="ko-bar-lbl">48.68%</span></div><div class="ko-bar-seg ko-bar-r" style="width:31%"><span class="ko-bar-lbl ko-bar-lbl-r">21.82%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;England 1-0 Croatia (48.68%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:53%"><span class="ko-bar-lbl">30.36%</span></div><div class="ko-bar-seg ko-bar-r" style="width:47%"><span class="ko-bar-lbl ko-bar-lbl-r">26.54%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;England 2-2 Croatia (30.36%)</div>
 </div>
   </div>
   <div class="ko-round-label">Right Side of Bracket (feeds Semi-Final 2)</div>
@@ -428,128 +474,128 @@
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">USA</div>
-      <div class="ko-stat">Reaches&nbsp;48.04% &bull; Wins&nbsp;if&nbsp;reached&nbsp;69.09%</div>
+      <div class="ko-stat">Reaches&nbsp;43.76% &bull; Wins&nbsp;if&nbsp;reached&nbsp;65.47%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Australia</div>
-      <div class="ko-stat">Reaches&nbsp;27.09% &bull; Wins&nbsp;if&nbsp;reached&nbsp;57.07%</div>
+      <div class="ko-name">Türkiye</div>
+      <div class="ko-stat">Reaches&nbsp;24.91% &bull; Wins&nbsp;if&nbsp;reached&nbsp;56.2%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:68%"><span class="ko-bar-lbl">33.19%</span></div><div class="ko-bar-seg ko-bar-r" style="width:32%"><span class="ko-bar-lbl ko-bar-lbl-r">15.46%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;USA 1-0 Australia (33.19%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:67%"><span class="ko-bar-lbl">28.65%</span></div><div class="ko-bar-seg ko-bar-r" style="width:33%"><span class="ko-bar-lbl ko-bar-lbl-r">14.0%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;USA 1-1 Türkiye (28.65%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M82 &middot; Lumen Field, Seattle &middot; <span class="ko-slot">1st-G vs 3rd(A/E/H/I/J)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Belgium</div>
-      <div class="ko-stat">Reaches&nbsp;50.04% &bull; Wins&nbsp;if&nbsp;reached&nbsp;60.31%</div>
+      <div class="ko-stat">Reaches&nbsp;57.87% &bull; Wins&nbsp;if&nbsp;reached&nbsp;59.88%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Iran</div>
-      <div class="ko-stat">Reaches&nbsp;36.91% &bull; Wins&nbsp;if&nbsp;reached&nbsp;58.3%</div>
+      <div class="ko-name">Egypt</div>
+      <div class="ko-stat">Reaches&nbsp;22.01% &bull; Wins&nbsp;if&nbsp;reached&nbsp;46.98%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:58%"><span class="ko-bar-lbl">30.18%</span></div><div class="ko-bar-seg ko-bar-r" style="width:42%"><span class="ko-bar-lbl ko-bar-lbl-r">21.52%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Belgium 1-0 Iran (30.18%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:77%"><span class="ko-bar-lbl">34.65%</span></div><div class="ko-bar-seg ko-bar-r" style="width:23%"><span class="ko-bar-lbl ko-bar-lbl-r">10.34%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Belgium 2-1 Egypt (34.65%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M83 &middot; BMO Field, Toronto &middot; <span class="ko-slot">2nd-K vs 2nd-L</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
-      <div class="ko-name">Croatia</div>
-      <div class="ko-stat">Reaches&nbsp;48.54% &bull; Wins&nbsp;if&nbsp;reached&nbsp;73.75%</div>
+      <div class="ko-name">Colombia</div>
+      <div class="ko-stat">Reaches&nbsp;38.81% &bull; Wins&nbsp;if&nbsp;reached&nbsp;52.62%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Colombia</div>
-      <div class="ko-stat">Reaches&nbsp;48.0% &bull; Wins&nbsp;if&nbsp;reached&nbsp;36.0%</div>
+      <div class="ko-name">Ghana</div>
+      <div class="ko-stat">Reaches&nbsp;17.23% &bull; Wins&nbsp;if&nbsp;reached&nbsp;45.04%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:67%"><span class="ko-bar-lbl">35.8%</span></div><div class="ko-bar-seg ko-bar-r" style="width:33%"><span class="ko-bar-lbl ko-bar-lbl-r">17.28%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Croatia 1-0 Colombia (35.8%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:72%"><span class="ko-bar-lbl">20.42%</span></div><div class="ko-bar-seg ko-bar-r" style="width:28%"><span class="ko-bar-lbl ko-bar-lbl-r">7.76%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Colombia 2-1 Ghana (20.42%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M84 &middot; SoFi Stadium, LA &middot; <span class="ko-slot">1st-H vs 2nd-J</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Spain</div>
-      <div class="ko-stat">Reaches&nbsp;69.56% &bull; Wins&nbsp;if&nbsp;reached&nbsp;77.33%</div>
+      <div class="ko-stat">Reaches&nbsp;68.96% &bull; Wins&nbsp;if&nbsp;reached&nbsp;73.74%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Austria</div>
-      <div class="ko-stat">Reaches&nbsp;39.11% &bull; Wins&nbsp;if&nbsp;reached&nbsp;29.66%</div>
+      <div class="ko-stat">Reaches&nbsp;40.92% &bull; Wins&nbsp;if&nbsp;reached&nbsp;34.12%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:82%"><span class="ko-bar-lbl">53.79%</span></div><div class="ko-bar-seg ko-bar-r" style="width:18%"><span class="ko-bar-lbl ko-bar-lbl-r">11.6%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Spain 1-0 Austria (53.79%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:78%"><span class="ko-bar-lbl">50.85%</span></div><div class="ko-bar-seg ko-bar-r" style="width:22%"><span class="ko-bar-lbl ko-bar-lbl-r">13.96%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Spain 3-1 Austria (50.85%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M85 &middot; BC Place, Vancouver &middot; <span class="ko-slot">1st-B vs 3rd(E/F/G/I/J)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Switzerland</div>
-      <div class="ko-stat">Reaches&nbsp;52.55% &bull; Wins&nbsp;if&nbsp;reached&nbsp;59.66%</div>
+      <div class="ko-stat">Reaches&nbsp;47.98% &bull; Wins&nbsp;if&nbsp;reached&nbsp;58.88%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Canada</div>
-      <div class="ko-stat">Reaches&nbsp;25.85% &bull; Wins&nbsp;if&nbsp;reached&nbsp;54.08%</div>
+      <div class="ko-name">Bosnia-Herzegovina</div>
+      <div class="ko-stat">Reaches&nbsp;16.68% &bull; Wins&nbsp;if&nbsp;reached&nbsp;48.02%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:69%"><span class="ko-bar-lbl">31.35%</span></div><div class="ko-bar-seg ko-bar-r" style="width:31%"><span class="ko-bar-lbl ko-bar-lbl-r">13.98%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Switzerland 1-0 Canada (31.35%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:78%"><span class="ko-bar-lbl">28.25%</span></div><div class="ko-bar-seg ko-bar-r" style="width:22%"><span class="ko-bar-lbl ko-bar-lbl-r">8.01%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Switzerland 1-1 Bosnia-Herzegovina (28.25%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M86 &middot; Hard Rock Stadium, Miami &middot; <span class="ko-slot">1st-J vs 2nd-H</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Argentina</div>
-      <div class="ko-stat">Reaches&nbsp;72.85% &bull; Wins&nbsp;if&nbsp;reached&nbsp;72.12%</div>
+      <div class="ko-stat">Reaches&nbsp;70.74% &bull; Wins&nbsp;if&nbsp;reached&nbsp;69.66%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
       <div class="ko-name">Uruguay</div>
-      <div class="ko-stat">Reaches&nbsp;45.36% &bull; Wins&nbsp;if&nbsp;reached&nbsp;37.19%</div>
+      <div class="ko-stat">Reaches&nbsp;42.61% &bull; Wins&nbsp;if&nbsp;reached&nbsp;38.23%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:76%"><span class="ko-bar-lbl">52.54%</span></div><div class="ko-bar-seg ko-bar-r" style="width:24%"><span class="ko-bar-lbl ko-bar-lbl-r">16.87%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Argentina 1-0 Uruguay (52.54%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:75%"><span class="ko-bar-lbl">49.28%</span></div><div class="ko-bar-seg ko-bar-r" style="width:25%"><span class="ko-bar-lbl ko-bar-lbl-r">16.29%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Argentina 3-1 Uruguay (49.28%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M87 &middot; Arrowhead Stadium, KC &middot; <span class="ko-slot">1st-K vs 3rd(D/E/I/J/L)</span></div>
   <div class="ko-matchup">
     <div class="ko-team  ko-wt">
       <div class="ko-name">Portugal</div>
-      <div class="ko-stat">Reaches&nbsp;75.3% &bull; Wins&nbsp;if&nbsp;reached&nbsp;73.65%</div>
+      <div class="ko-stat">Reaches&nbsp;56.71% &bull; Wins&nbsp;if&nbsp;reached&nbsp;66.78%</div>
     </div>
     <div class="ko-vs">vs</div>
     <div class="ko-team ko-right">
-      <div class="ko-name">Colombia</div>
-      <div class="ko-stat">Reaches&nbsp;24.27% &bull; Wins&nbsp;if&nbsp;reached&nbsp;53.19%</div>
+      <div class="ko-name">Panama</div>
+      <div class="ko-stat">Reaches&nbsp;20.34% &bull; Wins&nbsp;if&nbsp;reached&nbsp;29.84%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:81%"><span class="ko-bar-lbl">55.46%</span></div><div class="ko-bar-seg ko-bar-r" style="width:19%"><span class="ko-bar-lbl ko-bar-lbl-r">12.91%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Portugal 1-0 Colombia (55.46%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:86%"><span class="ko-bar-lbl">37.87%</span></div><div class="ko-bar-seg ko-bar-r" style="width:14%"><span class="ko-bar-lbl ko-bar-lbl-r">6.07%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Portugal 2-1 Panama (37.87%)</div>
 </div>
 <div class="ko-card">
   <div class="ko-head">M88 &middot; AT&amp;T Stadium, Dallas &middot; <span class="ko-slot">2nd-D vs 2nd-G</span></div>
   <div class="ko-matchup">
-    <div class="ko-team  ko-wt">
+    <div class="ko-team">
       <div class="ko-name">Iran</div>
-      <div class="ko-stat">Reaches&nbsp;33.78% &bull; Wins&nbsp;if&nbsp;reached&nbsp;49.64%</div>
+      <div class="ko-stat">Reaches&nbsp;31.83% &bull; Wins&nbsp;if&nbsp;reached&nbsp;46.21%</div>
     </div>
     <div class="ko-vs">vs</div>
-    <div class="ko-team ko-right">
+    <div class="ko-team ko-right  ko-wt">
       <div class="ko-name">Australia</div>
-      <div class="ko-stat">Reaches&nbsp;30.17% &bull; Wins&nbsp;if&nbsp;reached&nbsp;54.29%</div>
+      <div class="ko-stat">Reaches&nbsp;27.24% &bull; Wins&nbsp;if&nbsp;reached&nbsp;54.26%</div>
     </div>
   </div>
-<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:51%"><span class="ko-bar-lbl">16.77%</span></div><div class="ko-bar-seg ko-bar-r" style="width:49%"><span class="ko-bar-lbl ko-bar-lbl-r">16.38%</span></div></div>
-  <div class="ko-predicted">&#9654;&nbsp;Iran 1-0 Australia (16.77%)</div>
+<div class="ko-bar-row"><div class="ko-bar-seg ko-bar-l" style="width:50%"><span class="ko-bar-lbl">14.71%</span></div><div class="ko-bar-seg ko-bar-r" style="width:50%"><span class="ko-bar-lbl ko-bar-lbl-r">14.78%</span></div></div>
+  <div class="ko-predicted">&#9654;&nbsp;Australia 1-1 Iran (14.78%)</div>
 </div>
   </div>
 </section>
@@ -570,51 +616,51 @@
         <div class="b-round-title">Round of 16</div>
         <div class="b-slots">
           <div class="b-match">
-  <div class="b-team likely"><span>France</span><span class="b-team-pct">47.13%</span></div>
-  <div class="b-team"><span>Germany</span><span class="b-team-pct">12.74%</span></div>
-<div class="b-score">France 1-0 Germany (47.13%)</div>
+  <div class="b-team likely"><span>Germany</span><span class="b-team-pct">26.33%</span></div>
+  <div class="b-team"><span>France</span><span class="b-team-pct">23.72%</span></div>
+<div class="b-score">Germany 2-2 France (26.33%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Netherlands</span><span class="b-team-pct">22.66%</span></div>
-  <div class="b-team"><span>Japan</span><span class="b-team-pct">20.32%</span></div>
-<div class="b-score">Netherlands 1-0 Japan (22.66%)</div>
+  <div class="b-team likely"><span>Netherlands</span><span class="b-team-pct">32.4%</span></div>
+  <div class="b-team"><span>Mexico</span><span class="b-team-pct">5.98%</span></div>
+<div class="b-score">Netherlands 2-1 Mexico (32.4%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team"><span>Senegal</span><span class="b-team-pct">11.45%</span></div>
-  <div class="b-team likely"><span>Brazil</span><span class="b-team-pct">21.54%</span></div>
-<div class="b-score">Brazil 1-0 Senegal (21.54%)</div>
+  <div class="b-team likely"><span>Brazil</span><span class="b-team-pct">21.11%</span></div>
+  <div class="b-team"><span>Norway</span><span class="b-team-pct">7.6%</span></div>
+<div class="b-score">Brazil 2-1 Norway (21.11%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>England</span><span class="b-team-pct">31.48%</span></div>
-  <div class="b-team"><span>Mexico</span><span class="b-team-pct">19.4%</span></div>
-<div class="b-score">England 1-0 Mexico (31.48%)</div>
+  <div class="b-team"><span>Mexico</span><span class="b-team-pct">17.26%</span></div>
+  <div class="b-team likely"><span>England</span><span class="b-team-pct">18.3%</span></div>
+<div class="b-score">England 2-1 Mexico (18.3%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">37.18%</span></div>
-  <div class="b-team"><span>Croatia</span><span class="b-team-pct">16.53%</span></div>
-<div class="b-score">Spain 1-0 Croatia (37.18%)</div>
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">35.17%</span></div>
+  <div class="b-team"><span>Colombia</span><span class="b-team-pct">7.69%</span></div>
+<div class="b-score">Spain 3-2 Colombia (35.17%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>USA</span><span class="b-team-pct">21.28%</span></div>
-  <div class="b-team"><span>Belgium</span><span class="b-team-pct">15.72%</span></div>
-<div class="b-score">USA 1-0 Belgium (21.28%)</div>
+  <div class="b-team likely"><span>Belgium</span><span class="b-team-pct">18.46%</span></div>
+  <div class="b-team"><span>USA</span><span class="b-team-pct">18.0%</span></div>
+<div class="b-score">Belgium 2-1 USA (18.46%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">37.02%</span></div>
-  <div class="b-team"><span>USA</span><span class="b-team-pct">6.89%</span></div>
-<div class="b-score">Argentina 1-0 USA (37.02%)</div>
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">35.56%</span></div>
+  <div class="b-team"><span>Uruguay</span><span class="b-team-pct">11.39%</span></div>
+<div class="b-score">Argentina 3-1 Uruguay (35.56%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Portugal</span><span class="b-team-pct">38.69%</span></div>
-  <div class="b-team"><span>Switzerland</span><span class="b-team-pct">12.97%</span></div>
-<div class="b-score">Portugal 1-0 Switzerland (38.69%)</div>
+  <div class="b-team likely"><span>Portugal</span><span class="b-team-pct">25.72%</span></div>
+  <div class="b-team"><span>Colombia</span><span class="b-team-pct">18.36%</span></div>
+<div class="b-score">Portugal 2-2 Colombia (25.72%)</div>
 </div>
 <div class="b-divider"></div>
 
@@ -626,27 +672,27 @@
         <div class="b-round-title">Quarter-finals</div>
         <div class="b-slots">
           <div class="b-match">
-  <div class="b-team likely"><span>France</span><span class="b-team-pct">28.87%</span></div>
-  <div class="b-team"><span>Netherlands</span><span class="b-team-pct">11.95%</span></div>
-<div class="b-score">France 1-0 Netherlands (28.87%)</div>
+  <div class="b-team likely"><span>Netherlands</span><span class="b-team-pct">17.49%</span></div>
+  <div class="b-team"><span>Germany</span><span class="b-team-pct">15.33%</span></div>
+<div class="b-score">Netherlands 2-2 Germany (17.49%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">25.21%</span></div>
-  <div class="b-team"><span>USA</span><span class="b-team-pct">9.47%</span></div>
-<div class="b-score">Spain 1-0 USA (25.21%)</div>
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">24.77%</span></div>
+  <div class="b-team"><span>Belgium</span><span class="b-team-pct">7.11%</span></div>
+<div class="b-score">Spain 3-2 Belgium (24.77%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>England</span><span class="b-team-pct">16.36%</span></div>
-  <div class="b-team"><span>Brazil</span><span class="b-team-pct">11.42%</span></div>
-<div class="b-score">England 1-0 Brazil (16.36%)</div>
+  <div class="b-team likely"><span>Brazil</span><span class="b-team-pct">12.3%</span></div>
+  <div class="b-team"><span>England</span><span class="b-team-pct">9.11%</span></div>
+<div class="b-score">Brazil 2-2 England (12.3%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team"><span>Portugal</span><span class="b-team-pct">18.89%</span></div>
-  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">24.44%</span></div>
-<div class="b-score">Argentina 1-0 Portugal (24.44%)</div>
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">22.33%</span></div>
+  <div class="b-team"><span>Portugal</span><span class="b-team-pct">12.13%</span></div>
+<div class="b-score">Argentina 3-2 Portugal (22.33%)</div>
 </div>
 <div class="b-divider"></div>
 
@@ -658,15 +704,15 @@
         <div class="b-round-title">Semi-finals</div>
         <div class="b-slots">
           <div class="b-match">
-  <div class="b-team likely"><span>France</span><span class="b-team-pct">17.8%</span></div>
-  <div class="b-team"><span>Spain</span><span class="b-team-pct">12.8%</span></div>
-<div class="b-score">France 1-0 Spain (17.8%)</div>
+  <div class="b-team likely"><span>Spain</span><span class="b-team-pct">12.77%</span></div>
+  <div class="b-team"><span>Netherlands</span><span class="b-team-pct">10.17%</span></div>
+<div class="b-score">Spain 3-2 Netherlands (12.77%)</div>
 </div>
 <div class="b-divider"></div>
 <div class="b-match">
-  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">11.48%</span></div>
-  <div class="b-team"><span>Portugal</span><span class="b-team-pct">8.09%</span></div>
-<div class="b-score">Argentina 1-0 Portugal (11.48%)</div>
+  <div class="b-team likely"><span>Argentina</span><span class="b-team-pct">12.13%</span></div>
+  <div class="b-team"><span>Brazil</span><span class="b-team-pct">6.37%</span></div>
+<div class="b-score">Argentina 3-2 Brazil (12.13%)</div>
 </div>
 <div class="b-divider"></div>
 
@@ -678,16 +724,16 @@
         <div class="b-round-title">Final &middot; MetLife Stadium, NJ</div>
         <div class="b-slots">
           <div class="b-match">
-  <div class="b-team likely"><span>&#127942;&nbsp;France</span><span class="b-team-pct">10.47%</span></div>
-  <div class="b-team"><span>Spain</span><span class="b-team-pct">8.39%</span></div>
-<div class="b-score">France 1-0 Spain (10.47%)</div>
+  <div class="b-team likely"><span>&#127942;&nbsp;Spain</span><span class="b-team-pct">9.47%</span></div>
+  <div class="b-team"><span>Argentina</span><span class="b-team-pct">6.76%</span></div>
+<div class="b-score">Spain 3-3 Argentina (9.47%)</div>
 </div>
           <div class="tp-card">
             <div class="tp-title">3rd-Place Match &middot; Hard Rock Stadium, Miami</div>
             <div class="b-match">
-  <div class="b-team likely"><span>&#129353;&nbsp;Argentina</span><span class="b-team-pct">7.7%</span></div>
-  <div class="b-team"><span>Portugal</span><span class="b-team-pct">6.01%</span></div>
-<div class="b-score">Argentina 1-0 Portugal (7.7%)</div>
+  <div class="b-team likely"><span>&#129353;&nbsp;Netherlands</span><span class="b-team-pct">5.69%</span></div>
+  <div class="b-team"><span>Brazil</span><span class="b-team-pct">4.47%</span></div>
+<div class="b-score">Netherlands 2-2 Brazil (5.69%)</div>
 </div>
           </div>
         </div>
