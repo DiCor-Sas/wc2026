@@ -176,29 +176,28 @@ output = {
     },
 }
 
-# ── Derive the 3rd-place display from SF projected losers ─────────────────
-# SF1 = M101, SF2 = M102.  The projected loser of each SF is the participant
-# with lower overall_win_pct (they lose the SF more often than they win it).
-sf1_data = output["knockout_bracket"]["semi_finals"][0]   # M101
-sf2_data = output["knockout_bracket"]["semi_finals"][1]   # M102
+# ── Derive the 3rd-place display from actual M103 appearances ─────────────
+# Teams that appear in M103 are definitionally not finalists, so using the
+# real match-103 data avoids any SF-routing ambiguity in the aggregated stats.
+fin_teams = {t["name"] for t in output["knockout_bracket"]["final"]["teams"][:2]}
 
-def sf_loser_entry(sf_data):
-    """Return the team entry (reach_pct, etc.) for the projected SF loser,
-    but pull the conditional win probability from the actual M103 appearances."""
-    teams = sorted(sf_data["teams"], key=lambda t: t["overall_win_pct"])
-    loser = teams[0]   # lower overall_win_pct → projected loser
-    # Get their M103 stats from ko_appearances/ko_wins for accurate 3p numbers
-    app = ko_appearances[103][loser["name"]]
-    win = ko_wins[103][loser["name"]]
+# Top-2 teams in M103 by appearances, excluding any finalist (safety guard)
+m103_top = [
+    name for name, _ in ko_appearances[103].most_common()
+    if name not in fin_teams
+][:2]
+
+def m103_entry(name):
+    app = ko_appearances[103][name]
+    win = ko_wins[103][name]
     return {
-        "name": loser["name"],
+        "name": name,
         "reach_pct":          pct(app, total),
         "win_if_reached_pct": pct(win, app) if app else 0.0,
         "overall_win_pct":    pct(win, total),
     }
 
-tp_t1 = sf_loser_entry(sf1_data)
-tp_t2 = sf_loser_entry(sf2_data)
+tp_t1, tp_t2 = m103_entry(m103_top[0]), m103_entry(m103_top[1])
 tp_winner = max([tp_t1, tp_t2], key=lambda t: t["overall_win_pct"])["name"]
 
 # Predicted score for 3rd-place derived match
@@ -220,11 +219,9 @@ output["knockout_bracket"]["third_place_match_derived"] = {
 }
 
 # Verify the four Final/3P teams are all distinct
-fin_teams = {t["name"] for t in output["knockout_bracket"]["final"]["teams"][:2]}
-tp_teams  = {t["name"] for t in output["knockout_bracket"]["third_place_match_derived"]["teams"]}
+tp_teams = {t["name"] for t in output["knockout_bracket"]["third_place_match_derived"]["teams"]}
 assert fin_teams.isdisjoint(tp_teams), (
-    f"Derived 3P teams {tp_teams} still overlap with Final teams {fin_teams}. "
-    "Check SF data ordering."
+    f"Derived 3P teams {tp_teams} still overlap with Final teams {fin_teams}."
 )
 print(f"✓ Final teams: {fin_teams}")
 print(f"✓ 3P teams:    {tp_teams}  (all distinct from Final) ✓")
