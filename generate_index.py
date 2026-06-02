@@ -276,7 +276,7 @@ def _match_label(round_label, group):
 
 
 def _upcoming_matches(data):
-    """Return list of next 3 (pre-tournament) or next 48h (during) match dicts with computed stats."""
+    """Return list of next 6 (pre-tournament) or next 48h (during) match dicts with computed stats."""
     sim_probs = {_norm(t["team"]): t["probability"] for t in data.get("all_teams", [])}
 
     now_utc = datetime.now(timezone.utc)
@@ -298,7 +298,7 @@ def _upcoming_matches(data):
         upcoming.append((date_str, ko_col, t1, t2, group, round_label))
 
     if not tournament_started:
-        upcoming = upcoming[:3]
+        upcoming = upcoming[:6]
 
     results = []
     for date_str, ko_col, t1_raw, t2_raw, group, round_label in upcoming:
@@ -350,29 +350,23 @@ def _upcoming_matches(data):
 
 def _match_cards_html(matches):
     """Render the FIFA-style match cards for the upcoming matches section."""
+    from itertools import groupby
     cards = ""
-    last_date = None
     card_index = 0
-    for m in matches:
-        t1, t2 = m["t1"], m["t2"]
-        date_str = m.get("date_str", "")
-
-        # FIX 4: date group header between day groups (not before the first card)
-        if date_str != last_date:
-            if last_date is not None:
-                match_date = datetime.strptime(date_str, "%Y-%m-%d")
-                day_name = match_date.strftime("%A").upper()
-                day_mon = match_date.strftime("%-d %b").upper()
-                cards += f'\n<div class="date-header">{day_name} · {day_mon}</div>\n'
-            last_date = date_str
-
-        card_index += 1
-        delay = card_index * 200
-        # FIX 2: use hardcoded country codes
-        t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
-        t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
-        cards += f'''
-<div class="match-card" style="animation-delay:{delay}ms">
+    for date_str, group_iter in groupby(matches, key=lambda m: m["date_str"]):
+        match_date = datetime.strptime(date_str, "%Y-%m-%d")
+        day_name = match_date.strftime("%A").upper()
+        day_mon = match_date.strftime("%-d %b").upper()
+        cards += f'\n<div class="date-header">{day_name} · {day_mon}</div>\n'
+        cards += '<div class="matches-grid">\n'
+        for m in group_iter:
+            t1, t2 = m["t1"], m["t2"]
+            card_index += 1
+            delay = card_index * 200
+            t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
+            t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
+            colombia_style = ' style="border-left:3px solid #C9A84C"' if "Colombia" in (t1, t2) else ""
+            cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style}>
   <div class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</div>
   <div class="mc-header">
     <div class="mc-label">{h(m["match_lbl"])}</div>
@@ -400,7 +394,9 @@ def _match_cards_html(matches):
     <div class="chip chip-red">WINNER: {h(m["winner"]).upper()} · 8 pts</div>
     <div class="chip chip-blue">GOALS: {t1_abbr} {m["score1"]} · {t2_abbr} {m["score2"]} · 5 pts ea</div>
   </div>
-</div>'''
+</div>
+'''
+        cards += '</div>\n'
     return cards
 
 
@@ -646,6 +642,12 @@ def build_html(data):
       max-width: 500px;
       margin: 0 auto;
     }}
+    .matches-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 12px;
+    }}
     @keyframes slideUp {{
       from {{ opacity: 0; transform: translateY(24px); }}
       to   {{ opacity: 1; transform: translateY(0); }}
@@ -671,8 +673,8 @@ def build_html(data):
     }}
     .mc-conf-badge {{
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 8px;
+      right: 8px;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -684,7 +686,7 @@ def build_html(data):
     .conf-med  {{ background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
     .conf-low  {{ background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }}
     .mc-header {{
-      padding: 12px 14px 10px;
+      padding: 10px 10px 8px;
       border-bottom: 1px solid var(--fifa-border);
     }}
     .mc-label {{
@@ -713,8 +715,8 @@ def build_html(data):
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 14px;
-      gap: 8px;
+      padding: 10px 10px;
+      gap: 4px;
     }}
     .mc-team {{
       display: flex;
@@ -727,20 +729,21 @@ def build_html(data):
       align-items: flex-end;
       text-align: right;
     }}
-    .mc-flag {{ font-size: 32px; line-height: 1; }}
+    .mc-flag {{ font-size: 22px; line-height: 1; }}
     .mc-name {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       color: var(--fifa-text-primary);
       line-height: 1;
+      word-break: break-word;
     }}
     .mc-prob {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 22px;
+      font-size: 16px;
       color: var(--fifa-red);
       line-height: 1;
     }}
@@ -753,7 +756,7 @@ def build_html(data):
     .mc-score {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 52px;
+      font-size: 32px;
       color: var(--fifa-white);
       letter-spacing: -0.02em;
       line-height: 1;
@@ -769,17 +772,18 @@ def build_html(data):
     }}
     .mc-chips {{
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 0 14px 14px;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 10px 10px;
     }}
     .chip {{
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 600;
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 100px;
       background: rgba(255,255,255,0.04);
-      white-space: nowrap;
+      white-space: normal;
+      word-break: break-word;
       letter-spacing: 0.02em;
     }}
     .chip-gold  {{ border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }}

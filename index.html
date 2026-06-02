@@ -131,6 +131,12 @@
       max-width: 500px;
       margin: 0 auto;
     }
+    .matches-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 12px;
+    }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -156,8 +162,8 @@
     }
     .mc-conf-badge {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 8px;
+      right: 8px;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -169,7 +175,7 @@
     .conf-med  { background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }
     .conf-low  { background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }
     .mc-header {
-      padding: 12px 14px 10px;
+      padding: 10px 10px 8px;
       border-bottom: 1px solid var(--fifa-border);
     }
     .mc-label {
@@ -198,8 +204,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 14px;
-      gap: 8px;
+      padding: 10px 10px;
+      gap: 4px;
     }
     .mc-team {
       display: flex;
@@ -212,20 +218,21 @@
       align-items: flex-end;
       text-align: right;
     }
-    .mc-flag { font-size: 32px; line-height: 1; }
+    .mc-flag { font-size: 22px; line-height: 1; }
     .mc-name {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       color: var(--fifa-text-primary);
       line-height: 1;
+      word-break: break-word;
     }
     .mc-prob {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 22px;
+      font-size: 16px;
       color: var(--fifa-red);
       line-height: 1;
     }
@@ -238,7 +245,7 @@
     .mc-score {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 52px;
+      font-size: 32px;
       color: var(--fifa-white);
       letter-spacing: -0.02em;
       line-height: 1;
@@ -254,17 +261,18 @@
     }
     .mc-chips {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 0 14px 14px;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 10px 10px;
     }
     .chip {
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 600;
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 100px;
       background: rgba(255,255,255,0.04);
-      white-space: nowrap;
+      white-space: normal;
+      word-break: break-word;
       letter-spacing: 0.02em;
     }
     .chip-gold  { border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }
@@ -449,6 +457,8 @@
 <div class="matches-section">
 <div class="countdown-banner">TOURNAMENT STARTS IN 9 DAYS · FIRST KICKOFF JUNE 11</div>
 
+<div class="date-header">THURSDAY · 11 JUN</div>
+<div class="matches-grid">
 <div class="match-card" style="animation-delay:200ms">
   <div class="mc-conf-badge conf-high">HIGH</div>
   <div class="mc-header">
@@ -507,8 +517,10 @@
     <div class="chip chip-blue">GOALS: KOR 1 · CZE 1 · 5 pts ea</div>
   </div>
 </div>
-<div class="date-header">FRIDAY · 12 JUN</div>
+</div>
 
+<div class="date-header">FRIDAY · 12 JUN</div>
+<div class="matches-grid">
 <div class="match-card" style="animation-delay:600ms">
   <div class="mc-conf-badge conf-med">MED</div>
   <div class="mc-header">
@@ -538,6 +550,99 @@
     <div class="chip chip-blue">GOALS: CAN 1 · BIH 1 · 5 pts ea</div>
   </div>
 </div>
+<div class="match-card" style="animation-delay:800ms">
+  <div class="mc-conf-badge conf-high">HIGH</div>
+  <div class="mc-header">
+    <div class="mc-label">GROUP D · MD 1</div>
+    <div class="mc-venue">SoFi Stadium · Los Angeles</div>
+    <div class="mc-time">12 Jun · 20:00 COL</div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-team">
+      <span class="mc-flag">🇺🇸</span>
+      <span class="mc-name">USA</span>
+      <span class="mc-prob">65%</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score">2 – 1</div>
+      <div class="mc-score-label">PREDICTED</div>
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-prob">10%</span>
+      <span class="mc-name">PARAGUAY</span>
+      <span class="mc-flag">🇵🇾</span>
+    </div>
+  </div>
+  <div class="mc-chips">
+    <div class="chip chip-gold">EXACT SCORE: 2-1 · 15 pts</div>
+    <div class="chip chip-red">WINNER: USA · 8 pts</div>
+    <div class="chip chip-blue">GOALS: USA 2 · PAR 1 · 5 pts ea</div>
+  </div>
+</div>
+</div>
+
+<div class="date-header">SATURDAY · 13 JUN</div>
+<div class="matches-grid">
+<div class="match-card" style="animation-delay:1000ms">
+  <div class="mc-conf-badge conf-high">HIGH</div>
+  <div class="mc-header">
+    <div class="mc-label">GROUP B · MD 1</div>
+    <div class="mc-venue">Levi's Stadium · San Francisco</div>
+    <div class="mc-time">13 Jun · 14:00 COL</div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-team">
+      <span class="mc-flag">🇶🇦</span>
+      <span class="mc-name">QATAR</span>
+      <span class="mc-prob">13%</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score">1 – 2</div>
+      <div class="mc-score-label">PREDICTED</div>
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-prob">62%</span>
+      <span class="mc-name">SWITZERLAND</span>
+      <span class="mc-flag">🇨🇭</span>
+    </div>
+  </div>
+  <div class="mc-chips">
+    <div class="chip chip-gold">EXACT SCORE: 1-2 · 15 pts</div>
+    <div class="chip chip-red">WINNER: SWITZERLAND · 8 pts</div>
+    <div class="chip chip-blue">GOALS: QAT 1 · SUI 2 · 5 pts ea</div>
+  </div>
+</div>
+<div class="match-card" style="animation-delay:1200ms">
+  <div class="mc-conf-badge conf-med">MED</div>
+  <div class="mc-header">
+    <div class="mc-label">GROUP C · MD 1</div>
+    <div class="mc-venue">MetLife Stadium · New York/New Jersey</div>
+    <div class="mc-time">13 Jun · 17:00 COL</div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-team">
+      <span class="mc-flag">🇧🇷</span>
+      <span class="mc-name">BRAZIL</span>
+      <span class="mc-prob">45%</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score">2 – 1</div>
+      <div class="mc-score-label">PREDICTED</div>
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-prob">30%</span>
+      <span class="mc-name">MOROCCO</span>
+      <span class="mc-flag">🇲🇦</span>
+    </div>
+  </div>
+  <div class="mc-chips">
+    <div class="chip chip-gold">EXACT SCORE: 2-1 · 15 pts</div>
+    <div class="chip chip-red">WINNER: BRAZIL · 8 pts</div>
+    <div class="chip chip-blue">GOALS: BRA 2 · MAR 1 · 5 pts ea</div>
+  </div>
+</div>
+</div>
+
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -560,7 +665,7 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-02 23:22 UTC &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-02 23:28 UTC &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
