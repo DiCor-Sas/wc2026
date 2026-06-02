@@ -187,24 +187,68 @@ def _strength_lambdas(team1, team2):
 TOURNAMENT_START = datetime(2026, 6, 11, 0, 0, 0)  # midnight Col time on opening day
 
 
-def build_pollaya_panel(data):
-    """
-    Build the Pollaya Picks HTML panel.
+FLAG_EMOJI = {
+    "Mexico": "🇲🇽", "Canada": "🇨🇦", "South Korea": "🇰🇷", "South Africa": "🇿🇦",
+    "Czechia": "🇨🇿", "Switzerland": "🇨🇭", "Qatar": "🇶🇦", "Bosnia-Herzegovina": "🇧🇦",
+    "Brazil": "🇧🇷", "Morocco": "🇲🇦", "Haiti": "🇭🇹", "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "USA": "🇺🇸", "Paraguay": "🇵🇾", "Australia": "🇦🇺", "Türkiye": "🇹🇷",
+    "Germany": "🇩🇪", "Curaçao": "🇨🇼", "Ivory Coast": "🇨🇮", "Ecuador": "🇪🇨",
+    "Netherlands": "🇳🇱", "Japan": "🇯🇵", "Sweden": "🇸🇪", "Tunisia": "🇹🇳",
+    "Belgium": "🇧🇪", "Egypt": "🇪🇬", "Iran": "🇮🇷", "New Zealand": "🇳🇿",
+    "Spain": "🇪🇸", "Cabo Verde": "🇨🇻", "Saudi Arabia": "🇸🇦", "Uruguay": "🇺🇾",
+    "France": "🇫🇷", "Senegal": "🇸🇳", "Norway": "🇳🇴", "Iraq": "🇮🇶",
+    "Argentina": "🇦🇷", "Algeria": "🇩🇿", "Austria": "🇦🇹", "Jordan": "🇯🇴",
+    "Portugal": "🇵🇹", "Colombia": "🇨🇴", "Congo DR": "🇨🇩", "Uzbekistan": "🇺🇿",
+    "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "Croatia": "🇭🇷", "Ghana": "🇬🇭", "Panama": "🇵🇦",
+    "TBD": "🏳️",
+}
 
-    Before June 11 (tournament start): show next 3 upcoming scheduled matches
-    regardless of how far away they are, labelled as "Upcoming picks".
-    After June 11: revert to strict 48-hour window.
-    """
+MATCH_VENUES = {
+    ("Mexico", "Canada"):             "SoFi Stadium · Los Angeles",
+    ("South Korea", "South Africa"):  "AT&T Stadium · Dallas",
+    ("Czechia", "TBD"):               "MetLife Stadium · NJ",
+    ("Switzerland", "Qatar"):         "Levi's Stadium · San Francisco",
+    ("Canada", "Bosnia-Herzegovina"): "BMO Field · Toronto",
+    ("Brazil", "Morocco"):            "SoFi Stadium · Los Angeles",
+    ("Haiti", "Scotland"):            "NRG Stadium · Houston",
+    ("USA", "Paraguay"):              "MetLife Stadium · NJ",
+    ("Australia", "Türkiye"):         "Arrowhead Stadium · Kansas City",
+    ("Germany", "Curaçao"):           "Lumen Field · Seattle",
+    ("Ivory Coast", "Ecuador"):       "Gillette Stadium · Boston",
+    ("Netherlands", "Japan"):         "Hard Rock Stadium · Miami",
+    ("Sweden", "Tunisia"):            "BC Place · Vancouver",
+    ("Belgium", "Egypt"):             "Mercedes-Benz Stadium · Atlanta",
+    ("Iran", "New Zealand"):          "Estadio BBVA · Monterrey",
+    ("Spain", "Cabo Verde"):          "Estadio Azteca · Mexico City",
+    ("Saudi Arabia", "Uruguay"):      "Estadio Akron · Guadalajara",
+    ("France", "Senegal"):            "AT&T Stadium · Dallas",
+    ("Norway", "Iraq"):               "SoFi Stadium · Los Angeles",
+    ("Argentina", "Algeria"):         "MetLife Stadium · NJ",
+    ("Austria", "Jordan"):            "Hard Rock Stadium · Miami",
+    ("Portugal", "Colombia"):         "NRG Stadium · Houston",
+    ("Congo DR", "Uzbekistan"):       "Levi's Stadium · San Francisco",
+    ("England", "Croatia"):           "Gillette Stadium · Boston",
+    ("Ghana", "Panama"):              "Estadio BBVA · Monterrey",
+}
+
+
+def _flag(team):
+    return FLAG_EMOJI.get(team, "🏳️")
+
+
+def _match_label(round_label, group):
+    # "Group A MD1" → "GROUP A · MD 1"
+    return round_label.upper().replace("MD", "· MD ")
+
+
+def _upcoming_matches(data):
+    """Return list of next 3 (pre-tournament) or next 48h (during) match dicts with computed stats."""
     sim_probs = {t["team"]: t["probability"] for t in data.get("all_teams", [])}
 
     now_utc = datetime.now(timezone.utc)
     now_col = (now_utc + COLOMBIA_OFFSET).replace(tzinfo=None)
     tournament_started = now_col >= TOURNAMENT_START
-
-    if tournament_started:
-        cutoff = now_col + timedelta(hours=48)
-    else:
-        cutoff = None  # no upper bound — show next 3 regardless of date
+    cutoff = (now_col + timedelta(hours=48)) if tournament_started else None
 
     upcoming = []
     for entry in WC_2026_SCHEDULE:
@@ -217,88 +261,95 @@ def build_pollaya_panel(data):
             continue
         if cutoff is not None and ko_col > cutoff:
             continue
-        upcoming.append({
-            "date_str": date_str,
-            "ko_col": ko_col,
-            "team1": t1,
-            "team2": t2,
-            "group": group,
-            "round_label": round_label,
-        })
+        upcoming.append((date_str, ko_col, t1, t2, group, round_label))
 
-    # Before tournament starts: only show the next 3 upcoming matches
     if not tournament_started:
         upcoming = upcoming[:3]
 
-    section_title = "&#9917; My Pollaya Picks &mdash; Next 48 Hours" if tournament_started else "&#9917; My Pollaya Picks &mdash; Upcoming"
-
-    if not upcoming:
-        return '''<section id="pollaya">
-  <div class="section-title">&#9917; My Pollaya Picks</div>
-  <div class="pollaya-empty">No matches in the next 48 hours. First kickoff: Jun 11 2:00 PM Colombia time.</div>
-</section>'''
-
-    cards_html = ""
-    for m in upcoming:
-        t1, t2 = m["team1"], m["team2"]
+    results = []
+    for date_str, ko_col, t1, t2, group, round_label in upcoming:
         p1 = sim_probs.get(t1, 1.0)
         p2 = sim_probs.get(t2, 1.0)
         total_p = p1 + p2 if (p1 + p2) > 0 else 1.0
-
-        # Win probabilities (normalized to sum to ~1, draw not modelled explicitly)
-        draw_boost = 0.25  # typical draw probability in WC group stage
+        draw_boost = 0.25
         r1 = p1 / total_p
         r2 = p2 / total_p
-        win_p1 = round(r1 * (1 - draw_boost) * 100, 1)
-        win_p2 = round(r2 * (1 - draw_boost) * 100, 1)
-        draw_p = round(100 - win_p1 - win_p2, 1)
+        win_p1 = round(r1 * (1 - draw_boost) * 100)
+        win_p2 = round(r2 * (1 - draw_boost) * 100)
+        draw_p = 100 - win_p1 - win_p2
 
-        # Expected goals via Poisson using team_strength.json (Fix 3)
         lam1, lam2 = _strength_lambdas(t1, t2)
         score1, score2 = _most_probable_score(lam1, lam2)
 
-        # Likely winner
         if win_p1 > win_p2:
-            winner, winner_pct = t1, win_p1
+            winner = t1
         elif win_p2 > win_p1:
-            winner, winner_pct = t2, win_p2
+            winner = t2
         else:
-            winner, winner_pct = "Draw likely", draw_p
+            winner = "DRAW"
 
-        # Confidence
         max_win = max(win_p1, win_p2)
         if max_win >= 60:
-            conf, conf_cls = "High", "conf-high"
+            conf, conf_cls = "HIGH", "conf-high"
         elif max_win >= 45:
-            conf, conf_cls = "Medium", "conf-med"
+            conf, conf_cls = "MED", "conf-med"
         else:
-            conf, conf_cls = "Low", "conf-low"
+            conf, conf_cls = "LOW", "conf-low"
 
-        ko_fmt = m["ko_col"].strftime("%-d %b %H:%M")
+        venue = MATCH_VENUES.get((t1, t2), f"Group {group}")
+        ko_fmt = ko_col.strftime("%-d %b · %H:%M COL")
+        match_lbl = _match_label(round_label, group)
 
-        cards_html += f'''
-<div class="pollaya-card">
-  <div class="pc-head">
-    <span class="pc-round">{h(m["round_label"])}</span>
-    <span class="pc-time">&#128336; {ko_fmt} COL</span>
+        results.append({
+            "t1": t1, "t2": t2, "group": group,
+            "win_p1": win_p1, "win_p2": win_p2, "draw_p": draw_p,
+            "score1": score1, "score2": score2,
+            "winner": winner,
+            "conf": conf, "conf_cls": conf_cls,
+            "venue": venue, "ko_fmt": ko_fmt, "match_lbl": match_lbl,
+        })
+    return results
+
+
+def _match_cards_html(matches):
+    """Render the FIFA-style match cards for the upcoming matches section."""
+    cards = ""
+    for i, m in enumerate(matches):
+        t1, t2 = m["t1"], m["t2"]
+        delay = (i + 1) * 200
+        t1_abbr = t1[:3].upper()
+        t2_abbr = t2[:3].upper()
+        cards += f'''
+<div class="match-card" style="animation-delay:{delay}ms">
+  <div class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</div>
+  <div class="mc-header">
+    <div class="mc-label">{h(m["match_lbl"])}</div>
+    <div class="mc-venue">{h(m["venue"])}</div>
+    <div class="mc-time">{h(m["ko_fmt"])}</div>
   </div>
-  <div class="pc-matchup">{h(t1)} <span class="pc-vs">vs</span> {h(t2)}</div>
-  <div class="pc-rows">
-    <div class="pc-row"><span class="pc-lbl">&#127919; Score (15 pts)</span><span class="pc-val">{score1}&#8209;{score2}</span></div>
-    <div class="pc-row"><span class="pc-lbl">&#127942; Winner (8 pts)</span><span class="pc-val">{h(winner)} &mdash; {winner_pct}%</span></div>
-    <div class="pc-row"><span class="pc-lbl">&#9917; Goals {h(t1)} (5 pts)</span><span class="pc-val">{score1}</span></div>
-    <div class="pc-row"><span class="pc-lbl">&#9917; Goals {h(t2)} (5 pts)</span><span class="pc-val">{score2}</span></div>
-    <div class="pc-row"><span class="pc-lbl">&#128200; Confidence</span><span class="pc-val pc-conf {conf_cls}">{conf}</span></div>
+  <div class="mc-body">
+    <div class="mc-team">
+      <span class="mc-flag">{_flag(t1)}</span>
+      <span class="mc-name">{h(t1).upper()}</span>
+      <span class="mc-prob">{m["win_p1"]}%</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score">{m["score1"]} – {m["score2"]}</div>
+      <div class="mc-score-label">PREDICTED</div>
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-prob">{m["win_p2"]}%</span>
+      <span class="mc-name">{h(t2).upper()}</span>
+      <span class="mc-flag">{_flag(t2)}</span>
+    </div>
+  </div>
+  <div class="mc-chips">
+    <div class="chip chip-gold">EXACT SCORE: {m["score1"]}-{m["score2"]} · 15 pts</div>
+    <div class="chip chip-red">WINNER: {h(m["winner"]).upper()} · 8 pts</div>
+    <div class="chip chip-blue">GOALS: {t1_abbr} {m["score1"]} · {t2_abbr} {m["score2"]} · 5 pts ea</div>
   </div>
 </div>'''
-
-    return f'''<section id="pollaya">
-  <div class="section-title">{section_title}</div>
-  <p class="pollaya-note">Score prediction earns 15 pts &bull; Winner pick 8 pts &bull; Goals per team 5 pts each</p>
-  <div class="pollaya-grid">
-{cards_html}
-  </div>
-</section>'''
+    return cards
 
 
 def _compute_golden_boot(data):
@@ -376,479 +427,475 @@ def build_html(data):
     runners_up = data["runners_up"]
     third_place = data["third_place"]
     all_teams = data["all_teams"]
-    kb = data["knockout_bracket"]
-    today = date.today().strftime("%B %-d, %Y")
+    now_utc = datetime.now(timezone.utc)
 
     runner = runners_up[0] if runners_up else {"team": "—", "probability": 0}
     third  = third_place[0] if third_place else {"team": "—", "probability": 0}
     golden_boot = _compute_golden_boot(data)
 
-    # Check for pending teams
-    has_pending = any("*" in t["team"] for t in all_teams)
+    matches = _upcoming_matches(data)
+    match_cards = _match_cards_html(matches)
 
-    # ── R32 labels & cities ─────────────────────────────────────────────────
-    R32_LABELS = {
-        73: "2nd-A vs 2nd-B",      74: "1st-E vs 3rd(A/B/C/D/F)",
-        75: "1st-F vs 2nd-C",      76: "1st-C vs 2nd-F",
-        77: "1st-I vs 3rd(C/D/F/G/H)", 78: "2nd-E vs 2nd-I",
-        79: "1st-A vs 3rd(C/E/F/H/I)", 80: "1st-L vs 3rd(E/H/I/J/K)",
-        81: "1st-D vs 3rd(B/E/F/I/J)", 82: "1st-G vs 3rd(A/E/H/I/J)",
-        83: "2nd-K vs 2nd-L",      84: "1st-H vs 2nd-J",
-        85: "1st-B vs 3rd(E/F/G/I/J)", 86: "1st-J vs 2nd-H",
-        87: "1st-K vs 3rd(D/E/I/J/L)", 88: "2nd-D vs 2nd-G",
-    }
-    R32_CITIES = {
-        73: "SoFi Stadium, LA",     74: "Gillette Stadium, Boston",
-        75: "Estadio BBVA, Monterrey", 76: "NRG Stadium, Houston",
-        77: "MetLife Stadium, NJ",  78: "AT&T Stadium, Dallas",
-        79: "Estadio Azteca, Mexico City", 80: "Mercedes-Benz Stadium",
-        81: "Levi's Stadium, SF",   82: "Lumen Field, Seattle",
-        83: "BMO Field, Toronto",   84: "SoFi Stadium, LA",
-        85: "BC Place, Vancouver",  86: "Hard Rock Stadium, Miami",
-        87: "Arrowhead Stadium, KC", 88: "AT&T Stadium, Dallas",
-    }
-
-    # ── helpers for bracket tree ────────────────────────────────────────────
-    def _t(match):
-        """Return (t1, t2) from a match dict's teams list."""
-        teams = match.get("teams", [])
-        t1 = teams[0] if len(teams) > 0 else {"name": "TBD", "overall_win_pct": 0}
-        t2 = teams[1] if len(teams) > 1 else {"name": "TBD", "overall_win_pct": 0}
-        return t1, t2
-
-    # ── win-probability table ────────────────────────────────────────────────
-    prob_rows = ""
-    for i, item in enumerate(all_teams[:16]):
+    top5_rows = ""
+    for i, item in enumerate(all_teams[:5]):
         bar_w = round(item["probability"] / winner_pct * 100)
-        star = " &#9733;" if "*" in item["team"] else ""
-        prob_rows += (
-            f'<tr>'
-            f'<td>{i+1}</td>'
-            f'<td>{h(item["team"].replace(" *", ""))}{star}</td>'
-            f'<td>'
-            f'<div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:{bar_w}%"></div>'
-            f'<span class="prob-bar-lbl">{item["probability"]}%</span></div>'
-            f'</td>'
-            f'</tr>\n'
+        top5_rows += (
+            f'<div class="conf-row">'
+            f'<span class="conf-rank">{i+1}</span>'
+            f'<span class="conf-team">{_flag(item["team"])} {h(item["team"]).upper()}</span>'
+            f'<div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:{bar_w}%"></div></div>'
+            f'<span class="conf-pct">{item["probability"]}%</span>'
+            f'</div>\n'
         )
 
-    # ── R32 cards ────────────────────────────────────────────────────────────
-    r32_left = ""
-    r32_right = ""
-    for idx, m in enumerate(kb["round_of_32"]):
-        mn = m["match"]
-        card = ko_card(m, slot_label=R32_LABELS.get(mn, ""), city=R32_CITIES.get(mn, ""))
-        if idx < 8:
-            r32_left += card + "\n"
-        else:
-            r32_right += card + "\n"
-
-    # ── Bracket tree columns ─────────────────────────────────────────────────
-    # R16 — 8 matches
-    r16_html = ""
-    for m in kb["round_of_16"]:
-        t1, t2 = _t(m)
-        r16_html += b_match(
-            t1["name"], t1["overall_win_pct"],
-            t2["name"], t2["overall_win_pct"],
-            m.get("likely_winner", ""),
-            predicted_score=m.get("predicted_score"),
-        ) + '\n<div class="b-divider"></div>\n'
-
-    # QF — 4 matches
-    qf_html = ""
-    for m in kb["quarter_finals"]:
-        t1, t2 = _t(m)
-        qf_html += b_match(
-            t1["name"], t1["overall_win_pct"],
-            t2["name"], t2["overall_win_pct"],
-            m.get("likely_winner", ""),
-            predicted_score=m.get("predicted_score"),
-        ) + '\n<div class="b-divider"></div>\n'
-
-    # SF — 2 matches
-    sf_html = ""
-    for m in kb["semi_finals"]:
-        t1, t2 = _t(m)
-        sf_html += b_match(
-            t1["name"], t1["overall_win_pct"],
-            t2["name"], t2["overall_win_pct"],
-            m.get("likely_winner", ""),
-            predicted_score=m.get("predicted_score"),
-        ) + '\n<div class="b-divider"></div>\n'
-
-    # Final
-    fin = kb["final"]
-    ft1, ft2 = _t(fin)
-    final_html = b_match(
-        ft1["name"], ft1["overall_win_pct"],
-        ft2["name"], ft2["overall_win_pct"],
-        fin.get("likely_winner", ""),
-        predicted_score=fin.get("predicted_score"),
-        winner_icon="&#127942;",
-    )
-
-    # Third place derived
-    tp = kb.get("third_place_match_derived") or kb["third_place_match"]
-    tp_t = tp.get("teams", [])
-    tp1 = tp_t[0] if len(tp_t) > 0 else {"name": "TBD", "overall_win_pct": 0}
-    tp2 = tp_t[1] if len(tp_t) > 1 else {"name": "TBD", "overall_win_pct": 0}
-    tp_city = tp.get("city", "Miami")
-    tp_html = b_match(
-        tp1["name"], tp1["overall_win_pct"],
-        tp2["name"], tp2["overall_win_pct"],
-        tp.get("likely_winner", ""),
-        predicted_score=tp.get("predicted_score"),
-        winner_icon="&#129353;",
-    )
-
-    pending_banner = ""
-    if has_pending:
-        pending_banner = f'''
-<div class="pending-banner">
-  &#9733; {h(PENDING_NOTE)}
-</div>'''
+    ts = now_utc.strftime("%Y-%m-%d %H:%M UTC")
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WC 2026 Predictions Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0A1628" />
+  <title>Pollaya 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
     :root {{
-      --bg:      #0d1f0f;
-      --bg2:     #152818;
-      --bg3:     #1c3320;
-      --card:    #1e3d22;
-      --border:  #2e5c34;
-      --accent:  #4caf50;
-      --accent2: #81c784;
-      --gold:    #ffd54f;
-      --silver:  #b0bec5;
-      --bronze:  #a0714f;
-      --text:    #e8f5e9;
-      --muted:   #a5d6a7;
-      --red:     #ef5350;
-      --yellow:  #ffca28;
-      --radius:  8px;
+      --fifa-navy:    #0A1628;
+      --fifa-red:     #E8002D;
+      --fifa-white:   #FFFFFF;
+      --fifa-gold:    #C9A84C;
+      --fifa-dark:    #060E1A;
+      --fifa-card:    #111D2E;
+      --fifa-card-hover: #1A2B40;
+      --fifa-border:  #1E3050;
+      --fifa-text-primary:   #FFFFFF;
+      --fifa-text-secondary: #8BA0BB;
+      --fifa-text-muted:     #4A6080;
+      --fifa-green:   #00C853;
+      --fifa-green-dim: #1A3320;
+      --fifa-silver:  #A8B8C8;
+      --fifa-bronze:  #A06830;
     }}
+    html {{ background: var(--fifa-dark); }}
     body {{
-      background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh; padding-bottom: 3rem;
+      background: var(--fifa-dark);
+      color: var(--fifa-text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
     }}
-    header {{
-      background: linear-gradient(135deg,#0a1a0c 0%,#1b3d1e 50%,#0a1a0c 100%);
-      border-bottom: 2px solid var(--border);
-      padding: 1.5rem 1rem; text-align: center;
+
+    /* ── SECTION 1: Picks Header ── */
+    .picks-header {{
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--fifa-navy);
+      border-bottom: 1px solid var(--fifa-border);
+      padding: 12px 16px 0;
+      animation: fadeIn 300ms ease both;
     }}
-    header h1 {{
-      font-size: clamp(1.3rem,4vw,2rem); font-weight: 800;
-      letter-spacing: .05em; color: var(--accent); text-transform: uppercase;
+    .picks-title {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      color: var(--fifa-gold);
+      text-transform: uppercase;
+      margin-bottom: 10px;
     }}
-    header p {{ color: var(--muted); font-size: .82rem; margin-top: .3rem; }}
-    .container {{ max-width: 960px; margin: 0 auto; padding: 0 1rem; }}
-    section {{ margin-top: 2rem; }}
-    .section-title {{
-      font-size: .68rem; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--accent2);
-      border-left: 3px solid var(--accent); padding-left: .6rem; margin-bottom: 1rem;
+    .picks-title span {{
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--fifa-text-secondary);
+      margin-left: 8px;
+      text-transform: none;
+      letter-spacing: 0;
     }}
-    /* Pending banner */
-    .pending-banner {{
-      background: #1a2f1a; border: 1px solid var(--yellow);
-      border-radius: var(--radius); padding: .5rem .8rem;
-      font-size: .72rem; color: var(--yellow); margin-bottom: 1rem;
+    .picks-row {{
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }}
-    /* Top predictions */
-    .top-grid {{ display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }}
-    @media(min-width:600px){{ .top-grid {{ grid-template-columns: repeat(4,1fr); }} }}
-    .pred-card.boot::before {{ background: var(--yellow); }}
-    .pred-card {{
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1rem .8rem;
-      text-align: center; position: relative; overflow: hidden;
+    .picks-row::-webkit-scrollbar {{ display: none; }}
+    .pick-mini {{
+      flex: 0 0 auto;
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      min-width: 120px;
+      position: relative;
+      overflow: hidden;
     }}
-    .pred-card::before {{
-      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    .pick-mini::before {{
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
     }}
-    .pred-card.winner::before {{ background: var(--gold); }}
-    .pred-card.runner::before {{ background: var(--silver); }}
-    .pred-card.third::before  {{ background: var(--bronze); }}
-    .pred-medal  {{ font-size:1.4rem; display:block; margin-bottom:.3rem; }}
-    .pred-label  {{ font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }}
-    .pred-team   {{ font-size:1rem; font-weight:800; }}
-    .pred-pct    {{ font-size:1.5rem; font-weight:900; margin-top:.25rem; line-height:1; }}
-    .pred-card.winner .pred-pct {{ color: var(--gold); }}
-    .pred-card.runner .pred-pct {{ color: var(--silver); }}
-    .pred-card.third  .pred-pct {{ color: var(--bronze); }}
-    .pred-sub {{ font-size:.68rem; color:var(--muted); margin-top:.2rem; }}
-    /* Win probability table */
-    .prob-table {{ width:100%; border-collapse:collapse; font-size:.78rem; margin-top:.5rem; }}
-    .prob-table th {{ text-align:left; font-size:.62rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:.35rem .5rem; border-bottom:1px solid var(--border); }}
-    .prob-table td {{ padding:.32rem .5rem; border-bottom:1px solid var(--bg3); }}
-    .prob-table tr:hover td {{ background:var(--bg3); }}
-    .prob-bar-wrap {{ position:relative; height:14px; border-radius:3px; overflow:hidden; background:var(--bg); min-width:80px; display:flex; align-items:center; }}
-    .prob-bar-fill {{ position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; }}
-    .prob-bar-lbl {{ position:relative; z-index:1; font-size:.62rem; font-weight:700; padding-left:4px; color:var(--text); }}
-    /* R32 ko-cards */
-    .ko-round-label {{
-      font-size:.65rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--accent); margin:1.4rem 0 .55rem;
-      display:flex; align-items:center; gap:.5rem;
+    .pick-mini.gold::before   {{ background: var(--fifa-gold); }}
+    .pick-mini.silver::before {{ background: var(--fifa-silver); }}
+    .pick-mini.bronze::before {{ background: var(--fifa-bronze); }}
+    .pick-mini.green::before  {{ background: var(--fifa-green); }}
+    .pick-mini-label {{
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-text-muted);
+      margin-bottom: 4px;
     }}
-    .ko-round-label::after {{ content:''; flex:1; height:1px; background:var(--border); }}
-    .ko-grid {{ display:grid; grid-template-columns:1fr; gap:.6rem; }}
-    @media(min-width:600px){{ .ko-grid {{ grid-template-columns:1fr 1fr; }} }}
-    .ko-card {{
-      background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); padding:.75rem .85rem;
+    .pick-mini-flag {{ font-size: 20px; display: block; margin-bottom: 2px; }}
+    .pick-mini-team {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      color: var(--fifa-text-primary);
+      white-space: nowrap;
     }}
-    .ko-card.final-card {{ border-color:var(--gold); background:#1e3020; }}
-    .ko-head {{
-      font-size:.6rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
-      color:var(--muted); margin-bottom:.55rem; display:flex; flex-wrap:wrap; gap:.25rem; align-items:center;
+    .pick-mini-pct {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      margin-top: 2px;
     }}
-    .ko-slot {{
-      background:var(--bg3); border:1px solid var(--border); border-radius:3px;
-      padding:1px 5px; color:var(--accent2); font-size:.58rem; text-transform:none; letter-spacing:0;
+    .pick-mini.gold   .pick-mini-pct {{ color: var(--fifa-gold); }}
+    .pick-mini.silver .pick-mini-pct {{ color: var(--fifa-silver); }}
+    .pick-mini.bronze .pick-mini-pct {{ color: var(--fifa-bronze); }}
+    .pick-mini.green  .pick-mini-pct {{ color: var(--fifa-green); }}
+
+    /* ── SECTION 2: Match Cards ── */
+    .matches-section {{
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 500px;
+      margin: 0 auto;
     }}
-    .ko-matchup {{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:.35rem; margin-bottom:.5rem; }}
-    .ko-team {{ display:flex; flex-direction:column; }}
-    .ko-right {{ align-items:flex-end; text-align:right; }}
-    .ko-name {{ font-size:.88rem; font-weight:800; line-height:1.2; }}
-    .ko-wt .ko-name {{ color:var(--accent2); }}
-    .ko-stat {{ font-size:.58rem; color:var(--muted); margin-top:.15rem; line-height:1.3; }}
-    .ko-vs {{ font-size:.65rem; font-weight:700; color:var(--muted); padding:0 .2rem; }}
-    .ko-bar-row {{ display:flex; border-radius:4px; overflow:hidden; height:16px; margin-bottom:.45rem; }}
-    .ko-bar-seg {{ display:flex; align-items:center; min-width:20px; }}
-    .ko-bar-l {{ background:linear-gradient(90deg,var(--accent2),var(--accent)); justify-content:flex-end; }}
-    .ko-bar-r {{ background:linear-gradient(90deg,#e57373,var(--red)); justify-content:flex-start; }}
-    .ko-bar-lbl {{ font-size:.58rem; font-weight:700; padding:0 3px; color:#0d1f0f; white-space:nowrap; }}
-    .ko-bar-lbl-r {{ color:#fff; }}
-    .ko-predicted {{ font-size:.65rem; font-weight:700; color:var(--accent); border-top:1px solid var(--border); padding-top:.35rem; margin-top:.1rem; }}
-    .final-card .ko-predicted {{ color:var(--gold); }}
-    /* Bracket tree */
-    .bracket-note {{ font-size:.72rem; color:var(--muted); margin-bottom:1rem; }}
-    .bracket-scroll {{ overflow-x:auto; padding-bottom:.5rem; }}
-    .bracket {{
-      display:grid; grid-template-columns:repeat(4,minmax(148px,1fr));
-      gap:0; min-width:600px;
+    @keyframes slideUp {{
+      from {{ opacity: 0; transform: translateY(24px); }}
+      to   {{ opacity: 1; transform: translateY(0); }}
     }}
-    .b-round {{ display:flex; flex-direction:column; }}
-    .b-round-title {{
-      font-size:.58rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--accent2); text-align:center; padding:.4rem 0;
-      background:var(--bg2); border-bottom:1px solid var(--border);
-      border-right:1px solid var(--border);
+    @keyframes fadeIn {{
+      from {{ opacity: 0; }}
+      to   {{ opacity: 1; }}
     }}
-    .b-round:first-child .b-round-title {{ border-left:1px solid var(--border); }}
-    .b-slots {{
-      flex:1; display:flex; flex-direction:column; justify-content:space-around;
-      padding:.5rem .45rem; border-right:1px solid var(--border);
-      border-bottom:1px solid var(--border); background:var(--bg2);
+    .match-card {{
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      animation: slideUp 400ms ease both;
+      transition: transform 200ms ease, box-shadow 200ms ease;
     }}
-    .b-round:first-child .b-slots {{ border-left:1px solid var(--border); }}
-    .b-match {{ margin:.22rem 0; }}
-    .b-team {{
-      background:var(--card); border:1px solid var(--border); border-radius:4px;
-      padding:.28rem .48rem; font-size:.72rem; font-weight:700;
-      display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;
+    @media (hover: hover) {{
+      .match-card:hover {{
+        transform: scale(1.02);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      }}
     }}
-    .b-team.likely      {{ border-color:var(--accent); color:var(--accent2); }}
-    .b-team.winner-team {{ border-color:var(--gold); color:var(--gold); background:#1e3322; }}
-    .b-team-pct {{ font-size:.62rem; font-weight:600; color:var(--muted); }}
-    .b-team.likely .b-team-pct      {{ color:var(--accent); }}
-    .b-team.winner-team .b-team-pct {{ color:var(--gold); }}
-    .b-score {{
-      font-size:.6rem; font-weight:700; color:var(--yellow);
-      text-align:center; padding:.18rem .2rem; letter-spacing:.02em;
+    .mc-conf-badge {{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
     }}
-    .b-divider {{ height:1px; background:var(--border); margin:.22rem 0; opacity:.4; }}
-    .tp-card {{
-      background:var(--bg2); border:1px solid var(--border);
-      border-radius:var(--radius); padding:.55rem .6rem; margin-top:.8rem;
+    .conf-high {{ background: rgba(0,200,83,0.15); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }}
+    .conf-med  {{ background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
+    .conf-low  {{ background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }}
+    .mc-header {{
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--fifa-border);
     }}
-    .tp-title {{
-      font-size:.58rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      color:var(--muted); margin-bottom:.4rem; text-align:center;
+    .mc-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--fifa-text-secondary);
     }}
-    footer {{ text-align:center; margin-top:2.5rem; font-size:.68rem; color:#4a6e4d; }}
-    /* ── Pollaya Picks panel ── */
-    #pollaya {{ margin-top:1.5rem; }}
-    .pollaya-note {{ font-size:.72rem; color:var(--muted); margin-bottom:.75rem; }}
-    .pollaya-empty {{
-      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-      padding:1.2rem; text-align:center; color:var(--muted); font-size:.82rem;
+    .mc-venue {{
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--fifa-text-muted);
+      margin-top: 2px;
     }}
-    .pollaya-grid {{ display:grid; grid-template-columns:1fr; gap:.75rem; }}
-    @media(min-width:600px){{ .pollaya-grid {{ grid-template-columns:repeat(2,1fr); }} }}
-    @media(min-width:900px){{ .pollaya-grid {{ grid-template-columns:repeat(3,1fr); }} }}
-    .pollaya-card {{
-      background:linear-gradient(160deg,#1a3d1e 0%,#122b15 100%);
-      border:1px solid #2e7d32; border-radius:var(--radius);
-      padding:.85rem .9rem; position:relative; overflow:hidden;
+    .mc-time {{
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fifa-text-secondary);
+      margin-top: 2px;
     }}
-    .pollaya-card::before {{
-      content:''; position:absolute; top:0; left:0; right:0; height:3px;
-      background:linear-gradient(90deg,#4caf50,#81c784);
+    .mc-body {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 14px;
+      gap: 8px;
     }}
-    .pc-head {{
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:.5rem; flex-wrap:wrap; gap:.25rem;
+    .mc-team {{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1;
+      gap: 4px;
     }}
-    .pc-round {{ font-size:.58rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent2); }}
-    .pc-time  {{ font-size:.62rem; color:var(--muted); }}
-    .pc-matchup {{ font-size:.92rem; font-weight:800; text-align:center; padding:.35rem 0; color:var(--text); }}
-    .pc-vs {{ color:var(--muted); font-weight:400; font-size:.78rem; margin:0 .3rem; }}
-    .pc-rows {{ border-top:1px solid var(--border); padding-top:.45rem; margin-top:.1rem; }}
-    .pc-row {{
-      display:flex; justify-content:space-between; align-items:center;
-      padding:.22rem 0; border-bottom:1px solid rgba(46,92,52,.4); font-size:.74rem;
+    .mc-team-right {{
+      align-items: flex-end;
+      text-align: right;
     }}
-    .pc-row:last-child {{ border-bottom:none; }}
-    .pc-lbl {{ color:var(--muted); }}
-    .pc-val {{ font-weight:800; color:var(--accent2); }}
-    .pc-conf {{ padding:.1rem .4rem; border-radius:3px; font-size:.66rem; font-weight:700; letter-spacing:.05em; }}
-    .conf-high {{ background:#1b5e20; color:#a5d6a7; }}
-    .conf-med  {{ background:#e65100; color:#ffccbc; }}
-    .conf-low  {{ background:#4a148c; color:#e1bee7; }}
+    .mc-flag {{ font-size: 32px; line-height: 1; }}
+    .mc-name {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--fifa-text-primary);
+      line-height: 1;
+    }}
+    .mc-prob {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      color: var(--fifa-red);
+      line-height: 1;
+    }}
+    .mc-score-block {{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 auto;
+    }}
+    .mc-score {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 52px;
+      color: var(--fifa-white);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      white-space: nowrap;
+    }}
+    .mc-score-label {{
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-text-muted);
+      margin-top: 2px;
+    }}
+    .mc-chips {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 14px 14px;
+    }}
+    .chip {{
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }}
+    .chip-gold  {{ border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }}
+    .chip-red   {{ border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }}
+    .chip-blue  {{ border: 1px solid rgba(64,140,255,0.5); color: #60A0FF; }}
+
+    /* ── SECTION 3: Model Confidence ── */
+    .confidence-section {{
+      margin: 0 16px;
+      max-width: 468px;
+      margin-left: auto;
+      margin-right: auto;
+    }}
+    .confidence-toggle {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 44px;
+    }}
+    .confidence-toggle-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-gold);
+    }}
+    .confidence-arrow {{
+      font-size: 12px;
+      color: var(--fifa-text-muted);
+      transition: transform 300ms ease;
+    }}
+    .confidence-section.open .confidence-arrow {{ transform: rotate(180deg); }}
+    .confidence-section.open .confidence-toggle {{
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-color: transparent;
+    }}
+    .confidence-body {{
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms ease-in-out;
+      background: var(--fifa-navy);
+      border: 1px solid var(--fifa-border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+    }}
+    .confidence-section.open .confidence-body {{ max-height: 320px; }}
+    .confidence-inner {{ padding: 14px 16px; }}
+    .conf-row {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--fifa-border);
+    }}
+    .conf-row:last-child {{ border-bottom: none; }}
+    .conf-rank {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--fifa-text-muted);
+      width: 16px;
+      text-align: center;
+    }}
+    .conf-team {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      color: var(--fifa-text-primary);
+      flex: 0 0 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .conf-bar-wrap {{
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }}
+    .conf-bar-fill {{
+      height: 100%;
+      background: var(--fifa-red);
+      border-radius: 3px;
+    }}
+    .conf-pct {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--fifa-text-secondary);
+      width: 36px;
+      text-align: right;
+    }}
+
+    /* ── Footer ── */
+    .site-footer {{
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      line-height: 1.6;
+    }}
   </style>
 </head>
 <body>
 
-<header>
-  <h1>&#127942; FIFA World Cup 2026 &mdash; Predictions</h1>
-  <p>Monte Carlo simulation &mdash; {sims:,} runs &bull; Full 48-team format with Round of 32 &bull; {today}</p>
-</header>
-
-<div class="container">
-
-<!-- ═══ POLLAYA PICKS (always first) ═══ -->
-{build_pollaya_panel(data)}
-
-<!-- ═══ SECTION 1 — TOP PREDICTIONS ═══ -->
-<section>
-  <div class="section-title">Top Predictions</div>
-  {pending_banner}
-  <div class="top-grid">
-    <div class="pred-card winner">
-      <span class="pred-medal">&#127942;</span>
-      <div class="pred-label">Tournament Winner</div>
-      <div class="pred-team">{h(winner)}</div>
-      <div class="pred-pct">{winner_pct}%</div>
-      <div class="pred-sub">{round(winner_pct/100*sims):,} / {sims:,} simulations</div>
+<!-- ══════════════════════════════════════════
+     SECTION 1 — POLLAYA PICKS HEADER (sticky)
+     ══════════════════════════════════════════ -->
+<div class="picks-header">
+  <div class="picks-title">POLLAYA 2026 <span>Pre-tournament picks</span></div>
+  <div class="picks-row">
+    <div class="pick-mini gold">
+      <div class="pick-mini-label">Champion</div>
+      <span class="pick-mini-flag">{_flag(winner)}</span>
+      <div class="pick-mini-team">{h(winner)}</div>
+      <div class="pick-mini-pct">{winner_pct}%</div>
     </div>
-    <div class="pred-card runner">
-      <span class="pred-medal">&#129352;</span>
-      <div class="pred-label">Runner-Up</div>
-      <div class="pred-team">{h(runner["team"])}</div>
-      <div class="pred-pct">{runner["probability"]}%</div>
-      <div class="pred-sub">Most likely finalist #2</div>
+    <div class="pick-mini silver">
+      <div class="pick-mini-label">Runner-Up</div>
+      <span class="pick-mini-flag">{_flag(runner["team"])}</span>
+      <div class="pick-mini-team">{h(runner["team"])}</div>
+      <div class="pick-mini-pct">{runner["probability"]}%</div>
     </div>
-    <div class="pred-card third">
-      <span class="pred-medal">&#129353;</span>
-      <div class="pred-label">Third Place</div>
-      <div class="pred-team">{h(third["team"])}</div>
-      <div class="pred-pct">{third["probability"]}%</div>
-      <div class="pred-sub">Most likely 3rd-place finish</div>
+    <div class="pick-mini bronze">
+      <div class="pick-mini-label">Third Place</div>
+      <span class="pick-mini-flag">{_flag(third["team"])}</span>
+      <div class="pick-mini-team">{h(third["team"])}</div>
+      <div class="pick-mini-pct">{third["probability"]}%</div>
     </div>
-    <div class="pred-card boot">
-      <span class="pred-medal">&#127966;</span>
-      <div class="pred-label">Golden Boot</div>
-      <div class="pred-team">{h(golden_boot["player"])}</div>
-      <div class="pred-pct" style="color:var(--yellow);">{golden_boot["expected_goals"]}</div>
-      <div class="pred-sub">{h(golden_boot["team"])} &bull; xG in tournament</div>
+    <div class="pick-mini green">
+      <div class="pick-mini-label">Golden Boot</div>
+      <span class="pick-mini-flag">{_flag(golden_boot["team"])}</span>
+      <div class="pick-mini-team">{h(golden_boot["player"])}</div>
+      <div class="pick-mini-pct">{golden_boot["expected_goals"]} xG</div>
     </div>
   </div>
-</section>
-
-<!-- ═══ SECTION 2 — WIN PROBABILITY RANKINGS ═══ -->
-<section>
-  <div class="section-title">Win Probability &mdash; Top 16</div>
-  <table class="prob-table">
-    <thead><tr><th>#</th><th>Team</th><th>Win Probability</th></tr></thead>
-    <tbody>
-{prob_rows}    </tbody>
-  </table>
-</section>
-
-<!-- ═══ SECTION 3 — ROUND OF 32 ═══ -->
-<section>
-  <div class="section-title">Round of 32 &mdash; All 16 Matches</div>
-  <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;">
-    "Reaches X%" = probability this team plays in this slot across all {sims:,} simulations.
-    "Wins if reached Y%" = conditional win probability when they do play.
-    Score format: Most-probable predicted scoreline.
-  </p>
-  <div class="ko-round-label">Left Side of Bracket (feeds Semi-Final 1)</div>
-  <div class="ko-grid">
-{r32_left}  </div>
-  <div class="ko-round-label">Right Side of Bracket (feeds Semi-Final 2)</div>
-  <div class="ko-grid">
-{r32_right}  </div>
-</section>
-
-<!-- ═══ SECTION 4 — BRACKET TREE R16 → FINAL ═══ -->
-<section>
-  <div class="section-title">Knockout Bracket &mdash; Round of 16 through Final</div>
-  <p class="bracket-note">
-    Projected bracket path based on {sims:,} simulations. Percentages = probability of winning that match slot overall.
-    Highlighted team is the projected winner at each stage. Predicted scoreline shown below each matchup.
-    Scroll right on small screens.
-  </p>
-  <div class="bracket-scroll">
-    <div class="bracket">
-
-      <!-- Column 1: Round of 16 -->
-      <div class="b-round">
-        <div class="b-round-title">Round of 16</div>
-        <div class="b-slots">
-          {r16_html}
-        </div>
-      </div>
-
-      <!-- Column 2: Quarter-finals -->
-      <div class="b-round">
-        <div class="b-round-title">Quarter-finals</div>
-        <div class="b-slots">
-          {qf_html}
-        </div>
-      </div>
-
-      <!-- Column 3: Semi-finals -->
-      <div class="b-round">
-        <div class="b-round-title">Semi-finals</div>
-        <div class="b-slots">
-          {sf_html}
-        </div>
-      </div>
-
-      <!-- Column 4: Final + 3rd place -->
-      <div class="b-round">
-        <div class="b-round-title">Final &middot; MetLife Stadium, NJ</div>
-        <div class="b-slots">
-          {final_html}
-          <div class="tp-card">
-            <div class="tp-title">3rd-Place Match &middot; Hard Rock Stadium, {h(tp_city)}</div>
-            {tp_html}
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
 </div>
 
-<footer>
-  Generated {today} &bull; Monte Carlo simulation {sims:,} iterations &bull;
-  Full 48-team FIFA World Cup 2026 format
-  {" &bull; &#9733; = Pending FIFA confirmation" if has_pending else ""}
-</footer>
+<!-- ══════════════════════════════════════════
+     SECTION 2 — UPCOMING MATCHES
+     ══════════════════════════════════════════ -->
+<div class="matches-section">
+{match_cards if match_cards else '<div style="color:var(--fifa-text-muted);text-align:center;padding:40px 0;font-size:14px;">No upcoming matches scheduled.</div>'}
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — MODEL CONFIDENCE (collapsible)
+     ══════════════════════════════════════════ -->
+<div class="confidence-section" id="conf-section">
+  <div class="confidence-toggle" onclick="toggleConf()">
+    <span class="confidence-toggle-label">Model Confidence</span>
+    <span class="confidence-arrow" id="conf-arrow">▾</span>
+  </div>
+  <div class="confidence-body" id="conf-body">
+    <div class="confidence-inner">
+{top5_rows}    </div>
+  </div>
+</div>
+
+<div class="site-footer">
+  Updated {ts} &bull; Monte Carlo {sims:,} runs &bull; dicor-sas.github.io/wc2026
+</div>
+
+<script>
+function toggleConf() {{
+  document.getElementById('conf-section').classList.toggle('open');
+}}
+</script>
 
 </body>
 </html>"""
