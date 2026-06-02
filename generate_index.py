@@ -13,6 +13,62 @@ TEAM_STRENGTH_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/team_stren
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 
+NAME_MAP = {
+    "Korea Republic": "South Korea",
+    "South Korea": "South Korea",
+    "Czech Republic": "Czechia",
+    "Czechia": "Czechia",
+    "Türkiye": "Türkiye",
+    "Turkey": "Türkiye",
+    "Bosnia and Herzegovina": "Bosnia-Herzegovina",
+    "Bosnia-Herzegovina": "Bosnia-Herzegovina",
+    "Ivory Coast": "Ivory Coast",
+    "Côte d'Ivoire": "Ivory Coast",
+    "DR Congo": "Congo DR",
+    "Congo DR": "Congo DR",
+    "USA": "USA",
+    "United States": "USA",
+    "IR Iran": "Iran",
+    "Iran": "Iran",
+    "Cabo Verde": "Cabo Verde",
+    "Cape Verde": "Cabo Verde",
+    "Curaçao": "Curaçao",
+    "Curacao": "Curaçao",
+}
+
+COUNTRY_CODE = {
+    "Mexico": "MEX", "South Korea": "KOR",
+    "South Africa": "RSA", "Czechia": "CZE",
+    "Canada": "CAN", "Switzerland": "SUI",
+    "Qatar": "QAT", "Bosnia-Herzegovina": "BIH",
+    "Brazil": "BRA", "Morocco": "MAR",
+    "Haiti": "HAI", "Scotland": "SCO",
+    "USA": "USA", "Paraguay": "PAR",
+    "Australia": "AUS", "Türkiye": "TUR",
+    "Germany": "GER", "Curaçao": "CUW",
+    "Ivory Coast": "CIV", "Ecuador": "ECU",
+    "Netherlands": "NED", "Japan": "JPN",
+    "Sweden": "SWE", "Tunisia": "TUN",
+    "Belgium": "BEL", "Egypt": "EGY",
+    "Iran": "IRN", "New Zealand": "NZL",
+    "Spain": "ESP", "Cabo Verde": "CPV",
+    "Saudi Arabia": "KSA", "Uruguay": "URU",
+    "France": "FRA", "Senegal": "SEN",
+    "Norway": "NOR", "Iraq": "IRQ",
+    "Argentina": "ARG", "Algeria": "ALG",
+    "Austria": "AUT", "Jordan": "JOR",
+    "Portugal": "POR", "Colombia": "COL",
+    "Congo DR": "COD", "Uzbekistan": "UZB",
+    "England": "ENG", "Croatia": "CRO",
+    "Ghana": "GHA", "Panama": "PAN",
+}
+
+
+def _norm(name):
+    """Normalize a team name through NAME_MAP; unknown names pass through."""
+    return NAME_MAP.get(name, name)
+
+
 def h(text):
     """HTML-escape a string."""
     return (str(text)
@@ -241,7 +297,7 @@ def _match_label(round_label, group):
 
 def _upcoming_matches(data):
     """Return list of next 3 (pre-tournament) or next 48h (during) match dicts with computed stats."""
-    sim_probs = {t["team"]: t["probability"] for t in data.get("all_teams", [])}
+    sim_probs = {_norm(t["team"]): t["probability"] for t in data.get("all_teams", [])}
 
     now_utc = datetime.now(timezone.utc)
     now_col = (now_utc + COLOMBIA_OFFSET).replace(tzinfo=None)
@@ -265,7 +321,9 @@ def _upcoming_matches(data):
         upcoming = upcoming[:3]
 
     results = []
-    for date_str, ko_col, t1, t2, group, round_label in upcoming:
+    for date_str, ko_col, t1_raw, t2_raw, group, round_label in upcoming:
+        t1 = _norm(t1_raw)
+        t2 = _norm(t2_raw)
         p1 = sim_probs.get(t1, 1.0)
         p2 = sim_probs.get(t2, 1.0)
         total_p = p1 + p2 if (p1 + p2) > 0 else 1.0
@@ -305,6 +363,7 @@ def _upcoming_matches(data):
             "winner": winner,
             "conf": conf, "conf_cls": conf_cls,
             "venue": venue, "ko_fmt": ko_fmt, "match_lbl": match_lbl,
+            "date_str": date_str,
         })
     return results
 
@@ -312,11 +371,26 @@ def _upcoming_matches(data):
 def _match_cards_html(matches):
     """Render the FIFA-style match cards for the upcoming matches section."""
     cards = ""
-    for i, m in enumerate(matches):
+    last_date = None
+    card_index = 0
+    for m in matches:
         t1, t2 = m["t1"], m["t2"]
-        delay = (i + 1) * 200
-        t1_abbr = t1[:3].upper()
-        t2_abbr = t2[:3].upper()
+        date_str = m.get("date_str", "")
+
+        # FIX 4: date group header between day groups (not before the first card)
+        if date_str != last_date:
+            if last_date is not None:
+                match_date = datetime.strptime(date_str, "%Y-%m-%d")
+                day_name = match_date.strftime("%A").upper()
+                day_mon = match_date.strftime("%-d %b").upper()
+                cards += f'\n<div class="date-header">{day_name} · {day_mon}</div>\n'
+            last_date = date_str
+
+        card_index += 1
+        delay = card_index * 200
+        # FIX 2: use hardcoded country codes
+        t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
+        t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
         cards += f'''
 <div class="match-card" style="animation-delay:{delay}ms">
   <div class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</div>
@@ -433,6 +507,17 @@ def build_html(data):
 
     matches = _upcoming_matches(data)
     match_cards = _match_cards_html(matches)
+
+    today = date.today()
+    kickoff_date = date(2026, 6, 11)
+    days_until = (kickoff_date - today).days
+    if days_until > 0:
+        countdown_text = f"TOURNAMENT STARTS IN {days_until} DAYS · FIRST KICKOFF JUNE 11"
+        countdown_html = f'<div class="countdown-banner">{countdown_text}</div>'
+    elif days_until == 0:
+        countdown_html = '<div class="countdown-banner">TOURNAMENT STARTS TODAY · FIRST KICKOFF 14:00 COL</div>'
+    else:
+        countdown_html = '<div class="countdown-banner" style="display:none"></div>'
 
     top5_rows = ""
     for i, item in enumerate(all_teams[:5]):
@@ -819,6 +904,35 @@ def build_html(data):
       text-align: right;
     }}
 
+    /* ── Countdown Banner ── */
+    .countdown-banner {{
+      background: #E8002D;
+      color: #FFFFFF;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 10px 16px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+    }}
+
+    /* ── Date Headers ── */
+    .date-header {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #C9A84C;
+      padding: 20px 4px 8px 4px;
+      border-bottom: 1px solid #1E3050;
+      margin-bottom: 12px;
+    }}
+
     /* ── Footer ── */
     .site-footer {{
       text-align: center;
@@ -868,6 +982,7 @@ def build_html(data):
      SECTION 2 — UPCOMING MATCHES
      ══════════════════════════════════════════ -->
 <div class="matches-section">
+{countdown_html}
 {match_cards if match_cards else '<div style="color:var(--fifa-text-muted);text-align:center;padding:40px 0;font-size:14px;">No upcoming matches scheduled.</div>'}
 </div>
 
