@@ -17,6 +17,8 @@ third_place_counter = Counter()
 # For every knockout match number, count team appearances and wins
 ko_appearances = defaultdict(Counter)  # match_num -> {team_name: n_times_in_that_slot}
 ko_wins = defaultdict(Counter)         # match_num -> {team_name: n_times_won_that_match}
+# Track actual scores: match_num -> (winner_name, w_goals, l_goals) counter
+ko_score_tracker = defaultdict(Counter)  # match_num -> Counter of (winner, w_g, l_g)
 
 KNOCKOUT_STAGES = [
     STAGE.ROUND_OF_32,
@@ -64,6 +66,12 @@ for i in range(NUM_SIMULATIONS):
             winner = match.get_winner()
             if winner:
                 ko_wins[mn][winner.name] += 1
+                loser = match.get_loser()
+                if loser and match.home_score is not None:
+                    is_home_winner = winner == match.home_team
+                    w_g = match.home_score if is_home_winner else match.away_score
+                    l_g = match.away_score if is_home_winner else match.home_score
+                    ko_score_tracker[mn][(winner.name, w_g, l_g)] += 1
 
 total = sum(winners.values())
 
@@ -98,12 +106,22 @@ def format_ko_match(match_num):
         })
 
     likely_winner = None
+    predicted_score = None
     if teams_out:
         likely_winner = max(teams_out, key=lambda x: x["overall_win_pct"])["name"]
+        # Find the most common score for the likely winner
+        scores = {(w, wg, lg): c for (w, wg, lg), c in ko_score_tracker[match_num].items() if w == likely_winner}
+        if scores:
+            best = max(scores, key=scores.__getitem__)
+            _, w_g, l_g = best
+            likely_loser = next((t["name"] for t in teams_out if t["name"] != likely_winner), "?")
+            win_pct = max(teams_out, key=lambda x: x["overall_win_pct"])["overall_win_pct"]
+            predicted_score = f"{likely_winner} {w_g}-{l_g} {likely_loser} ({win_pct}%)"
 
     return {
         "match": match_num,
         "likely_winner": likely_winner,
+        "predicted_score": predicted_score,
         "teams": teams_out,
     }
 
@@ -183,10 +201,21 @@ tp_t1 = sf_loser_entry(sf1_data)
 tp_t2 = sf_loser_entry(sf2_data)
 tp_winner = max([tp_t1, tp_t2], key=lambda t: t["overall_win_pct"])["name"]
 
+# Predicted score for 3rd-place derived match
+tp_scores = {(w, wg, lg): c for (w, wg, lg), c in ko_score_tracker[103].items() if w == tp_winner}
+tp_predicted_score = None
+if tp_scores:
+    best_tp = max(tp_scores, key=tp_scores.__getitem__)
+    _, tp_wg, tp_lg = best_tp
+    tp_loser = tp_t2["name"] if tp_winner == tp_t1["name"] else tp_t1["name"]
+    tp_wp = max(tp_t1, tp_t2, key=lambda t: t["overall_win_pct"])["overall_win_pct"]
+    tp_predicted_score = f"{tp_winner} {tp_wg}-{tp_lg} {tp_loser} ({tp_wp}%)"
+
 output["knockout_bracket"]["third_place_match_derived"] = {
     "match": 103,
     "city":  "Miami",
     "likely_winner": tp_winner,
+    "predicted_score": tp_predicted_score,
     "teams": [tp_t1, tp_t2],
 }
 
