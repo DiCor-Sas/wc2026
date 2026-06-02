@@ -10,6 +10,7 @@ PREDICTIONS_FILE   = "/Users/diegofelipecortessastoque/Desktop/wc2026/prediction
 OUTPUT_FILE        = "/Users/diegofelipecortessastoque/Desktop/wc2026/index.html"
 PLAYER_STATS_FILE  = "/Users/diegofelipecortessastoque/Desktop/wc2026/player_stats.json"
 TEAM_STRENGTH_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json"
+FIXTURES_FILE      = "/Users/diegofelipecortessastoque/Desktop/wc2026/fixtures.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 
@@ -157,40 +158,28 @@ def b_match(t1_name, t1_pct, t2_name, t2_pct, likely_winner, predicted_score=Non
 
 # ── WC 2026 Group-stage schedule (Colombia time = UTC-5) ─────────────────────
 # Format: (date_str YYYY-MM-DD, hour_col, minute_col, team1, team2, group, round_label)
-WC_2026_SCHEDULE = [
-    # June 11 — Opening day
-    ("2026-06-11", 14, 0,  "Mexico",      "Canada",            "A", "Group A MD1"),
-    ("2026-06-11", 17, 0,  "South Korea", "South Africa",      "A", "Group A MD1"),
-    ("2026-06-11", 20, 0,  "Czechia",     "TBD",               "A", "Group A MD1"),
-    # June 12
-    ("2026-06-12", 11, 0,  "Switzerland", "Qatar",             "B", "Group B MD1"),
-    ("2026-06-12", 14, 0,  "Canada",      "Bosnia-Herzegovina","B", "Group B MD1"),
-    ("2026-06-12", 17, 0,  "Brazil",      "Morocco",           "C", "Group C MD1"),
-    ("2026-06-12", 20, 0,  "Haiti",       "Scotland",          "C", "Group C MD1"),
-    # June 13
-    ("2026-06-13", 11, 0,  "USA",         "Paraguay",          "D", "Group D MD1"),
-    ("2026-06-13", 14, 0,  "Australia",   "Türkiye",           "D", "Group D MD1"),
-    ("2026-06-13", 17, 0,  "Germany",     "Curaçao",           "E", "Group E MD1"),
-    ("2026-06-13", 20, 0,  "Ivory Coast", "Ecuador",           "E", "Group E MD1"),
-    # June 14
-    ("2026-06-14", 11, 0,  "Netherlands", "Japan",             "F", "Group F MD1"),
-    ("2026-06-14", 14, 0,  "Sweden",      "Tunisia",           "F", "Group F MD1"),
-    ("2026-06-14", 17, 0,  "Belgium",     "Egypt",             "G", "Group G MD1"),
-    ("2026-06-14", 20, 0,  "Iran",        "New Zealand",       "G", "Group G MD1"),
-    # June 15
-    ("2026-06-15", 11, 0,  "Spain",       "Cabo Verde",        "H", "Group H MD1"),
-    ("2026-06-15", 14, 0,  "Saudi Arabia","Uruguay",           "H", "Group H MD1"),
-    ("2026-06-15", 17, 0,  "France",      "Senegal",           "I", "Group I MD1"),
-    ("2026-06-15", 20, 0,  "Norway",      "Iraq",              "I", "Group I MD1"),
-    # June 16
-    ("2026-06-16", 11, 0,  "Argentina",   "Algeria",           "J", "Group J MD1"),
-    ("2026-06-16", 14, 0,  "Austria",     "Jordan",            "J", "Group J MD1"),
-    ("2026-06-16", 17, 0,  "Portugal",    "Colombia",          "K", "Group K MD1"),
-    ("2026-06-16", 20, 0,  "Congo DR",    "Uzbekistan",        "K", "Group K MD1"),
-    # June 17
-    ("2026-06-17", 11, 0,  "England",     "Croatia",           "L", "Group L MD1"),
-    ("2026-06-17", 14, 0,  "Ghana",       "Panama",            "L", "Group L MD1"),
-]
+def _load_fixtures():
+    """Load fixtures from fixtures.json and return as schedule tuples."""
+    try:
+        with open(FIXTURES_FILE) as f:
+            raw = json.load(f)
+    except Exception:
+        return []
+    schedule = []
+    for fx in raw:
+        date_str = fx.get("date", "")
+        time_str = fx.get("time", "00:00")
+        home = _norm(fx.get("home", "TBD"))
+        away = _norm(fx.get("away", "TBD"))
+        group = fx.get("group", "?")
+        md = fx.get("matchday", 1)
+        round_label = f"Group {group} MD{md}"
+        try:
+            hour, minute = int(time_str[:2]), int(time_str[3:5])
+        except Exception:
+            hour, minute = 0, 0
+        schedule.append((date_str, hour, minute, home, away, group, round_label))
+    return sorted(schedule, key=lambda e: (e[0], e[1], e[2]))
 
 COLOMBIA_OFFSET = timedelta(hours=-5)  # UTC-5
 
@@ -257,33 +246,24 @@ FLAG_EMOJI = {
     "TBD": "🏳️",
 }
 
-MATCH_VENUES = {
-    ("Mexico", "Canada"):             "SoFi Stadium · Los Angeles",
-    ("South Korea", "South Africa"):  "AT&T Stadium · Dallas",
-    ("Czechia", "TBD"):               "MetLife Stadium · NJ",
-    ("Switzerland", "Qatar"):         "Levi's Stadium · San Francisco",
-    ("Canada", "Bosnia-Herzegovina"): "BMO Field · Toronto",
-    ("Brazil", "Morocco"):            "SoFi Stadium · Los Angeles",
-    ("Haiti", "Scotland"):            "NRG Stadium · Houston",
-    ("USA", "Paraguay"):              "MetLife Stadium · NJ",
-    ("Australia", "Türkiye"):         "Arrowhead Stadium · Kansas City",
-    ("Germany", "Curaçao"):           "Lumen Field · Seattle",
-    ("Ivory Coast", "Ecuador"):       "Gillette Stadium · Boston",
-    ("Netherlands", "Japan"):         "Hard Rock Stadium · Miami",
-    ("Sweden", "Tunisia"):            "BC Place · Vancouver",
-    ("Belgium", "Egypt"):             "Mercedes-Benz Stadium · Atlanta",
-    ("Iran", "New Zealand"):          "Estadio BBVA · Monterrey",
-    ("Spain", "Cabo Verde"):          "Estadio Azteca · Mexico City",
-    ("Saudi Arabia", "Uruguay"):      "Estadio Akron · Guadalajara",
-    ("France", "Senegal"):            "AT&T Stadium · Dallas",
-    ("Norway", "Iraq"):               "SoFi Stadium · Los Angeles",
-    ("Argentina", "Algeria"):         "MetLife Stadium · NJ",
-    ("Austria", "Jordan"):            "Hard Rock Stadium · Miami",
-    ("Portugal", "Colombia"):         "NRG Stadium · Houston",
-    ("Congo DR", "Uzbekistan"):       "Levi's Stadium · San Francisco",
-    ("England", "Croatia"):           "Gillette Stadium · Boston",
-    ("Ghana", "Panama"):              "Estadio BBVA · Monterrey",
-}
+def _build_match_venues():
+    """Build venue lookup from fixtures.json."""
+    try:
+        with open(FIXTURES_FILE) as f:
+            raw = json.load(f)
+    except Exception:
+        return {}
+    venues = {}
+    for fx in raw:
+        home = _norm(fx.get("home", "TBD"))
+        away = _norm(fx.get("away", "TBD"))
+        venue = fx.get("venue", "")
+        city = fx.get("city", "")
+        loc = f"{venue} · {city}" if venue and city else city or venue or ""
+        venues[(home, away)] = loc
+    return venues
+
+MATCH_VENUES = _build_match_venues()
 
 
 def _flag(team):
@@ -305,7 +285,7 @@ def _upcoming_matches(data):
     cutoff = (now_col + timedelta(hours=48)) if tournament_started else None
 
     upcoming = []
-    for entry in WC_2026_SCHEDULE:
+    for entry in _load_fixtures():
         date_str, hour, minute, t1, t2, group, round_label = entry
         ko_col = datetime(
             int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
