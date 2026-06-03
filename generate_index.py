@@ -256,6 +256,52 @@ FLAG_EMOJI = {
     "TBD": "🏳️",
 }
 
+R32_MATCHES = [
+    {"num": 73,  "date": "Jun 28", "city": "Los Angeles",   "home": "2nd Group A", "away": "2nd Group B"},
+    {"num": 74,  "date": "Jun 29", "city": "Boston",        "home": "1st Group E", "away": "best 3rd A/B/C/D/F"},
+    {"num": 75,  "date": "Jun 29", "city": "Monterrey",     "home": "1st Group F", "away": "2nd Group C"},
+    {"num": 76,  "date": "Jun 29", "city": "Houston",       "home": "1st Group C", "away": "2nd Group F"},
+    {"num": 77,  "date": "Jun 30", "city": "New York/NJ",   "home": "1st Group I", "away": "best 3rd C/D/F/G/H"},
+    {"num": 78,  "date": "Jun 30", "city": "Dallas",        "home": "2nd Group E", "away": "2nd Group I"},
+    {"num": 79,  "date": "Jun 30", "city": "Mexico City",   "home": "1st Group A", "away": "best 3rd C/E/F/H/I"},
+    {"num": 80,  "date": "Jul 1",  "city": "Atlanta",       "home": "1st Group L", "away": "best 3rd E/H/I/J/K"},
+    {"num": 81,  "date": "Jul 1",  "city": "San Francisco", "home": "1st Group D", "away": "best 3rd B/E/F/I/J"},
+    {"num": 82,  "date": "Jul 1",  "city": "Seattle",       "home": "1st Group G", "away": "best 3rd A/E/H/I/J"},
+    {"num": 83,  "date": "Jul 2",  "city": "Toronto",       "home": "2nd Group K", "away": "2nd Group L"},
+    {"num": 84,  "date": "Jul 2",  "city": "Los Angeles",   "home": "1st Group H", "away": "2nd Group J"},
+    {"num": 85,  "date": "Jul 2",  "city": "Vancouver",     "home": "1st Group B", "away": "best 3rd E/F/G/I/J"},
+    {"num": 86,  "date": "Jul 3",  "city": "Miami",         "home": "1st Group J", "away": "2nd Group H"},
+    {"num": 87,  "date": "Jul 3",  "city": "Kansas City",   "home": "1st Group K", "away": "best 3rd D/E/I/J/L"},
+    {"num": 88,  "date": "Jul 3",  "city": "Dallas",        "home": "2nd Group D", "away": "2nd Group G"},
+]
+
+R16_MATCHES = [
+    {"num": 89, "home": "Winner M74", "away": "Winner M77"},
+    {"num": 90, "home": "Winner M73", "away": "Winner M75"},
+    {"num": 91, "home": "Winner M76", "away": "Winner M78"},
+    {"num": 92, "home": "Winner M79", "away": "Winner M80"},
+    {"num": 93, "home": "Winner M83", "away": "Winner M84"},
+    {"num": 94, "home": "Winner M81", "away": "Winner M82"},
+    {"num": 95, "home": "Winner M86", "away": "Winner M88"},
+    {"num": 96, "home": "Winner M85", "away": "Winner M87"},
+]
+
+QF_MATCHES = [
+    {"num": 97,  "home": "Winner M89", "away": "Winner M90"},
+    {"num": 98,  "home": "Winner M93", "away": "Winner M94"},
+    {"num": 99,  "home": "Winner M91", "away": "Winner M92"},
+    {"num": 100, "home": "Winner M95", "away": "Winner M96"},
+]
+
+SF_MATCHES = [
+    {"num": 101, "home": "Winner M97",  "away": "Winner M98"},
+    {"num": 102, "home": "Winner M99",  "away": "Winner M100"},
+]
+
+THIRD_MATCH = {"num": 103, "home": "Loser M101",   "away": "Loser M102",   "date": "Jul 18", "city": "Miami"}
+FINAL_MATCH = {"num": 104, "home": "Winner M101",  "away": "Winner M102",  "date": "Jul 19", "city": "MetLife Stadium, New York/NJ"}
+
+
 def _build_match_venues():
     """Build venue lookup from fixtures.json."""
     try:
@@ -415,36 +461,46 @@ def _match_cards_html(matches):
             delay = card_index * 200
             t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
             t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
+            t1_abbr = t1_abbr[:3] if len(t1_abbr) > 3 else t1_abbr
+            t2_abbr = t2_abbr[:3] if len(t2_abbr) > 3 else t2_abbr
             colombia_style = ' style="border-left:3px solid #C9A84C"' if "Colombia" in (t1, t2) else ""
             lineup_badge = _lineup_badge_html(t1, t2, lineups)
+            venue_time = f'{h(m["venue"])} · {h(m["ko_fmt"])}'
+            score_chip = f'SCORE {m["score1"]}-{m["score2"]} · 15pts'
+            if m["winner"] == "DRAW":
+                win_chip = 'DRAW · 8pts'
+            else:
+                w_code = COUNTRY_CODE.get(m["winner"], m["winner"][:3].upper())
+                w_code = w_code[:3] if len(w_code) > 3 else w_code
+                win_chip = f'WIN: {h(w_code)} · 8pts'
+            goals_chip = f'{t1_abbr} {m["score1"]} · {t2_abbr} {m["score2"]} · 5pts'
             cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style}>
-  <div class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</div>
-  <div class="mc-header">
-    <div class="mc-label">{h(m["match_lbl"])}</div>
-    <div class="mc-venue">{h(m["venue"])}</div>
-    <div class="mc-time">{h(m["ko_fmt"])}</div>
-    {lineup_badge}
+  <div class="mc-card-header">
+    <span class="mc-card-label">{h(m["match_lbl"])}</span>
+    <span class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">{venue_time}</div>
+  <div class="mc-lineup-wrap">{lineup_badge}</div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">{_flag(t1)}</span>
-      <span class="mc-name">{_card_name(t1)}</span>
+      <span class="mc-name">{h(t1)}</span>
       <span class="mc-prob">{m["win_p1"]}%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">{m["score1"]} – {m["score2"]}</div>
+      <div class="mc-score">{m["score1"]}–{m["score2"]}</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">{m["win_p2"]}%</span>
-      <span class="mc-name">{_card_name(t2)}</span>
       <span class="mc-flag">{_flag(t2)}</span>
+      <span class="mc-name">{h(t2)}</span>
+      <span class="mc-prob">{m["win_p2"]}%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: {m["score1"]}-{m["score2"]} · 15 pts</div>
-    <div class="chip chip-red">WINNER: {h(m["winner"]).upper()} · 8 pts</div>
-    <div class="chip chip-blue">GOALS: {t1_abbr} {m["score1"]} · {t2_abbr} {m["score2"]} · 5 pts ea</div>
+    <div class="mc-chip chip-gold">{score_chip}</div>
+    <div class="mc-chip chip-red">{win_chip}</div>
+    <div class="mc-chip chip-blue">{goals_chip}</div>
   </div>
 </div>
 '''
@@ -532,7 +588,6 @@ def _bracket_section_html():
     total_slots = len(bracket)
     pending_count = total_slots - confirmed_count
 
-    # Phase detection
     if confirmed_count == 0:
         phase = 1
     elif confirmed_count < 32:
@@ -540,104 +595,97 @@ def _bracket_section_html():
     else:
         phase = 3
 
-    # Header counts
     header_label = (
         f'KNOCKOUT BRACKET'
         f' · <span class="bracket-confirmed-count">{confirmed_count} CONFIRMED</span>'
         f' · <span style="color:#4A6080">{pending_count} PENDING</span>'
     )
 
-    # Body content
+    def _slot_display(slot_label):
+        """Return HTML for a slot, using real team name if confirmed in bracket_state."""
+        parts = slot_label.split()
+        bk_key = None
+        if len(parts) >= 3 and parts[0] in ("1st", "2nd") and parts[1] == "Group":
+            bk_key = f"Group {parts[2]} {parts[0]}"
+        is_third = slot_label.startswith("best 3rd")
+        if bk_key and bk_key in bracket:
+            slot_data = bracket[bk_key]
+            if slot_data.get("status") == "CONFIRMED":
+                team = h(slot_data.get("team", "TBD"))
+                return f'<span class="bk-slot-confirmed">&#10003; {team}</span>'
+        if is_third:
+            groups = slot_label.replace("best 3rd ", "")
+            return (
+                f'<span class="bk-slot-label">BEST 3RD</span>'
+                f'<span class="bk-third-pill">{h(groups)}</span>'
+            )
+        return f'<span class="bk-slot-label">{h(slot_label.upper())}</span>'
+
+    def _r32_cards():
+        cards = ""
+        for m in R32_MATCHES:
+            home_html = _slot_display(m["home"])
+            away_html = _slot_display(m["away"])
+            cards += (
+                f'<div class="bk-r32-card">'
+                f'<div class="bk-match-meta">M{m["num"]} &middot; {h(m["date"])} &middot; '
+                f'<span class="bk-city">{h(m["city"])}</span></div>'
+                f'<div class="bk-matchup-row">'
+                f'<div class="bk-slot-cell">{home_html}</div>'
+                f'<div class="bk-vs-cell">VS</div>'
+                f'<div class="bk-slot-cell bk-slot-right">{away_html}</div>'
+                f'</div>'
+                f'</div>'
+            )
+        return cards
+
+    def _later_rounds():
+        def _line(num, home, away, extra=""):
+            return (
+                f'<div class="bk-late-match">M{num} &middot; '
+                f'<span class="bk-late-team">{h(home)}</span>'
+                f' <span class="bk-late-vs">vs</span> '
+                f'<span class="bk-late-team">{h(away)}</span>'
+                f'{extra}</div>'
+            )
+        out = ""
+        out += '<div class="bk-late-section"><div class="bk-late-header">ROUND OF 16</div>'
+        for m in R16_MATCHES:
+            out += _line(m["num"], m["home"], m["away"])
+        out += '</div>'
+        out += '<div class="bk-late-section"><div class="bk-late-header">QUARTERFINALS</div>'
+        for m in QF_MATCHES:
+            out += _line(m["num"], m["home"], m["away"])
+        out += '</div>'
+        out += '<div class="bk-late-section"><div class="bk-late-header">SEMIFINALS</div>'
+        for m in SF_MATCHES:
+            out += _line(m["num"], m["home"], m["away"])
+        out += '</div>'
+        tm = THIRD_MATCH
+        out += '<div class="bk-late-section"><div class="bk-late-header">THIRD PLACE</div>'
+        out += _line(tm["num"], tm["home"], tm["away"],
+                     f' &middot; {h(tm["date"])} &middot; {h(tm["city"])}')
+        out += '</div>'
+        fm = FINAL_MATCH
+        out += '<div class="bk-late-section"><div class="bk-late-header bk-final-header">FINAL</div>'
+        out += _line(fm["num"], fm["home"], fm["away"],
+                     f' &middot; {h(fm["date"])} &middot; {h(fm["city"])}')
+        out += '</div>'
+        return out
+
+    r32_html = _r32_cards()
+
+    later_html = _later_rounds()
     if phase == 1:
-        body_html = (
-            '<div class="bracket-placeholder">'
-            '&#9672; Bracket will fill in as group stage results are confirmed.'
-            ' Check back from June 24 onward.'
-            '</div>'
+        note = (
+            '<div class="bk-phase-note">Bracket slots are confirmed. '
+            'Teams fill in from June 24 as groups complete.</div>'
         )
+        body_html = note + '<div class="bk-r32-grid">' + r32_html + '</div>' + later_html
     elif phase == 2:
-        # Collect groups A–L
-        groups = {}
-        for slot_key, slot_val in bracket.items():
-            # Only group-stage slots: "Group X 1st" / "Group X 2nd"
-            parts = slot_key.split()
-            if len(parts) == 3 and parts[0] == "Group" and parts[2] in ("1st", "2nd"):
-                grp_letter = parts[1]
-                rank = parts[2]
-                groups.setdefault(grp_letter, {})[rank] = slot_val
-
-        group_cards = ""
-        for grp_letter in sorted(groups.keys()):
-            slots = groups[grp_letter]
-            cards_html = ""
-            for rank in ("1st", "2nd"):
-                slot_val = slots.get(rank)
-                if slot_val:
-                    status = slot_val.get("status", "PROJECTED")
-                    team = slot_val.get("team", "TBD")
-                    prob = slot_val.get("probability", 0)
-                    prob_pct = round(prob * 100)
-                    if status == "CONFIRMED":
-                        team_html = f'<span class="bk-team-confirmed">&#10003; {h(team)}</span>'
-                    else:
-                        team_html = f'<span class="bk-team-projected">{h(team)} ({prob_pct}%)</span>'
-                else:
-                    team_html = '<span class="bk-team-projected">TBD</span>'
-                cards_html += (
-                    f'<div class="bk-slot">'
-                    f'<span class="bk-slot-rank">{rank}</span>'
-                    f'{team_html}'
-                    f'</div>'
-                )
-            group_cards += (
-                f'<div class="bk-group-card">'
-                f'<div class="bk-group-letter">GROUP {h(grp_letter)}</div>'
-                f'{cards_html}'
-                f'<div class="bk-third-note">Best 3rd place pool</div>'
-                f'</div>'
-            )
-        body_html = f'<div class="bk-groups-grid">{group_cards}</div>'
+        body_html = '<div class="bk-r32-grid">' + r32_html + '</div>' + later_html
     else:
-        # Phase 3: Round of 32 matchup cards
-        r32_slots = {k: v for k, v in bracket.items() if "Round of 32" in k or "R32" in k}
-        # Fallback: match slots M73–M88
-        matchup_keys = [k for k in bracket if k.startswith("M") and k[1:].isdigit()]
-        matchup_keys.sort(key=lambda k: int(k[1:]))
-
-        cards_html = ""
-        match_num_start = 73
-        for i in range(16):
-            match_num = match_num_start + i
-            home_key = f"M{match_num} home"
-            away_key = f"M{match_num} away"
-            home_slot = bracket.get(home_key, {})
-            away_slot = bracket.get(away_key, {})
-
-            def _team_display(slot):
-                if not slot:
-                    return '<span class="bk-team-projected">TBD</span>'
-                status = slot.get("status", "PROJECTED")
-                team = slot.get("team", "TBD")
-                prob = slot.get("probability", 0)
-                prob_pct = round(prob * 100)
-                if status == "ELIMINATED":
-                    return f'<span class="bk-team-eliminated">&#10007; {h(team)}</span>'
-                elif status == "CONFIRMED":
-                    return f'<span class="bk-team-confirmed">&#10003; {h(team)}</span>'
-                else:
-                    return f'<span class="bk-team-projected">{h(team)} ({prob_pct}%)</span>'
-
-            cards_html += (
-                f'<div class="bk-match-card">'
-                f'<div class="bk-match-num">M{match_num}</div>'
-                f'<div class="bk-matchup">'
-                f'{_team_display(home_slot)}'
-                f'<span class="bk-vs">vs</span>'
-                f'{_team_display(away_slot)}'
-                f'</div>'
-                f'</div>'
-            )
-        body_html = f'<div class="bk-r32-grid">{cards_html}</div>'
+        body_html = '<div class="bk-r32-grid">' + r32_html + '</div>' + later_html
 
     return header_label, body_html
 
@@ -843,16 +891,10 @@ def build_html(data):
       margin: 0 auto;
     }}
     .matches-grid {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 0 12px;
-    }}
-    @media (max-width: 380px) {{
-      .matches-grid {{ grid-template-columns: 1fr; }}
-    }}
-    @media (max-width: 480px) {{
-      .match-card {{ padding: 8px; }}
     }}
     @keyframes slideUp {{
       from {{ opacity: 0; transform: translateY(24px); }}
@@ -877,82 +919,76 @@ def build_html(data):
         box-shadow: 0 12px 40px rgba(0,0,0,0.5);
       }}
     }}
+    .mc-card-header {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px 4px;
+    }}
+    .mc-card-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-text-muted);
+    }}
     .mc-conf-badge {{
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.1em;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       text-transform: uppercase;
     }}
     .conf-high {{ background: rgba(0,200,83,0.15); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }}
     .conf-med  {{ background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
     .conf-low  {{ background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }}
-    .mc-header {{
-      padding: 10px 10px 8px;
-      border-bottom: 1px solid var(--fifa-border);
-    }}
-    .mc-label {{
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--fifa-text-secondary);
-    }}
-    .mc-venue {{
-      font-size: 12px;
+    .mc-venue-row {{
+      font-size: 11px;
       font-weight: 500;
       color: var(--fifa-text-muted);
-      margin-top: 2px;
+      padding: 0 12px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }}
-    .mc-time {{
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--fifa-text-secondary);
-      margin-top: 2px;
+    .mc-lineup-wrap {{
+      padding: 0 12px 4px;
+      text-align: center;
     }}
-    .mc-body {{
-      display: flex;
+    .teams-score-row {{
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 10px;
-      gap: 4px;
+      gap: 8px;
+      margin: 12px 12px;
     }}
     .mc-team {{
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      flex: 1;
       gap: 4px;
     }}
     .mc-team-right {{
       align-items: flex-end;
       text-align: right;
     }}
-    .mc-flag {{ font-size: 22px; line-height: 1; }}
+    .mc-flag {{ font-size: 28px; line-height: 1; }}
     .mc-name {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 16px;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: var(--fifa-text-primary);
-      line-height: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      color: var(--fifa-white);
+      line-height: 1.1;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }}
     .mc-prob {{
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 20px;
       color: var(--fifa-red);
       line-height: 1;
     }}
@@ -960,19 +996,19 @@ def build_html(data):
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 0 0 auto;
+      min-width: 90px;
     }}
     .mc-score {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 32px;
+      font-size: 52px;
       color: var(--fifa-white);
       letter-spacing: -0.02em;
       line-height: 1;
       white-space: nowrap;
     }}
     .mc-score-label {{
-      font-size: 12px;
+      font-size: 9px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -980,22 +1016,24 @@ def build_html(data):
       margin-top: 2px;
     }}
     .mc-chips {{
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
       border-top: 1px solid var(--fifa-border);
-      margin-top: 8px;
-      padding: 8px 10px 10px;
+      padding: 10px 12px 12px;
+      margin-top: 4px;
     }}
-    .chip {{
-      font-size: 12px;
+    .mc-chip {{
+      font-size: 11px;
       font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 100px;
+      text-align: center;
+      white-space: nowrap;
+      padding: 5px 6px;
+      border-radius: 20px;
       background: rgba(255,255,255,0.04);
-      white-space: normal;
-      word-break: break-word;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }}
     .chip-gold  {{ border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }}
     .chip-red   {{ border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }}
@@ -1130,14 +1168,14 @@ def build_html(data):
 
     /* ── Lineup Status Badge ── */
     .mc-lineup-badge {{
-      display: inline-block;
-      font-size: 12px;
+      display: block;
+      font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-top: 5px;
+      text-align: center;
     }}
     .lineup-confirmed {{ background: rgba(0,200,83,0.12); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }}
     .lineup-estimated {{ background: rgba(255,160,0,0.12); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
@@ -1321,35 +1359,100 @@ def build_html(data):
       flex-shrink: 0;
     }}
 
-    /* ── Phase 2 Group Card Grid ── */
-    .group-cards-grid {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 12px 0;
+    /* ── Bracket R32 Placeholder Cards ── */
+    .bk-phase-note {{
+      font-size: 12px;
+      color: var(--fifa-text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
     }}
-    .group-card {{
+    .bk-r32-card {{
       background: var(--fifa-card);
       border: 1px solid var(--fifa-border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
     }}
-    .group-letter {{
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px;
-      font-weight: 900;
-      color: #C9A84C;
+    .bk-match-meta {{
+      font-size: 11px;
+      color: var(--fifa-text-muted);
       margin-bottom: 6px;
+      letter-spacing: 0.04em;
     }}
-    .group-slot {{
-      font-size: 12px;
-      font-weight: 500;
-      padding: 3px 0;
+    .bk-city {{ font-weight: 600; }}
+    .bk-matchup-row {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }}
-    .group-slot.confirmed {{ color: var(--fifa-white); }}
-    .group-slot.projected {{ color: var(--fifa-text-muted); font-style: italic; }}
-    .group-slot.confirmed::before {{ content: "✓ "; color: #22C55E; }}
-    .group-slot.projected::before {{ content: "~ "; color: var(--fifa-text-muted); }}
+    .bk-slot-cell {{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }}
+    .bk-slot-right {{ align-items: flex-end; text-align: right; }}
+    .bk-vs-cell {{
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      flex-shrink: 0;
+      font-weight: 600;
+    }}
+    .bk-slot-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--fifa-text-muted);
+      letter-spacing: 0.04em;
+    }}
+    .bk-slot-confirmed {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--fifa-white);
+    }}
+    .bk-third-pill {{
+      display: block;
+      font-size: 10px;
+      color: var(--fifa-text-muted);
+      letter-spacing: 0.02em;
+    }}
+    /* ── Bracket Later Rounds ── */
+    .bk-late-section {{
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--fifa-border);
+    }}
+    .bk-late-header {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-gold);
+      margin-bottom: 8px;
+    }}
+    .bk-final-header {{ color: var(--fifa-red); }}
+    .bk-late-match {{
+      font-size: 13px;
+      color: var(--fifa-text-secondary);
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(30,48,80,0.5);
+    }}
+    .bk-late-match:last-child {{ border-bottom: none; }}
+    .bk-late-team {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      color: var(--fifa-text-muted);
+      font-style: italic;
+    }}
+    .bk-late-vs {{
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      margin: 0 2px;
+    }}
 
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {{

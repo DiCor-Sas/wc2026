@@ -148,16 +148,10 @@
       margin: 0 auto;
     }
     .matches-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 0 12px;
-    }
-    @media (max-width: 380px) {
-      .matches-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 480px) {
-      .match-card { padding: 8px; }
     }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -182,82 +176,76 @@
         box-shadow: 0 12px 40px rgba(0,0,0,0.5);
       }
     }
+    .mc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px 4px;
+    }
+    .mc-card-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-text-muted);
+    }
     .mc-conf-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.1em;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       text-transform: uppercase;
     }
     .conf-high { background: rgba(0,200,83,0.15); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }
     .conf-med  { background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }
     .conf-low  { background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }
-    .mc-header {
-      padding: 10px 10px 8px;
-      border-bottom: 1px solid var(--fifa-border);
-    }
-    .mc-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--fifa-text-secondary);
-    }
-    .mc-venue {
-      font-size: 12px;
+    .mc-venue-row {
+      font-size: 11px;
       font-weight: 500;
       color: var(--fifa-text-muted);
-      margin-top: 2px;
+      padding: 0 12px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .mc-time {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--fifa-text-secondary);
-      margin-top: 2px;
+    .mc-lineup-wrap {
+      padding: 0 12px 4px;
+      text-align: center;
     }
-    .mc-body {
-      display: flex;
+    .teams-score-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 10px;
-      gap: 4px;
+      gap: 8px;
+      margin: 12px 12px;
     }
     .mc-team {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      flex: 1;
       gap: 4px;
     }
     .mc-team-right {
       align-items: flex-end;
       text-align: right;
     }
-    .mc-flag { font-size: 22px; line-height: 1; }
+    .mc-flag { font-size: 28px; line-height: 1; }
     .mc-name {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 16px;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: var(--fifa-text-primary);
-      line-height: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      color: var(--fifa-white);
+      line-height: 1.1;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     .mc-prob {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 20px;
       color: var(--fifa-red);
       line-height: 1;
     }
@@ -265,19 +253,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 0 0 auto;
+      min-width: 90px;
     }
     .mc-score {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: 32px;
+      font-size: 52px;
       color: var(--fifa-white);
       letter-spacing: -0.02em;
       line-height: 1;
       white-space: nowrap;
     }
     .mc-score-label {
-      font-size: 12px;
+      font-size: 9px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -285,22 +273,24 @@
       margin-top: 2px;
     }
     .mc-chips {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
       border-top: 1px solid var(--fifa-border);
-      margin-top: 8px;
-      padding: 8px 10px 10px;
+      padding: 10px 12px 12px;
+      margin-top: 4px;
     }
-    .chip {
-      font-size: 12px;
+    .mc-chip {
+      font-size: 11px;
       font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 100px;
+      text-align: center;
+      white-space: nowrap;
+      padding: 5px 6px;
+      border-radius: 20px;
       background: rgba(255,255,255,0.04);
-      white-space: normal;
-      word-break: break-word;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .chip-gold  { border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }
     .chip-red   { border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }
@@ -435,14 +425,14 @@
 
     /* ── Lineup Status Badge ── */
     .mc-lineup-badge {
-      display: inline-block;
-      font-size: 12px;
+      display: block;
+      font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-top: 5px;
+      text-align: center;
     }
     .lineup-confirmed { background: rgba(0,200,83,0.12); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }
     .lineup-estimated { background: rgba(255,160,0,0.12); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }
@@ -626,35 +616,100 @@
       flex-shrink: 0;
     }
 
-    /* ── Phase 2 Group Card Grid ── */
-    .group-cards-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 12px 0;
+    /* ── Bracket R32 Placeholder Cards ── */
+    .bk-phase-note {
+      font-size: 12px;
+      color: var(--fifa-text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
     }
-    .group-card {
+    .bk-r32-card {
       background: var(--fifa-card);
       border: 1px solid var(--fifa-border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
     }
-    .group-letter {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px;
-      font-weight: 900;
-      color: #C9A84C;
+    .bk-match-meta {
+      font-size: 11px;
+      color: var(--fifa-text-muted);
       margin-bottom: 6px;
+      letter-spacing: 0.04em;
     }
-    .group-slot {
-      font-size: 12px;
-      font-weight: 500;
-      padding: 3px 0;
+    .bk-city { font-weight: 600; }
+    .bk-matchup-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .group-slot.confirmed { color: var(--fifa-white); }
-    .group-slot.projected { color: var(--fifa-text-muted); font-style: italic; }
-    .group-slot.confirmed::before { content: "✓ "; color: #22C55E; }
-    .group-slot.projected::before { content: "~ "; color: var(--fifa-text-muted); }
+    .bk-slot-cell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .bk-slot-right { align-items: flex-end; text-align: right; }
+    .bk-vs-cell {
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+    .bk-slot-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--fifa-text-muted);
+      letter-spacing: 0.04em;
+    }
+    .bk-slot-confirmed {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--fifa-white);
+    }
+    .bk-third-pill {
+      display: block;
+      font-size: 10px;
+      color: var(--fifa-text-muted);
+      letter-spacing: 0.02em;
+    }
+    /* ── Bracket Later Rounds ── */
+    .bk-late-section {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--fifa-border);
+    }
+    .bk-late-header {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-gold);
+      margin-bottom: 8px;
+    }
+    .bk-final-header { color: var(--fifa-red); }
+    .bk-late-match {
+      font-size: 13px;
+      color: var(--fifa-text-secondary);
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(30,48,80,0.5);
+    }
+    .bk-late-match:last-child { border-bottom: none; }
+    .bk-late-team {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      color: var(--fifa-text-muted);
+      font-style: italic;
+    }
+    .bk-late-vs {
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      margin: 0 2px;
+    }
 
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {
@@ -717,63 +772,61 @@
 <div class="date-header">THURSDAY · 11 JUN</div>
 <div class="matches-grid">
 <div class="match-card" style="animation-delay:200ms">
-  <div class="mc-conf-badge conf-high">HIGH</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP A · MD 1</div>
-    <div class="mc-venue">Estadio Azteca · Mexico City</div>
-    <div class="mc-time">11 Jun · 14:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP A · MD 1</span>
+    <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">Estadio Azteca · Mexico City · 11 Jun · 14:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇲🇽</span>
-      <span class="mc-name">MEXICO</span>
+      <span class="mc-name">Mexico</span>
       <span class="mc-prob">67%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">2 – 1</div>
+      <div class="mc-score">2–1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">8%</span>
-      <span class="mc-name">SOUTH AFRICA</span>
       <span class="mc-flag">🇿🇦</span>
+      <span class="mc-name">South Africa</span>
+      <span class="mc-prob">8%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 2-1 · 15 pts</div>
-    <div class="chip chip-red">WINNER: MEXICO · 8 pts</div>
-    <div class="chip chip-blue">GOALS: MEX 2 · RSA 1 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: MEX · 8pts</div>
+    <div class="mc-chip chip-blue">MEX 2 · RSA 1 · 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:400ms">
-  <div class="mc-conf-badge conf-low">LOW</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP A · MD 1</div>
-    <div class="mc-venue">Estadio Akron · Guadalajara</div>
-    <div class="mc-time">11 Jun · 21:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP A · MD 1</span>
+    <span class="mc-conf-badge conf-low">LOW</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">Estadio Akron · Guadalajara · 11 Jun · 21:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇰🇷</span>
-      <span class="mc-name">SOUTH KOREA</span>
+      <span class="mc-name">South Korea</span>
       <span class="mc-prob">37%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">1 – 1</div>
+      <div class="mc-score">1–1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">38%</span>
-      <span class="mc-name">CZECHIA</span>
       <span class="mc-flag">🇨🇿</span>
+      <span class="mc-name">Czechia</span>
+      <span class="mc-prob">38%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 1-1 · 15 pts</div>
-    <div class="chip chip-red">WINNER: CZECHIA · 8 pts</div>
-    <div class="chip chip-blue">GOALS: KOR 1 · CZE 1 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 1-1 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: CZE · 8pts</div>
+    <div class="mc-chip chip-blue">KOR 1 · CZE 1 · 5pts</div>
   </div>
 </div>
 </div>
@@ -781,63 +834,61 @@
 <div class="date-header">FRIDAY · 12 JUN</div>
 <div class="matches-grid">
 <div class="match-card" style="animation-delay:600ms">
-  <div class="mc-conf-badge conf-med">MED</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP B · MD 1</div>
-    <div class="mc-venue">BMO Field · Toronto</div>
-    <div class="mc-time">12 Jun · 14:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP B · MD 1</span>
+    <span class="mc-conf-badge conf-med">MED</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">BMO Field · Toronto · 12 Jun · 14:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇨🇦</span>
-      <span class="mc-name">CANADA</span>
+      <span class="mc-name">Canada</span>
       <span class="mc-prob">51%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">1 – 1</div>
+      <div class="mc-score">1–1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">24%</span>
-      <span class="mc-name">BOSNIA-HRZ</span>
       <span class="mc-flag">🇧🇦</span>
+      <span class="mc-name">Bosnia-Herzegovina</span>
+      <span class="mc-prob">24%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 1-1 · 15 pts</div>
-    <div class="chip chip-red">WINNER: CANADA · 8 pts</div>
-    <div class="chip chip-blue">GOALS: CAN 1 · BOSNIA-HRZ 1 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 1-1 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: CAN · 8pts</div>
+    <div class="mc-chip chip-blue">CAN 1 · BOS 1 · 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:800ms">
-  <div class="mc-conf-badge conf-high">HIGH</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP D · MD 1</div>
-    <div class="mc-venue">SoFi Stadium · Los Angeles</div>
-    <div class="mc-time">12 Jun · 20:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP D · MD 1</span>
+    <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">SoFi Stadium · Los Angeles · 12 Jun · 20:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇺🇸</span>
       <span class="mc-name">USA</span>
       <span class="mc-prob">66%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">2 – 1</div>
+      <div class="mc-score">2–1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">9%</span>
-      <span class="mc-name">PARAGUAY</span>
       <span class="mc-flag">🇵🇾</span>
+      <span class="mc-name">Paraguay</span>
+      <span class="mc-prob">9%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 2-1 · 15 pts</div>
-    <div class="chip chip-red">WINNER: USA · 8 pts</div>
-    <div class="chip chip-blue">GOALS: USA 2 · PAR 1 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: USA · 8pts</div>
+    <div class="mc-chip chip-blue">USA 2 · PAR 1 · 5pts</div>
   </div>
 </div>
 </div>
@@ -845,63 +896,61 @@
 <div class="date-header">SATURDAY · 13 JUN</div>
 <div class="matches-grid">
 <div class="match-card" style="animation-delay:1000ms">
-  <div class="mc-conf-badge conf-high">HIGH</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP B · MD 1</div>
-    <div class="mc-venue">Levi's Stadium · San Francisco</div>
-    <div class="mc-time">13 Jun · 14:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP B · MD 1</span>
+    <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">Levi's Stadium · San Francisco · 13 Jun · 14:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇶🇦</span>
-      <span class="mc-name">QATAR</span>
+      <span class="mc-name">Qatar</span>
       <span class="mc-prob">13%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">1 – 2</div>
+      <div class="mc-score">1–2</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">62%</span>
-      <span class="mc-name">SWITZERLAND</span>
       <span class="mc-flag">🇨🇭</span>
+      <span class="mc-name">Switzerland</span>
+      <span class="mc-prob">62%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 1-2 · 15 pts</div>
-    <div class="chip chip-red">WINNER: SWITZERLAND · 8 pts</div>
-    <div class="chip chip-blue">GOALS: QAT 1 · SUI 2 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 1-2 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: SUI · 8pts</div>
+    <div class="mc-chip chip-blue">QAT 1 · SUI 2 · 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:1200ms">
-  <div class="mc-conf-badge conf-low">LOW</div>
-  <div class="mc-header">
-    <div class="mc-label">GROUP C · MD 1</div>
-    <div class="mc-venue">MetLife Stadium · New York/New Jersey</div>
-    <div class="mc-time">13 Jun · 17:00 COL</div>
-    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
+  <div class="mc-card-header">
+    <span class="mc-card-label">GROUP C · MD 1</span>
+    <span class="mc-conf-badge conf-low">LOW</span>
   </div>
-  <div class="mc-body">
+  <div class="mc-venue-row">MetLife Stadium · New York/New Jersey · 13 Jun · 17:00 COL</div>
+  <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
+  <div class="teams-score-row">
     <div class="mc-team">
       <span class="mc-flag">🇧🇷</span>
-      <span class="mc-name">BRAZIL</span>
+      <span class="mc-name">Brazil</span>
       <span class="mc-prob">44%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">2 – 1</div>
+      <div class="mc-score">2–1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">31%</span>
-      <span class="mc-name">MOROCCO</span>
       <span class="mc-flag">🇲🇦</span>
+      <span class="mc-name">Morocco</span>
+      <span class="mc-prob">31%</span>
     </div>
   </div>
   <div class="mc-chips">
-    <div class="chip chip-gold">EXACT SCORE: 2-1 · 15 pts</div>
-    <div class="chip chip-red">WINNER: BRAZIL · 8 pts</div>
-    <div class="chip chip-blue">GOALS: BRA 2 · MAR 1 · 5 pts ea</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
+    <div class="mc-chip chip-red">WIN: BRA · 8pts</div>
+    <div class="mc-chip chip-blue">BRA 2 · MAR 1 · 5pts</div>
   </div>
 </div>
 </div>
@@ -918,7 +967,7 @@
   </div>
   <div class="bracket-body" id="bracket-body">
     <div class="bracket-inner">
-<div class="bracket-placeholder">&#9672; Bracket will fill in as group stage results are confirmed. Check back from June 24 onward.</div>
+<div class="bk-phase-note">Bracket slots are confirmed. Teams fill in from June 24 as groups complete.</div><div class="bk-r32-grid"><div class="bk-r32-card"><div class="bk-match-meta">M73 &middot; Jun 28 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP B</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M74 &middot; Jun 29 &middot; <span class="bk-city">Boston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/B/C/D/F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M75 &middot; Jun 29 &middot; <span class="bk-city">Monterrey</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP F</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP C</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M76 &middot; Jun 29 &middot; <span class="bk-city">Houston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP C</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M77 &middot; Jun 30 &middot; <span class="bk-city">New York/NJ</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP I</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/D/F/G/H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M78 &middot; Jun 30 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M79 &middot; Jun 30 &middot; <span class="bk-city">Mexico City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/E/F/H/I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M80 &middot; Jul 1 &middot; <span class="bk-city">Atlanta</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP L</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/H/I/J/K</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M81 &middot; Jul 1 &middot; <span class="bk-city">San Francisco</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">B/E/F/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M82 &middot; Jul 1 &middot; <span class="bk-city">Seattle</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP G</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/E/H/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M83 &middot; Jul 2 &middot; <span class="bk-city">Toronto</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M84 &middot; Jul 2 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP H</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M85 &middot; Jul 2 &middot; <span class="bk-city">Vancouver</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP B</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/F/G/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M86 &middot; Jul 3 &middot; <span class="bk-city">Miami</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP J</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M87 &middot; Jul 3 &middot; <span class="bk-city">Kansas City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">D/E/I/J/L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M88 &middot; Jul 3 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP G</span></div></div></div></div><div class="bk-late-section"><div class="bk-late-header">ROUND OF 16</div><div class="bk-late-match">M89 &middot; <span class="bk-late-team">Winner M74</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M77</span></div><div class="bk-late-match">M90 &middot; <span class="bk-late-team">Winner M73</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M75</span></div><div class="bk-late-match">M91 &middot; <span class="bk-late-team">Winner M76</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M78</span></div><div class="bk-late-match">M92 &middot; <span class="bk-late-team">Winner M79</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M80</span></div><div class="bk-late-match">M93 &middot; <span class="bk-late-team">Winner M83</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M84</span></div><div class="bk-late-match">M94 &middot; <span class="bk-late-team">Winner M81</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M82</span></div><div class="bk-late-match">M95 &middot; <span class="bk-late-team">Winner M86</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M88</span></div><div class="bk-late-match">M96 &middot; <span class="bk-late-team">Winner M85</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M87</span></div></div><div class="bk-late-section"><div class="bk-late-header">QUARTERFINALS</div><div class="bk-late-match">M97 &middot; <span class="bk-late-team">Winner M89</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M90</span></div><div class="bk-late-match">M98 &middot; <span class="bk-late-team">Winner M93</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M94</span></div><div class="bk-late-match">M99 &middot; <span class="bk-late-team">Winner M91</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M92</span></div><div class="bk-late-match">M100 &middot; <span class="bk-late-team">Winner M95</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M96</span></div></div><div class="bk-late-section"><div class="bk-late-header">SEMIFINALS</div><div class="bk-late-match">M101 &middot; <span class="bk-late-team">Winner M97</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M98</span></div><div class="bk-late-match">M102 &middot; <span class="bk-late-team">Winner M99</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M100</span></div></div><div class="bk-late-section"><div class="bk-late-header">THIRD PLACE</div><div class="bk-late-match">M103 &middot; <span class="bk-late-team">Loser M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Loser M102</span> &middot; Jul 18 &middot; Miami</div></div><div class="bk-late-section"><div class="bk-late-header bk-final-header">FINAL</div><div class="bk-late-match">M104 &middot; <span class="bk-late-team">Winner M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M102</span> &middot; Jul 19 &middot; MetLife Stadium, New York/NJ</div></div>
     </div>
   </div>
 </div>
@@ -943,7 +992,7 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-03 15:08 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-03 15:30 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
