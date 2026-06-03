@@ -543,7 +543,7 @@ def _bracket_section_html():
     # Header counts
     header_label = (
         f'KNOCKOUT BRACKET'
-        f' · <span style="color:#C9A84C">{confirmed_count} CONFIRMED</span>'
+        f' · <span class="bracket-confirmed-count">{confirmed_count} CONFIRMED</span>'
         f' · <span style="color:#4A6080">{pending_count} PENDING</span>'
     )
 
@@ -551,7 +551,7 @@ def _bracket_section_html():
     if phase == 1:
         body_html = (
             '<div class="bracket-placeholder">'
-            'Bracket will fill in as group stage results are confirmed.'
+            '&#9672; Bracket will fill in as group stage results are confirmed.'
             ' Check back from June 24 onward.'
             '</div>'
         )
@@ -758,7 +758,7 @@ def build_html(data):
       color: var(--fifa-text-secondary);
       margin-left: 8px;
       text-transform: none;
-      letter-spacing: 0;
+      letter-spacing: 0.05em;
     }}
     .picks-row {{
       display: flex;
@@ -785,10 +785,14 @@ def build_html(data):
       left: 0; top: 0; bottom: 0;
       width: 3px;
     }}
-    .pick-mini.gold::before   {{ background: var(--fifa-gold); }}
-    .pick-mini.silver::before {{ background: var(--fifa-silver); }}
-    .pick-mini.bronze::before {{ background: var(--fifa-bronze); }}
-    .pick-mini.green::before  {{ background: var(--fifa-green); }}
+    .pick-mini.gold::before   {{ background: #C9A84C; }}
+    .pick-mini.silver::before {{ background: #C0C0C0; }}
+    .pick-mini.bronze::before {{ background: #CD7F32; }}
+    .pick-mini.green::before  {{ background: #22C55E; }}
+    .pick-mini.gold   {{ background: rgba(201,168,76,0.08); }}
+    .pick-mini.silver {{ background: rgba(192,192,192,0.08); }}
+    .pick-mini.bronze {{ background: rgba(205,127,50,0.08); }}
+    .pick-mini.green  {{ background: rgba(34,197,94,0.08); }}
     .pick-mini-label {{
       font-size: 12px;
       font-weight: 600;
@@ -812,10 +816,22 @@ def build_html(data):
       font-size: 18px;
       margin-top: 2px;
     }}
-    .pick-mini.gold   .pick-mini-pct {{ color: var(--fifa-gold); }}
-    .pick-mini.silver .pick-mini-pct {{ color: var(--fifa-silver); }}
-    .pick-mini.bronze .pick-mini-pct {{ color: var(--fifa-bronze); }}
-    .pick-mini.green  .pick-mini-pct {{ color: var(--fifa-green); }}
+    .pick-mini.gold   .pick-mini-pct {{ color: #C9A84C; }}
+    .pick-mini.silver .pick-mini-pct {{ color: #C0C0C0; }}
+    .pick-mini.bronze .pick-mini-pct {{ color: #CD7F32; }}
+    .pick-mini.green  .pick-mini-pct {{ color: #22C55E; }}
+    .pick-mini-pts {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }}
+    .pick-mini.gold   .pick-mini-pts {{ color: #C9A84C; }}
+    .pick-mini.silver .pick-mini-pts {{ color: #C0C0C0; }}
+    .pick-mini.bronze .pick-mini-pts {{ color: #CD7F32; }}
+    .pick-mini.green  .pick-mini-pts {{ color: #22C55E; }}
 
     /* ── SECTION 2: Match Cards ── */
     .matches-section {{
@@ -831,6 +847,12 @@ def build_html(data):
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       padding: 0 12px;
+    }}
+    @media (max-width: 380px) {{
+      .matches-grid {{ grid-template-columns: 1fr; }}
+    }}
+    @media (max-width: 480px) {{
+      .match-card {{ padding: 8px; }}
     }}
     @keyframes slideUp {{
       from {{ opacity: 0; transform: translateY(24px); }}
@@ -922,7 +944,10 @@ def build_html(data):
       letter-spacing: 0.03em;
       color: var(--fifa-text-primary);
       line-height: 1;
-      word-break: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }}
     .mc-prob {{
       font-family: 'Barlow Condensed', sans-serif;
@@ -958,7 +983,9 @@ def build_html(data):
       display: flex;
       flex-direction: column;
       gap: 4px;
-      padding: 0 10px 10px;
+      border-top: 1px solid var(--fifa-border);
+      margin-top: 8px;
+      padding: 8px 10px 10px;
     }}
     .chip {{
       font-size: 12px;
@@ -1142,11 +1169,20 @@ def build_html(data):
     }}
 
     /* ── SECTION: Knockout Bracket ── */
+    @keyframes countPulse {{
+      0%   {{ color: #C9A84C; }}
+      50%  {{ color: #FFFFFF; }}
+      100% {{ color: #C9A84C; }}
+    }}
+    .bracket-confirmed-count {{ color: #C9A84C; }}
+    @media (prefers-reduced-motion: no-preference) {{
+      .bracket-confirmed-count {{ animation: countPulse 1.5s ease-in-out; }}
+    }}
     .bracket-section {{
-      margin: 14px 16px 0;
       max-width: 468px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 8px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid rgba(201,168,76,0.3);
     }}
     .bracket-toggle {{
       display: flex;
@@ -1195,7 +1231,9 @@ def build_html(data):
       color: var(--fifa-text-muted);
       font-size: 14px;
       line-height: 1.6;
-      padding: 16px 0;
+      padding: 20px;
+      border: 1px dashed var(--fifa-border);
+      border-radius: 8px;
     }}
     .bk-groups-grid {{
       display: grid;
@@ -1283,6 +1321,36 @@ def build_html(data):
       flex-shrink: 0;
     }}
 
+    /* ── Phase 2 Group Card Grid ── */
+    .group-cards-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px 0;
+    }}
+    .group-card {{
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }}
+    .group-letter {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #C9A84C;
+      margin-bottom: 6px;
+    }}
+    .group-slot {{
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 0;
+    }}
+    .group-slot.confirmed {{ color: var(--fifa-white); }}
+    .group-slot.projected {{ color: var(--fifa-text-muted); font-style: italic; }}
+    .group-slot.confirmed::before {{ content: "✓ "; color: #22C55E; }}
+    .group-slot.projected::before {{ content: "~ "; color: var(--fifa-text-muted); }}
+
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {{
       *,
@@ -1309,24 +1377,28 @@ def build_html(data):
       <span class="pick-mini-flag">{_flag(winner)}</span>
       <div class="pick-mini-team">{h(winner)}</div>
       <div class="pick-mini-pct">{winner_pct}%</div>
+      <div class="pick-mini-pts">50 PTS</div>
     </div>
     <div class="pick-mini silver">
       <div class="pick-mini-label">Runner-Up</div>
       <span class="pick-mini-flag">{_flag(runner["team"])}</span>
       <div class="pick-mini-team">{h(runner["team"])}</div>
       <div class="pick-mini-pct">{runner["probability"]}%</div>
+      <div class="pick-mini-pts">35 PTS</div>
     </div>
     <div class="pick-mini bronze">
       <div class="pick-mini-label">Third Place</div>
       <span class="pick-mini-flag">{_flag(third["team"])}</span>
       <div class="pick-mini-team">{h(third["team"])}</div>
       <div class="pick-mini-pct">{third["probability"]}%</div>
+      <div class="pick-mini-pts">20 PTS</div>
     </div>
     <div class="pick-mini green">
       <div class="pick-mini-label">Golden Boot</div>
       <span class="pick-mini-flag">{_flag(golden_boot["team"])}</span>
       <div class="pick-mini-team">{h(golden_boot["player"])}</div>
       <div class="pick-mini-pct">{golden_boot["expected_goals"]} xG</div>
+      <div class="pick-mini-pts">30 PTS</div>
     </div>
   </div>
 </div>
