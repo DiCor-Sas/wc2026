@@ -1,0 +1,92 @@
+name: Auto Update WC 2026 Dashboard
+
+on:
+  schedule:
+    # Main pipeline — every 2 hours from 10:00 to 02:00 UTC (12 runs per day)
+    - cron: "0 10,12,14,16,18,20,22,0,2 * * *"
+    # Lineup fetch triggers — 75 min before each scheduled kickoff (UTC)
+    # June 11 specific kickoffs
+    - cron: "45 17 11 6 *"   # Match 1: 14:00 COT = 19:00 UTC → trigger 17:45 UTC
+    - cron: "45 0 12 6 *"    # Match 2: 21:00 COT = 02:00 UTC Jun 12 → trigger 00:45 UTC
+    # General pre-match windows June 12 through July 19
+    - cron: "45 10 * * *"    # covers 12:00 COT kickoffs (17:00 UTC)
+    - cron: "45 13 * * *"    # covers 15:00 COT kickoffs (20:00 UTC)
+    - cron: "45 16 * * *"    # covers 18:00 COT kickoffs (23:00 UTC)
+    - cron: "45 17 * * *"    # covers 19:00 COT kickoffs (00:00 UTC)
+    - cron: "45 19 * * *"    # covers 21:00 COT kickoffs (02:00 UTC)
+    - cron: "45 22 * * *"    # covers 00:00 COT kickoffs (05:00 UTC)
+    - cron: "45 23 * * *"    # covers 01:00 COT kickoffs (06:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.schedule == '0 10,12,14,16,18,20,22,0,2 * * *'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python3 update_results.py
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push if changed
+        run: |
+          git add wc2026_results.json bracket_state.json elo_ratings.json \
+                  team_strength.json predictions.json index.html \
+                  daily_results.json lineups.json match_adjustments.json || true
+          git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git push origin main
+
+  lineup_fetch:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' &&
+      github.event.schedule != '0 10,12,14,16,18,20,22,0,2 * * *'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch lineups for upcoming matches
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python3 fetch_results.py --lineup-only
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit lineup data if changed
+        run: |
+          git add lineups.json match_adjustments.json || true
+          git diff --quiet && git diff --staged --quiet && echo "No lineup changes" && exit 0
+          git commit -m "lineup update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git push origin main

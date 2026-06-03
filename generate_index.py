@@ -11,6 +11,7 @@ OUTPUT_FILE        = "/Users/diegofelipecortessastoque/Desktop/wc2026/index.html
 PLAYER_STATS_FILE  = "/Users/diegofelipecortessastoque/Desktop/wc2026/player_stats.json"
 TEAM_STRENGTH_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json"
 FIXTURES_FILE      = "/Users/diegofelipecortessastoque/Desktop/wc2026/fixtures.json"
+LINEUPS_FILE       = "/Users/diegofelipecortessastoque/Desktop/wc2026/lineups.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 
@@ -62,7 +63,15 @@ COUNTRY_CODE = {
     "Congo DR": "COD", "Uzbekistan": "UZB",
     "England": "ENG", "Croatia": "CRO",
     "Ghana": "GHA", "Panama": "PAN",
+    "Bosnia-Herzegovina": "BOSNIA-HRZ",
 }
+
+# Display name override for match cards: if value len > 3, use it instead of full name
+def _card_name(team):
+    code = COUNTRY_CODE.get(team, "")
+    if len(code) > 3:
+        return code
+    return h(team).upper()
 
 
 def _norm(name):
@@ -266,6 +275,24 @@ def _build_match_venues():
 MATCH_VENUES = _build_match_venues()
 
 
+def _load_lineups():
+    """Load lineups.json, return dict keyed by (home_team, away_team)."""
+    try:
+        with open(LINEUPS_FILE) as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            return {}
+        result = {}
+        for lu in data:
+            match_str = lu.get("match", "")
+            if " vs " in match_str:
+                parts = match_str.split(" vs ", 1)
+                result[(parts[0].strip(), parts[1].strip())] = lu
+        return result
+    except Exception:
+        return {}
+
+
 def _flag(team):
     return FLAG_EMOJI.get(team, "🏳️")
 
@@ -348,9 +375,28 @@ def _upcoming_matches(data):
     return results
 
 
+def _lineup_badge_html(t1, t2, lineups):
+    """Return lineup status badge HTML for a match card."""
+    lu = lineups.get((t1, t2)) or lineups.get((t2, t1))
+    if not lu:
+        return '<div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>'
+    src = lu.get("source", "none")
+    absences = lu.get("key_absences", [])
+    has_xi = bool(lu.get("home_xi") or lu.get("away_xi"))
+    if absences:
+        absent_name = absences[0]["player"].split()[-1]
+        return f'<div class="mc-lineup-badge lineup-absent">&#9888; {h(absent_name)} OUT</div>'
+    if src == "api-football" and has_xi:
+        return '<div class="mc-lineup-badge lineup-confirmed">LINEUP CONFIRMED</div>'
+    if src == "web-search" and has_xi:
+        return '<div class="mc-lineup-badge lineup-estimated">LINEUP ESTIMATED</div>'
+    return '<div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>'
+
+
 def _match_cards_html(matches):
     """Render the FIFA-style match cards for the upcoming matches section."""
     from itertools import groupby
+    lineups = _load_lineups()
     cards = ""
     card_index = 0
     for date_str, group_iter in groupby(matches, key=lambda m: m["date_str"]):
@@ -366,17 +412,19 @@ def _match_cards_html(matches):
             t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
             t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
             colombia_style = ' style="border-left:3px solid #C9A84C"' if "Colombia" in (t1, t2) else ""
+            lineup_badge = _lineup_badge_html(t1, t2, lineups)
             cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style}>
   <div class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</div>
   <div class="mc-header">
     <div class="mc-label">{h(m["match_lbl"])}</div>
     <div class="mc-venue">{h(m["venue"])}</div>
     <div class="mc-time">{h(m["ko_fmt"])}</div>
+    {lineup_badge}
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">{_flag(t1)}</span>
-      <span class="mc-name">{h(t1).upper()}</span>
+      <span class="mc-name">{_card_name(t1)}</span>
       <span class="mc-prob">{m["win_p1"]}%</span>
     </div>
     <div class="mc-score-block">
@@ -385,7 +433,7 @@ def _match_cards_html(matches):
     </div>
     <div class="mc-team mc-team-right">
       <span class="mc-prob">{m["win_p2"]}%</span>
-      <span class="mc-name">{h(t2).upper()}</span>
+      <span class="mc-name">{_card_name(t2)}</span>
       <span class="mc-flag">{_flag(t2)}</span>
     </div>
   </div>
@@ -491,7 +539,7 @@ def build_html(data):
         countdown_text = f"TOURNAMENT STARTS IN {days_until} DAYS · FIRST KICKOFF JUNE 11"
         countdown_html = f'<div class="countdown-banner">{countdown_text}</div>'
     elif days_until == 0:
-        countdown_html = '<div class="countdown-banner">TOURNAMENT STARTS TODAY · FIRST KICKOFF 14:00 COL</div>'
+        countdown_html = '<div class="countdown-banner">TOURNAMENT STARTS TODAY · FIRST KICKOFF 14:00 COT</div>'
     else:
         countdown_html = '<div class="countdown-banner" style="display:none"></div>'
 
@@ -916,6 +964,22 @@ def build_html(data):
       border-bottom: 1px solid #1E3050;
       margin-bottom: 12px;
     }}
+
+    /* ── Lineup Status Badge ── */
+    .mc-lineup-badge {{
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 5px;
+    }}
+    .lineup-confirmed {{ background: rgba(0,200,83,0.12); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }}
+    .lineup-estimated {{ background: rgba(255,160,0,0.12); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
+    .lineup-absent    {{ background: rgba(255,235,59,0.12); color: #FFE000; border: 1px solid rgba(255,235,59,0.3); }}
+    .lineup-pending   {{ background: rgba(100,120,140,0.10); color: var(--fifa-text-secondary); border: 1px solid rgba(100,120,140,0.25); }}
 
     /* ── Footer ── */
     .site-footer {{

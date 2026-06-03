@@ -1,0 +1,187 @@
+"""
+update_results.py — Full pipeline runner.
+Steps:
+  1. fetch_results.py  → wc2026_results.json, update elo_ratings.json, bracket_state.json
+  2. Recalculate team_strength.json from updated ELO (same blending formula, no changes)
+  3. Rerun simulation → predictions.json
+  4. Regenerate index.html from predictions.json + bracket_state.json
+  5. Commit all changed files and push to GitHub
+"""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path("/Users/diegofelipecortessastoque/Desktop/wc2026")
+
+SQUAD_SCALE_MIN = 800
+SQUAD_SCALE_MAX = 2200
+
+
+def step0_fetch_daily_results():
+    print("\n" + "═" * 60)
+    print("STEP 0 — Fetch daily international friendly results")
+    print("═" * 60)
+    import fetch_results
+    try:
+        fetch_results.fetch_daily_results()
+    except Exception as e:
+        print(f"  [warn] Daily results fetch failed: {e} — continuing pipeline")
+
+
+def step1_fetch_and_update():
+    print("\n" + "═" * 60)
+    print("STEP 1 — Fetch results / Update ELO / Update bracket state")
+    print("═" * 60)
+    import fetch_results
+    matches, source = fetch_results.fetch_results()
+    fetch_results.update_elo_from_results()
+    fetch_results.update_bracket_state()
+    return len(matches)
+
+
+def step2_recalculate_team_strength():
+    print("\n" + "═" * 60)
+    print("STEP 2 — Recalculate team_strength.json with updated ELO")
+    print("═" * 60)
+
+    with open(ROOT / "elo_ratings.json") as f:
+        elo_data = json.load(f)
+    with open(ROOT / "team_strength.json") as f:
+        ts = json.load(f)
+
+    updated = 0
+    for team, s in ts.items():
+        if team not in elo_data:
+            print(f"  [warn] {team} not in elo_ratings.json — skipping")
+            continue
+
+        new_elo = elo_data[team]["elo"]
+        if new_elo == s["elo"]:
+            continue  # no change
+
+        # Update stored ELO
+        s["elo"] = new_elo
+
+        # Recompute: base = ELO*0.50 + FIFA*0.30 + form*0.20
+        base = (new_elo * 0.50) + (s["fifa_score"] * 0.30) + (s["form_score"] * 0.20)
+
+        # Squad layer: squad_elo_like = 800 + norm * 1400
+        squad_elo_like = SQUAD_SCALE_MIN + s["squad_score_norm"] * (SQUAD_SCALE_MAX - SQUAD_SCALE_MIN)
+
+        # Blend: 70% base + 30% squad
+        s["final_strength"] = round(base * 0.70 + squad_elo_like * 0.30, 2)
+        updated += 1
+        print(f"  {team}: ELO updated → {new_elo}  final_strength={s['final_strength']}")
+
+    with open(ROOT / "team_strength.json", "w") as f:
+        json.dump(ts, f, indent=2)
+
+    if updated == 0:
+        print("  No ELO changes — team_strength.json unchanged.")
+    else:
+        print(f"  ✓ {updated} teams updated. team_strength.json saved.")
+
+
+def step3_run_simulation():
+    print("\n" + "═" * 60)
+    print("STEP 3 — Run tournament simulation (10,000 iterations)")
+    print("═" * 60)
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "run_predictions.py")],
+        cwd=str(ROOT),
+    )
+    if result.returncode != 0:
+        print("ERROR: Simulation failed.")
+        sys.exit(1)
+    print("✓ Simulation complete.")
+
+
+def step4_regenerate_html():
+    print("\n" + "═" * 60)
+    print("STEP 4 — Regenerate index.html")
+    print("═" * 60)
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "generate_index.py")],
+        cwd=str(ROOT),
+    )
+    if result.returncode != 0:
+        print("ERROR: HTML generation failed.")
+        sys.exit(1)
+    print("✓ index.html regenerated.")
+
+
+def step5_commit_and_push():
+    print("\n" + "═" * 60)
+    print("STEP 5 — Commit and push to GitHub")
+    print("═" * 60)
+
+    # Check for changes
+    diff = subprocess.run(
+        ["git", "diff", "--quiet"],
+        cwd=str(ROOT),
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+
+    has_diff = diff.returncode != 0
+    has_untracked = bool(untracked.stdout.strip())
+
+    if not has_diff and not has_untracked:
+        print("  No changes to commit.")
+        return
+
+    candidates = [
+        "wc2026_results.json",
+        "bracket_state.json",
+        "elo_ratings.json",
+        "team_strength.json",
+        "predictions.json",
+        "index.html",
+        "daily_results.json",
+        "lineups.json",
+        "match_adjustments.json",
+    ]
+    files_to_add = [f for f in candidates if (ROOT / f).exists()]
+
+    subprocess.run(["git", "add"] + files_to_add, cwd=str(ROOT), check=True)
+
+    from datetime import datetime, timezone
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    msg = f"auto update [{ts}]"
+
+    commit = subprocess.run(
+        ["git", "commit", "-m", msg],
+        cwd=str(ROOT),
+    )
+    if commit.returncode != 0:
+        print("  Nothing new to commit.")
+        return
+
+    push = subprocess.run(["git", "push", "origin", "main"], cwd=str(ROOT))
+    if push.returncode != 0:
+        print("ERROR: git push failed.")
+        sys.exit(1)
+    print(f"✓ Committed and pushed: {msg}")
+
+
+if __name__ == "__main__":
+    print("╔" + "═" * 58 + "╗")
+    print("║  WC 2026 Dashboard — Full Pipeline                      ║")
+    print("╚" + "═" * 58 + "╝")
+
+    step0_fetch_daily_results()
+    n_results = step1_fetch_and_update()
+    step2_recalculate_team_strength()
+    step3_run_simulation()
+    step4_regenerate_html()
+    step5_commit_and_push()
+
+    print("\n" + "═" * 60)
+    print(f"Pipeline complete. {n_results} completed match(es) processed.")
+    print("═" * 60)
