@@ -256,6 +256,12 @@ FLAG_EMOJI = {
     "TBD": "🏳️",
 }
 
+CONF_TOOLTIPS = {
+    "HIGH": "Model is confident. One team has 60%+ win probability. Trust the winner pick and predicted score.",
+    "MED":  "Competitive match. Favorite has a real edge but outcome is uncertain. Trust the winner pick, be cautious on exact score.",
+    "LOW":  "Toss-up. Win probabilities are close. Any outcome is realistic. Consider the draw. Highest Pollaya risk.",
+}
+
 R32_MATCHES = [
     {"num": 73,  "date": "Jun 28", "city": "Los Angeles",   "home": "2nd Group A", "away": "2nd Group B"},
     {"num": 74,  "date": "Jun 29", "city": "Boston",        "home": "1st Group E", "away": "best 3rd A/B/C/D/F"},
@@ -479,7 +485,7 @@ def _match_cards_html(matches):
             cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style} data-kickoff="{m["kickoff_utc"]}">
   <div class="mc-card-header">
     <span class="mc-card-label">{h(m["match_lbl"])}</span>
-    <span class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</span>
+    <span class="mc-conf-badge confidence-badge {m["conf_cls"]}" data-tooltip="{CONF_TOOLTIPS[m["conf"]]}">{m["conf"]} <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span></span>
   </div>
   <div class="mc-venue-row">{venue_time}</div>
   <span class="countdown-timer"></span>
@@ -979,6 +985,40 @@ def build_html(data):
     .conf-high {{ background: rgba(0,200,83,0.15); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }}
     .conf-med  {{ background: rgba(255,160,0,0.15); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }}
     .conf-low  {{ background: rgba(232,0,45,0.15); color: var(--fifa-red); border: 1px solid rgba(232,0,45,0.3); }}
+    .confidence-badge {{
+      position: relative;
+      cursor: help;
+    }}
+    .confidence-badge::after {{
+      content: attr(data-tooltip);
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: #1A2B40;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #1E3050;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 100;
+      white-space: normal;
+      text-align: left;
+    }}
+    .confidence-badge:focus::after,
+    .confidence-badge:focus-within::after {{
+      opacity: 1;
+    }}
+    .confidence-badge.tooltip-visible::after {{
+      opacity: 1;
+    }}
     .mc-venue-row {{
       font-size: 11px;
       font-weight: 500;
@@ -1692,6 +1732,24 @@ function updateCountdowns() {{
 }}
 updateCountdowns();
 setInterval(updateCountdowns, 60000);
+
+// Confidence badge tooltips — tap to show, tap elsewhere to dismiss
+document.querySelectorAll('.confidence-badge').forEach(badge => {{
+  badge.setAttribute('tabindex', '0');
+  badge.addEventListener('click', (e) => {{
+    e.stopPropagation();
+    const isVisible = badge.classList.contains('tooltip-visible');
+    document.querySelectorAll('.confidence-badge').forEach(b =>
+      b.classList.remove('tooltip-visible'));
+    if (!isVisible) {{
+      badge.classList.add('tooltip-visible');
+    }}
+  }});
+}});
+document.addEventListener('click', () => {{
+  document.querySelectorAll('.confidence-badge').forEach(b =>
+    b.classList.remove('tooltip-visible'));
+}});
 </script>
 
 </body>
