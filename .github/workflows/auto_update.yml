@@ -52,9 +52,27 @@ jobs:
           git add wc2026_results.json bracket_state.json elo_ratings.json \
                   team_strength.json predictions.json index.html \
                   daily_results.json lineups.json match_adjustments.json || true
+
+          # Remove stale PUSH_FAILED.txt if it was committed in a previous failed run
+          if git ls-files --error-unmatch PUSH_FAILED.txt 2>/dev/null; then
+            git rm PUSH_FAILED.txt
+          fi
+
           git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-          git push origin main
+
+          if git push origin main 2>push_error.txt; then
+            echo "Push succeeded."
+          else
+            TS=$(date -u '+%Y-%m-%d %H:%M UTC')
+            printf "Push failed at: %s\n---\n" "$TS"   > PUSH_FAILED.txt
+            cat push_error.txt                         >> PUSH_FAILED.txt
+            git add PUSH_FAILED.txt
+            git commit -m "record push failure [${TS}]"
+            git push origin main 2>/dev/null || true
+            echo "::warning::git push failed — PUSH_FAILED.txt recorded. Check token scope."
+            exit 0
+          fi
 
   lineup_fetch:
     runs-on: ubuntu-latest
@@ -87,6 +105,24 @@ jobs:
       - name: Commit lineup data if changed
         run: |
           git add lineups.json match_adjustments.json || true
+
+          # Remove stale PUSH_FAILED.txt if it was committed in a previous failed run
+          if git ls-files --error-unmatch PUSH_FAILED.txt 2>/dev/null; then
+            git rm PUSH_FAILED.txt
+          fi
+
           git diff --quiet && git diff --staged --quiet && echo "No lineup changes" && exit 0
           git commit -m "lineup update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-          git push origin main
+
+          if git push origin main 2>push_error.txt; then
+            echo "Push succeeded."
+          else
+            TS=$(date -u '+%Y-%m-%d %H:%M UTC')
+            printf "Push failed at: %s\n---\n" "$TS"   > PUSH_FAILED.txt
+            cat push_error.txt                         >> PUSH_FAILED.txt
+            git add PUSH_FAILED.txt
+            git commit -m "record push failure [${TS}]"
+            git push origin main 2>/dev/null || true
+            echo "::warning::git push failed — PUSH_FAILED.txt recorded. Check token scope."
+            exit 0
+          fi
