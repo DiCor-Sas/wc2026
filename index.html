@@ -406,6 +406,22 @@
       margin-bottom: 12px;
     }
 
+    /* ── Lineup Status Badge ── */
+    .mc-lineup-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 5px;
+    }
+    .lineup-confirmed { background: rgba(0,200,83,0.12); color: var(--fifa-green); border: 1px solid rgba(0,200,83,0.3); }
+    .lineup-estimated { background: rgba(255,160,0,0.12); color: #FFA000; border: 1px solid rgba(255,160,0,0.3); }
+    .lineup-absent    { background: rgba(255,235,59,0.12); color: #FFE000; border: 1px solid rgba(255,235,59,0.3); }
+    .lineup-pending   { background: rgba(100,120,140,0.10); color: var(--fifa-text-secondary); border: 1px solid rgba(100,120,140,0.25); }
+
     /* ── Footer ── */
     .site-footer {
       text-align: center;
@@ -428,19 +444,19 @@
       <div class="pick-mini-label">Champion</div>
       <span class="pick-mini-flag">🇪🇸</span>
       <div class="pick-mini-team">Spain</div>
-      <div class="pick-mini-pct">9.11%</div>
+      <div class="pick-mini-pct">9.15%</div>
     </div>
     <div class="pick-mini silver">
       <div class="pick-mini-label">Runner-Up</div>
       <span class="pick-mini-flag">🇦🇷</span>
       <div class="pick-mini-team">Argentina</div>
-      <div class="pick-mini-pct">6.91%</div>
+      <div class="pick-mini-pct">6.88%</div>
     </div>
     <div class="pick-mini bronze">
       <div class="pick-mini-label">Third Place</div>
       <span class="pick-mini-flag">🇳🇱</span>
       <div class="pick-mini-team">Netherlands</div>
-      <div class="pick-mini-pct">5.52%</div>
+      <div class="pick-mini-pct">5.11%</div>
     </div>
     <div class="pick-mini green">
       <div class="pick-mini-label">Golden Boot</div>
@@ -455,7 +471,7 @@
      SECTION 2 — UPCOMING MATCHES
      ══════════════════════════════════════════ -->
 <div class="matches-section">
-<div class="countdown-banner">TOURNAMENT STARTS IN 9 DAYS · FIRST KICKOFF JUNE 11</div>
+<div class="countdown-banner">TOURNAMENT STARTS IN 8 DAYS · FIRST KICKOFF JUNE 11</div>
 
 <div class="date-header">THURSDAY · 11 JUN</div>
 <div class="matches-grid">
@@ -465,19 +481,20 @@
     <div class="mc-label">GROUP A · MD 1</div>
     <div class="mc-venue">Estadio Azteca · Mexico City</div>
     <div class="mc-time">11 Jun · 14:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇲🇽</span>
       <span class="mc-name">MEXICO</span>
-      <span class="mc-prob">66%</span>
+      <span class="mc-prob">69%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">2 – 1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">9%</span>
+      <span class="mc-prob">6%</span>
       <span class="mc-name">SOUTH AFRICA</span>
       <span class="mc-flag">🇿🇦</span>
     </div>
@@ -494,19 +511,20 @@
     <div class="mc-label">GROUP A · MD 1</div>
     <div class="mc-venue">Estadio Akron · Guadalajara</div>
     <div class="mc-time">11 Jun · 21:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇰🇷</span>
       <span class="mc-name">SOUTH KOREA</span>
-      <span class="mc-prob">39%</span>
+      <span class="mc-prob">40%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">1 – 1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">36%</span>
+      <span class="mc-prob">35%</span>
       <span class="mc-name">CZECHIA</span>
       <span class="mc-flag">🇨🇿</span>
     </div>
@@ -527,27 +545,28 @@
     <div class="mc-label">GROUP B · MD 1</div>
     <div class="mc-venue">BMO Field · Toronto</div>
     <div class="mc-time">12 Jun · 14:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇨🇦</span>
       <span class="mc-name">CANADA</span>
-      <span class="mc-prob">52%</span>
+      <span class="mc-prob">57%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">1 – 1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">23%</span>
-      <span class="mc-name">BOSNIA-HERZEGOVINA</span>
+      <span class="mc-prob">18%</span>
+      <span class="mc-name">BOSNIA-HRZ</span>
       <span class="mc-flag">🇧🇦</span>
     </div>
   </div>
   <div class="mc-chips">
     <div class="chip chip-gold">EXACT SCORE: 1-1 · 15 pts</div>
     <div class="chip chip-red">WINNER: CANADA · 8 pts</div>
-    <div class="chip chip-blue">GOALS: CAN 1 · BIH 1 · 5 pts ea</div>
+    <div class="chip chip-blue">GOALS: CAN 1 · BOSNIA-HRZ 1 · 5 pts ea</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:800ms">
@@ -556,19 +575,20 @@
     <div class="mc-label">GROUP D · MD 1</div>
     <div class="mc-venue">SoFi Stadium · Los Angeles</div>
     <div class="mc-time">12 Jun · 20:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇺🇸</span>
       <span class="mc-name">USA</span>
-      <span class="mc-prob">64%</span>
+      <span class="mc-prob">63%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">2 – 1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">11%</span>
+      <span class="mc-prob">12%</span>
       <span class="mc-name">PARAGUAY</span>
       <span class="mc-flag">🇵🇾</span>
     </div>
@@ -589,19 +609,20 @@
     <div class="mc-label">GROUP B · MD 1</div>
     <div class="mc-venue">Levi's Stadium · San Francisco</div>
     <div class="mc-time">13 Jun · 14:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇶🇦</span>
       <span class="mc-name">QATAR</span>
-      <span class="mc-prob">13%</span>
+      <span class="mc-prob">12%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">1 – 2</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">62%</span>
+      <span class="mc-prob">63%</span>
       <span class="mc-name">SWITZERLAND</span>
       <span class="mc-flag">🇨🇭</span>
     </div>
@@ -618,19 +639,20 @@
     <div class="mc-label">GROUP C · MD 1</div>
     <div class="mc-venue">MetLife Stadium · New York/New Jersey</div>
     <div class="mc-time">13 Jun · 17:00 COL</div>
+    <div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div>
   </div>
   <div class="mc-body">
     <div class="mc-team">
       <span class="mc-flag">🇧🇷</span>
       <span class="mc-name">BRAZIL</span>
-      <span class="mc-prob">43%</span>
+      <span class="mc-prob">41%</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score">2 – 1</div>
       <div class="mc-score-label">PREDICTED</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-prob">32%</span>
+      <span class="mc-prob">34%</span>
       <span class="mc-name">MOROCCO</span>
       <span class="mc-flag">🇲🇦</span>
     </div>
@@ -655,17 +677,17 @@
   </div>
   <div class="confidence-body" id="conf-body">
     <div class="confidence-inner">
-<div class="conf-row"><span class="conf-rank">1</span><span class="conf-team">🇪🇸 SPAIN</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:100%"></div></div><span class="conf-pct">9.11%</span></div>
-<div class="conf-row"><span class="conf-rank">2</span><span class="conf-team">🇦🇷 ARGENTINA</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:79%"></div></div><span class="conf-pct">7.16%</span></div>
-<div class="conf-row"><span class="conf-rank">3</span><span class="conf-team">🇳🇱 NETHERLANDS</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:77%"></div></div><span class="conf-pct">7.05%</span></div>
-<div class="conf-row"><span class="conf-rank">4</span><span class="conf-team">🇫🇷 FRANCE</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:60%"></div></div><span class="conf-pct">5.51%</span></div>
-<div class="conf-row"><span class="conf-rank">5</span><span class="conf-team">🇩🇪 GERMANY</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:59%"></div></div><span class="conf-pct">5.39%</span></div>
+<div class="conf-row"><span class="conf-rank">1</span><span class="conf-team">🇪🇸 SPAIN</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:100%"></div></div><span class="conf-pct">9.15%</span></div>
+<div class="conf-row"><span class="conf-rank">2</span><span class="conf-team">🇳🇱 NETHERLANDS</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:77%"></div></div><span class="conf-pct">7.0%</span></div>
+<div class="conf-row"><span class="conf-rank">3</span><span class="conf-team">🇦🇷 ARGENTINA</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:76%"></div></div><span class="conf-pct">6.92%</span></div>
+<div class="conf-row"><span class="conf-rank">4</span><span class="conf-team">🇩🇪 GERMANY</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:65%"></div></div><span class="conf-pct">5.94%</span></div>
+<div class="conf-row"><span class="conf-rank">5</span><span class="conf-team">🇫🇷 FRANCE</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:61%"></div></div><span class="conf-pct">5.55%</span></div>
     </div>
   </div>
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-02 23:48 UTC &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-03 15:01 UTC &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
