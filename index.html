@@ -281,16 +281,16 @@
       margin-top: 4px;
     }
     .mc-chip {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       text-align: center;
-      white-space: nowrap;
+      white-space: normal;
+      word-break: break-word;
       padding: 5px 6px;
       border-radius: 20px;
       background: rgba(255,255,255,0.04);
       letter-spacing: 0.01em;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.4;
     }
     .chip-gold  { border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }
     .chip-red   { border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }
@@ -795,9 +795,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: MEX · 8pts</div>
-    <div class="mc-chip chip-blue">MEX 2 · RSA 1 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 15pts</div>
+    <div class="mc-chip chip-red">WIN MEX 8pts</div>
+    <div class="mc-chip chip-blue">MEX2 RSA1 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:400ms">
@@ -824,9 +824,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 1-1 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: CZE · 8pts</div>
-    <div class="mc-chip chip-blue">KOR 1 · CZE 1 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 1-1 15pts</div>
+    <div class="mc-chip chip-red">WIN CZE 8pts</div>
+    <div class="mc-chip chip-blue">KOR1 CZE1 5pts</div>
   </div>
 </div>
 </div>
@@ -857,9 +857,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 1-1 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: CAN · 8pts</div>
-    <div class="mc-chip chip-blue">CAN 1 · BOS 1 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 1-1 15pts</div>
+    <div class="mc-chip chip-red">WIN CAN 8pts</div>
+    <div class="mc-chip chip-blue">CAN1 BOS1 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:800ms">
@@ -886,9 +886,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: USA · 8pts</div>
-    <div class="mc-chip chip-blue">USA 2 · PAR 1 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 15pts</div>
+    <div class="mc-chip chip-red">WIN USA 8pts</div>
+    <div class="mc-chip chip-blue">USA2 PAR1 5pts</div>
   </div>
 </div>
 </div>
@@ -919,9 +919,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 1-2 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: SUI · 8pts</div>
-    <div class="mc-chip chip-blue">QAT 1 · SUI 2 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 1-2 15pts</div>
+    <div class="mc-chip chip-red">WIN SUI 8pts</div>
+    <div class="mc-chip chip-blue">QAT1 SUI2 5pts</div>
   </div>
 </div>
 <div class="match-card" style="animation-delay:1200ms">
@@ -948,9 +948,9 @@
     </div>
   </div>
   <div class="mc-chips">
-    <div class="mc-chip chip-gold">SCORE 2-1 · 15pts</div>
-    <div class="mc-chip chip-red">WIN: BRA · 8pts</div>
-    <div class="mc-chip chip-blue">BRA 2 · MAR 1 · 5pts</div>
+    <div class="mc-chip chip-gold">SCORE 2-1 15pts</div>
+    <div class="mc-chip chip-red">WIN BRA 8pts</div>
+    <div class="mc-chip chip-blue">BRA2 MAR1 5pts</div>
   </div>
 </div>
 </div>
@@ -967,7 +967,7 @@
   </div>
   <div class="bracket-body" id="bracket-body">
     <div class="bracket-inner">
-<div class="bk-phase-note">Bracket slots are confirmed. Teams fill in from June 24 as groups complete.</div><div class="bk-r32-grid"><div class="bk-r32-card"><div class="bk-match-meta">M73 &middot; Jun 28 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP B</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M74 &middot; Jun 29 &middot; <span class="bk-city">Boston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/B/C/D/F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M75 &middot; Jun 29 &middot; <span class="bk-city">Monterrey</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP F</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP C</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M76 &middot; Jun 29 &middot; <span class="bk-city">Houston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP C</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M77 &middot; Jun 30 &middot; <span class="bk-city">New York/NJ</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP I</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/D/F/G/H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M78 &middot; Jun 30 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M79 &middot; Jun 30 &middot; <span class="bk-city">Mexico City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/E/F/H/I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M80 &middot; Jul 1 &middot; <span class="bk-city">Atlanta</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP L</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/H/I/J/K</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M81 &middot; Jul 1 &middot; <span class="bk-city">San Francisco</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">B/E/F/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M82 &middot; Jul 1 &middot; <span class="bk-city">Seattle</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP G</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/E/H/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M83 &middot; Jul 2 &middot; <span class="bk-city">Toronto</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M84 &middot; Jul 2 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP H</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M85 &middot; Jul 2 &middot; <span class="bk-city">Vancouver</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP B</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/F/G/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M86 &middot; Jul 3 &middot; <span class="bk-city">Miami</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP J</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M87 &middot; Jul 3 &middot; <span class="bk-city">Kansas City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">D/E/I/J/L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M88 &middot; Jul 3 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP G</span></div></div></div></div><div class="bk-late-section"><div class="bk-late-header">ROUND OF 16</div><div class="bk-late-match">M89 &middot; <span class="bk-late-team">Winner M74</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M77</span></div><div class="bk-late-match">M90 &middot; <span class="bk-late-team">Winner M73</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M75</span></div><div class="bk-late-match">M91 &middot; <span class="bk-late-team">Winner M76</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M78</span></div><div class="bk-late-match">M92 &middot; <span class="bk-late-team">Winner M79</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M80</span></div><div class="bk-late-match">M93 &middot; <span class="bk-late-team">Winner M83</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M84</span></div><div class="bk-late-match">M94 &middot; <span class="bk-late-team">Winner M81</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M82</span></div><div class="bk-late-match">M95 &middot; <span class="bk-late-team">Winner M86</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M88</span></div><div class="bk-late-match">M96 &middot; <span class="bk-late-team">Winner M85</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M87</span></div></div><div class="bk-late-section"><div class="bk-late-header">QUARTERFINALS</div><div class="bk-late-match">M97 &middot; <span class="bk-late-team">Winner M89</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M90</span></div><div class="bk-late-match">M98 &middot; <span class="bk-late-team">Winner M93</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M94</span></div><div class="bk-late-match">M99 &middot; <span class="bk-late-team">Winner M91</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M92</span></div><div class="bk-late-match">M100 &middot; <span class="bk-late-team">Winner M95</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M96</span></div></div><div class="bk-late-section"><div class="bk-late-header">SEMIFINALS</div><div class="bk-late-match">M101 &middot; <span class="bk-late-team">Winner M97</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M98</span></div><div class="bk-late-match">M102 &middot; <span class="bk-late-team">Winner M99</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M100</span></div></div><div class="bk-late-section"><div class="bk-late-header">THIRD PLACE</div><div class="bk-late-match">M103 &middot; <span class="bk-late-team">Loser M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Loser M102</span> &middot; Jul 18 &middot; Miami</div></div><div class="bk-late-section"><div class="bk-late-header bk-final-header">FINAL</div><div class="bk-late-match">M104 &middot; <span class="bk-late-team">Winner M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M102</span> &middot; Jul 19 &middot; MetLife Stadium, New York/NJ</div></div>
+<div class="bk-phase-note">Bracket structure is pre-defined by FIFA. Team names fill in automatically from June 24 as groups complete.</div><div class="bk-r32-grid"><div class="bk-r32-card"><div class="bk-match-meta">M73 &middot; Jun 28 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP B</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M74 &middot; Jun 29 &middot; <span class="bk-city">Boston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/B/C/D/F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M75 &middot; Jun 29 &middot; <span class="bk-city">Monterrey</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP F</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP C</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M76 &middot; Jun 29 &middot; <span class="bk-city">Houston</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP C</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP F</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M77 &middot; Jun 30 &middot; <span class="bk-city">New York/NJ</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP I</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/D/F/G/H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M78 &middot; Jun 30 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP E</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M79 &middot; Jun 30 &middot; <span class="bk-city">Mexico City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP A</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">C/E/F/H/I</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M80 &middot; Jul 1 &middot; <span class="bk-city">Atlanta</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP L</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/H/I/J/K</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M81 &middot; Jul 1 &middot; <span class="bk-city">San Francisco</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">B/E/F/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M82 &middot; Jul 1 &middot; <span class="bk-city">Seattle</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP G</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">A/E/H/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M83 &middot; Jul 2 &middot; <span class="bk-city">Toronto</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M84 &middot; Jul 2 &middot; <span class="bk-city">Los Angeles</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP H</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M85 &middot; Jul 2 &middot; <span class="bk-city">Vancouver</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP B</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">E/F/G/I/J</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M86 &middot; Jul 3 &middot; <span class="bk-city">Miami</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP J</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP H</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M87 &middot; Jul 3 &middot; <span class="bk-city">Kansas City</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">1ST GROUP K</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">BEST 3RD</span><span class="bk-third-pill">D/E/I/J/L</span></div></div></div><div class="bk-r32-card"><div class="bk-match-meta">M88 &middot; Jul 3 &middot; <span class="bk-city">Dallas</span></div><div class="bk-matchup-row"><div class="bk-slot-cell"><span class="bk-slot-label">2ND GROUP D</span></div><div class="bk-vs-cell">VS</div><div class="bk-slot-cell bk-slot-right"><span class="bk-slot-label">2ND GROUP G</span></div></div></div></div><div class="bk-late-section"><div class="bk-late-header">ROUND OF 16</div><div class="bk-late-match">M89 &middot; <span class="bk-late-team">Winner M74</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M77</span></div><div class="bk-late-match">M90 &middot; <span class="bk-late-team">Winner M73</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M75</span></div><div class="bk-late-match">M91 &middot; <span class="bk-late-team">Winner M76</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M78</span></div><div class="bk-late-match">M92 &middot; <span class="bk-late-team">Winner M79</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M80</span></div><div class="bk-late-match">M93 &middot; <span class="bk-late-team">Winner M83</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M84</span></div><div class="bk-late-match">M94 &middot; <span class="bk-late-team">Winner M81</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M82</span></div><div class="bk-late-match">M95 &middot; <span class="bk-late-team">Winner M86</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M88</span></div><div class="bk-late-match">M96 &middot; <span class="bk-late-team">Winner M85</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M87</span></div></div><div class="bk-late-section"><div class="bk-late-header">QUARTERFINALS</div><div class="bk-late-match">M97 &middot; <span class="bk-late-team">Winner M89</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M90</span></div><div class="bk-late-match">M98 &middot; <span class="bk-late-team">Winner M93</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M94</span></div><div class="bk-late-match">M99 &middot; <span class="bk-late-team">Winner M91</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M92</span></div><div class="bk-late-match">M100 &middot; <span class="bk-late-team">Winner M95</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M96</span></div></div><div class="bk-late-section"><div class="bk-late-header">SEMIFINALS</div><div class="bk-late-match">M101 &middot; <span class="bk-late-team">Winner M97</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M98</span></div><div class="bk-late-match">M102 &middot; <span class="bk-late-team">Winner M99</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M100</span></div></div><div class="bk-late-section"><div class="bk-late-header">THIRD PLACE</div><div class="bk-late-match">M103 &middot; <span class="bk-late-team">Loser M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Loser M102</span> &middot; Jul 18 &middot; Miami</div></div><div class="bk-late-section"><div class="bk-late-header bk-final-header">FINAL</div><div class="bk-late-match">M104 &middot; <span class="bk-late-team">Winner M101</span> <span class="bk-late-vs">vs</span> <span class="bk-late-team">Winner M102</span> &middot; Jul 19 &middot; MetLife Stadium, New York/NJ</div></div>
     </div>
   </div>
 </div>
@@ -992,7 +992,7 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-03 15:30 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-03 15:39 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>

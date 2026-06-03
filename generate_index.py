@@ -466,14 +466,14 @@ def _match_cards_html(matches):
             colombia_style = ' style="border-left:3px solid #C9A84C"' if "Colombia" in (t1, t2) else ""
             lineup_badge = _lineup_badge_html(t1, t2, lineups)
             venue_time = f'{h(m["venue"])} · {h(m["ko_fmt"])}'
-            score_chip = f'SCORE {m["score1"]}-{m["score2"]} · 15pts'
+            score_chip = f'SCORE {m["score1"]}-{m["score2"]} 15pts'
             if m["winner"] == "DRAW":
-                win_chip = 'DRAW · 8pts'
+                win_chip = 'DRAW 8pts'
             else:
                 w_code = COUNTRY_CODE.get(m["winner"], m["winner"][:3].upper())
                 w_code = w_code[:3] if len(w_code) > 3 else w_code
-                win_chip = f'WIN: {h(w_code)} · 8pts'
-            goals_chip = f'{t1_abbr} {m["score1"]} · {t2_abbr} {m["score2"]} · 5pts'
+                win_chip = f'WIN {h(w_code)} 8pts'
+            goals_chip = f'{t1_abbr}{m["score1"]} {t2_abbr}{m["score2"]} 5pts'
             cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style}>
   <div class="mc-card-header">
     <span class="mc-card-label">{h(m["match_lbl"])}</span>
@@ -678,8 +678,8 @@ def _bracket_section_html():
     later_html = _later_rounds()
     if phase == 1:
         note = (
-            '<div class="bk-phase-note">Bracket slots are confirmed. '
-            'Teams fill in from June 24 as groups complete.</div>'
+            '<div class="bk-phase-note">Bracket structure is pre-defined by FIFA. '
+            'Team names fill in automatically from June 24 as groups complete.</div>'
         )
         body_html = note + '<div class="bk-r32-grid">' + r32_html + '</div>' + later_html
     elif phase == 2:
@@ -1024,16 +1024,16 @@ def build_html(data):
       margin-top: 4px;
     }}
     .mc-chip {{
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       text-align: center;
-      white-space: nowrap;
+      white-space: normal;
+      word-break: break-word;
       padding: 5px 6px;
       border-radius: 20px;
       background: rgba(255,255,255,0.04);
       letter-spacing: 0.01em;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.4;
     }}
     .chip-gold  {{ border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }}
     .chip-red   {{ border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }}
