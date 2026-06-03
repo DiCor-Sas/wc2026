@@ -590,7 +590,7 @@ def build_html(data):
       --fifa-text-primary:   #FFFFFF;
       --fifa-text-secondary: #8BA0BB;
       --fifa-text-muted:     #4A6080;
-      --fifa-green:   #00C853;
+      --fifa-green:   #22C55E;
       --fifa-green-dim: #1A3320;
       --fifa-silver:  #A8B8C8;
       --fifa-bronze:  #A06830;
@@ -663,7 +663,7 @@ def build_html(data):
     .pick-mini.bronze::before {{ background: var(--fifa-bronze); }}
     .pick-mini.green::before  {{ background: var(--fifa-green); }}
     .pick-mini-label {{
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -732,7 +732,7 @@ def build_html(data):
       position: absolute;
       top: 8px;
       right: 8px;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 3px 8px;
@@ -749,19 +749,19 @@ def build_html(data):
     .mc-label {{
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 12px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--fifa-text-secondary);
     }}
     .mc-venue {{
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--fifa-text-muted);
       margin-top: 2px;
     }}
     .mc-time {{
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -820,7 +820,7 @@ def build_html(data):
       white-space: nowrap;
     }}
     .mc-score-label {{
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -834,7 +834,7 @@ def build_html(data):
       padding: 0 10px 10px;
     }}
     .chip {{
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       padding: 4px 8px;
       border-radius: 100px;
@@ -977,7 +977,7 @@ def build_html(data):
     /* ── Lineup Status Badge ── */
     .mc-lineup-badge {{
       display: inline-block;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 4px;
@@ -994,9 +994,36 @@ def build_html(data):
     .site-footer {{
       text-align: center;
       padding: 24px 16px;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--fifa-text-muted);
       line-height: 1.6;
+    }}
+
+    /* ── Cursor and Focus States ── */
+    .mc-toggle {{ cursor: pointer; }}
+    .picks-mini-card {{ cursor: pointer; }}
+    .match-card {{ cursor: default; }}
+    .mc-toggle:focus-visible {{
+      outline: 2px solid #C9A84C;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }}
+    .picks-mini-card:focus-visible {{
+      outline: 2px solid #C9A84C;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }}
+
+    /* ── Prefers-Reduced-Motion ── */
+    @media (prefers-reduced-motion: reduce) {{
+      *,
+      *::before,
+      *::after {{
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }}
     }}
   </style>
 </head>
