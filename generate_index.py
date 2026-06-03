@@ -525,8 +525,15 @@ def build_html(data):
     all_teams = data["all_teams"]
     now_utc = datetime.now(timezone.utc)
 
-    runner = runners_up[0] if runners_up else {"team": "—", "probability": 0}
-    third  = third_place[0] if third_place else {"team": "—", "probability": 0}
+    runner = all_teams[1] if len(all_teams) > 1 else {"team": "—", "probability": 0}
+    third  = all_teams[2] if len(all_teams) > 2 else {"team": "—", "probability": 0}
+
+    runner_prob = runner["probability"]
+    third_prob  = third["probability"]
+    assert runner_prob > third_prob, (
+        f"Runner-Up must have higher win probability than Third Place "
+        f"({runner['team']} {runner_prob}% vs {third['team']} {third_prob}%)"
+    )
     golden_boot = _compute_golden_boot(data)
 
     matches = _upcoming_matches(data)
