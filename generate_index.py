@@ -410,6 +410,7 @@ def _upcoming_matches(data):
         ko_fmt = ko_col.strftime("%-d %b · %H:%M COL")
         match_lbl = _match_label(round_label, group)
 
+        kickoff_utc_iso = (ko_col + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
         results.append({
             "t1": t1, "t2": t2, "group": group,
             "win_p1": win_p1, "win_p2": win_p2, "draw_p": draw_p,
@@ -418,6 +419,7 @@ def _upcoming_matches(data):
             "conf": conf, "conf_cls": conf_cls,
             "venue": venue, "ko_fmt": ko_fmt, "match_lbl": match_lbl,
             "date_str": date_str,
+            "kickoff_utc": kickoff_utc_iso,
         })
     return results
 
@@ -474,12 +476,13 @@ def _match_cards_html(matches):
                 w_code = w_code[:3] if len(w_code) > 3 else w_code
                 win_chip = f'WIN {h(w_code)} 8pts'
             goals_chip = f'{t1_abbr}{m["score1"]} {t2_abbr}{m["score2"]} 5pts'
-            cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style}>
+            cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style} data-kickoff="{m["kickoff_utc"]}">
   <div class="mc-card-header">
     <span class="mc-card-label">{h(m["match_lbl"])}</span>
     <span class="mc-conf-badge {m["conf_cls"]}">{m["conf"]}</span>
   </div>
   <div class="mc-venue-row">{venue_time}</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap">{lineup_badge}</div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -778,6 +781,32 @@ def build_html(data):
       min-height: 100vh;
       padding-bottom: 80px;
       -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }}
+    body::before {{
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg at 30% 40%,
+        rgba(14, 165, 233, 0.06) 0deg,
+        rgba(201, 168, 76, 0.04) 90deg,
+        rgba(232, 0, 45, 0.03) 180deg,
+        rgba(10, 22, 40, 0.08) 270deg,
+        rgba(14, 165, 233, 0.06) 360deg
+      );
+      animation: auroraFlow 14s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }}
+    @keyframes auroraFlow {{
+      0%   {{ transform: rotate(0deg) scale(1);   opacity: 0.6; }}
+      50%  {{ transform: rotate(180deg) scale(1.1); opacity: 0.8; }}
+      100% {{ transform: rotate(360deg) scale(1);  opacity: 0.6; }}
     }}
 
     /* ── SECTION 1: Picks Header ── */
@@ -889,6 +918,8 @@ def build_html(data):
       gap: 14px;
       max-width: 500px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }}
     .matches-grid {{
       display: flex;
@@ -911,13 +942,17 @@ def build_html(data):
       overflow: hidden;
       position: relative;
       animation: slideUp 400ms ease both;
-      transition: transform 200ms ease, box-shadow 200ms ease;
+      transition: transform 150ms ease, box-shadow 150ms ease;
     }}
     @media (hover: hover) {{
       .match-card:hover {{
         transform: scale(1.02);
         box-shadow: 0 12px 40px rgba(0,0,0,0.5);
       }}
+    }}
+    .match-card:active {{
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }}
     .mc-card-header {{
       display: flex;
@@ -1045,6 +1080,8 @@ def build_html(data):
       max-width: 468px;
       margin-left: auto;
       margin-right: auto;
+      position: relative;
+      z-index: 1;
     }}
     .confidence-toggle {{
       display: flex;
@@ -1189,6 +1226,8 @@ def build_html(data):
       font-size: 12px;
       color: var(--fifa-text-muted);
       line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }}
 
     /* ── Cursor and Focus States ── */
@@ -1206,6 +1245,35 @@ def build_html(data):
       border-radius: 4px;
     }}
 
+    /* ── Countdown Timer ── */
+    .countdown-timer {{
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #C9A84C;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin: 4px 0;
+    }}
+
+    /* ── Skeleton Loader ── */
+    .skeleton {{
+      background: linear-gradient(
+        90deg,
+        var(--fifa-card) 25%,
+        #1A2B40 50%,
+        var(--fifa-card) 75%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }}
+    @keyframes shimmer {{
+      0%   {{ background-position: 200% 0; }}
+      100% {{ background-position: -200% 0; }}
+    }}
+
     /* ── SECTION: Knockout Bracket ── */
     @keyframes countPulse {{
       0%   {{ color: #C9A84C; }}
@@ -1221,6 +1289,8 @@ def build_html(data):
       margin: 8px auto 0;
       padding-top: 16px;
       border-top: 1px solid rgba(201,168,76,0.3);
+      position: relative;
+      z-index: 1;
     }}
     .bracket-toggle {{
       display: flex;
@@ -1464,6 +1534,8 @@ def build_html(data):
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
       }}
+      body::before {{ animation: none; }}
+      .skeleton {{ animation: none; }}
     }}
   </style>
 </head>
@@ -1510,6 +1582,10 @@ def build_html(data):
      SECTION 2 — UPCOMING MATCHES
      ══════════════════════════════════════════ -->
 <div class="matches-section">
+<div id="skeleton-overlay" style="position:relative">
+  <div class="skeleton" style="height:200px; margin:12px; border-radius:8px;"></div>
+  <div class="skeleton" style="height:200px; margin:12px; border-radius:8px; opacity:0.7;"></div>
+</div>
 {countdown_html}
 {match_cards if match_cards else '<div style="color:var(--fifa-text-muted);text-align:center;padding:40px 0;font-size:14px;">No upcoming matches scheduled.</div>'}
 </div>
@@ -1554,6 +1630,68 @@ function toggleConf() {{
 function toggleBracket() {{
   document.getElementById('bracket-section').classList.toggle('open');
 }}
+
+// Skeleton loader: fade out after 800ms
+setTimeout(() => {{
+  const sk = document.getElementById('skeleton-overlay');
+  if (sk) {{
+    sk.style.transition = 'opacity 400ms';
+    sk.style.opacity = '0';
+    setTimeout(() => sk.remove(), 400);
+  }}
+}}, 800);
+
+// Intersection Observer: scroll-triggered card entrance
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {{
+  const cards = document.querySelectorAll('.match-card, .bracket-match-card');
+  const observer = new IntersectionObserver(
+    (entries) => {{
+      entries.forEach(entry => {{
+        if (entry.isIntersecting) {{
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }}
+      }});
+    }},
+    {{ threshold: 0.1 }}
+  );
+  cards.forEach(card => {{
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 400ms ease, transform 400ms ease';
+    observer.observe(card);
+  }});
+}}
+
+// Live countdown timers
+function updateCountdowns() {{
+  document.querySelectorAll('[data-kickoff]').forEach(card => {{
+    const kickoff = new Date(card.dataset.kickoff);
+    const now = new Date();
+    const diff = kickoff - now;
+    const el = card.querySelector('.countdown-timer');
+    if (!el) return;
+    if (diff <= 0) {{
+      el.textContent = 'LIVE / COMPLETED';
+      el.style.color = '#22C55E';
+      return;
+    }}
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hrs  = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (days > 0) {{
+      el.textContent = `IN ${{days}}D ${{hrs}}H`;
+    }} else if (hrs > 0) {{
+      el.textContent = `IN ${{hrs}}H ${{mins}}M`;
+    }} else {{
+      el.textContent = `IN ${{mins}} MIN`;
+      el.style.color = '#E8002D';
+    }}
+  }});
+}}
+updateCountdowns();
+setInterval(updateCountdowns, 60000);
 </script>
 
 </body>

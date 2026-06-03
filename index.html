@@ -35,6 +35,32 @@
       min-height: 100vh;
       padding-bottom: 80px;
       -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg at 30% 40%,
+        rgba(14, 165, 233, 0.06) 0deg,
+        rgba(201, 168, 76, 0.04) 90deg,
+        rgba(232, 0, 45, 0.03) 180deg,
+        rgba(10, 22, 40, 0.08) 270deg,
+        rgba(14, 165, 233, 0.06) 360deg
+      );
+      animation: auroraFlow 14s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes auroraFlow {
+      0%   { transform: rotate(0deg) scale(1);   opacity: 0.6; }
+      50%  { transform: rotate(180deg) scale(1.1); opacity: 0.8; }
+      100% { transform: rotate(360deg) scale(1);  opacity: 0.6; }
     }
 
     /* ── SECTION 1: Picks Header ── */
@@ -146,6 +172,8 @@
       gap: 14px;
       max-width: 500px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     .matches-grid {
       display: flex;
@@ -168,13 +196,17 @@
       overflow: hidden;
       position: relative;
       animation: slideUp 400ms ease both;
-      transition: transform 200ms ease, box-shadow 200ms ease;
+      transition: transform 150ms ease, box-shadow 150ms ease;
     }
     @media (hover: hover) {
       .match-card:hover {
         transform: scale(1.02);
         box-shadow: 0 12px 40px rgba(0,0,0,0.5);
       }
+    }
+    .match-card:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
     .mc-card-header {
       display: flex;
@@ -302,6 +334,8 @@
       max-width: 468px;
       margin-left: auto;
       margin-right: auto;
+      position: relative;
+      z-index: 1;
     }
     .confidence-toggle {
       display: flex;
@@ -446,6 +480,8 @@
       font-size: 12px;
       color: var(--fifa-text-muted);
       line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
 
     /* ── Cursor and Focus States ── */
@@ -463,6 +499,35 @@
       border-radius: 4px;
     }
 
+    /* ── Countdown Timer ── */
+    .countdown-timer {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #C9A84C;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin: 4px 0;
+    }
+
+    /* ── Skeleton Loader ── */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--fifa-card) 25%,
+        #1A2B40 50%,
+        var(--fifa-card) 75%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     /* ── SECTION: Knockout Bracket ── */
     @keyframes countPulse {
       0%   { color: #C9A84C; }
@@ -478,6 +543,8 @@
       margin: 8px auto 0;
       padding-top: 16px;
       border-top: 1px solid rgba(201,168,76,0.3);
+      position: relative;
+      z-index: 1;
     }
     .bracket-toggle {
       display: flex;
@@ -721,6 +788,8 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
       }
+      body::before { animation: none; }
+      .skeleton { animation: none; }
     }
   </style>
 </head>
@@ -767,16 +836,21 @@
      SECTION 2 — UPCOMING MATCHES
      ══════════════════════════════════════════ -->
 <div class="matches-section">
+<div id="skeleton-overlay" style="position:relative">
+  <div class="skeleton" style="height:200px; margin:12px; border-radius:8px;"></div>
+  <div class="skeleton" style="height:200px; margin:12px; border-radius:8px; opacity:0.7;"></div>
+</div>
 <div class="countdown-banner">TOURNAMENT STARTS IN 8 DAYS · FIRST KICKOFF JUNE 11</div>
 
 <div class="date-header">THURSDAY · 11 JUN</div>
 <div class="matches-grid">
-<div class="match-card" style="animation-delay:200ms">
+<div class="match-card" style="animation-delay:200ms" data-kickoff="2026-06-11T19:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP A · MD 1</span>
     <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
   <div class="mc-venue-row">Estadio Azteca · Mexico City · 11 Jun · 14:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -800,12 +874,13 @@
     <div class="mc-chip chip-blue">MEX2 RSA1 5pts</div>
   </div>
 </div>
-<div class="match-card" style="animation-delay:400ms">
+<div class="match-card" style="animation-delay:400ms" data-kickoff="2026-06-12T02:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP A · MD 1</span>
     <span class="mc-conf-badge conf-low">LOW</span>
   </div>
   <div class="mc-venue-row">Estadio Akron · Guadalajara · 11 Jun · 21:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -833,12 +908,13 @@
 
 <div class="date-header">FRIDAY · 12 JUN</div>
 <div class="matches-grid">
-<div class="match-card" style="animation-delay:600ms">
+<div class="match-card" style="animation-delay:600ms" data-kickoff="2026-06-12T19:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP B · MD 1</span>
     <span class="mc-conf-badge conf-med">MED</span>
   </div>
   <div class="mc-venue-row">BMO Field · Toronto · 12 Jun · 14:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -862,12 +938,13 @@
     <div class="mc-chip chip-blue">CAN1 BOS1 5pts</div>
   </div>
 </div>
-<div class="match-card" style="animation-delay:800ms">
+<div class="match-card" style="animation-delay:800ms" data-kickoff="2026-06-13T01:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP D · MD 1</span>
     <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
   <div class="mc-venue-row">SoFi Stadium · Los Angeles · 12 Jun · 20:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -895,12 +972,13 @@
 
 <div class="date-header">SATURDAY · 13 JUN</div>
 <div class="matches-grid">
-<div class="match-card" style="animation-delay:1000ms">
+<div class="match-card" style="animation-delay:1000ms" data-kickoff="2026-06-13T19:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP B · MD 1</span>
     <span class="mc-conf-badge conf-high">HIGH</span>
   </div>
   <div class="mc-venue-row">Levi's Stadium · San Francisco · 13 Jun · 14:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -924,12 +1002,13 @@
     <div class="mc-chip chip-blue">QAT1 SUI2 5pts</div>
   </div>
 </div>
-<div class="match-card" style="animation-delay:1200ms">
+<div class="match-card" style="animation-delay:1200ms" data-kickoff="2026-06-13T22:00:00Z">
   <div class="mc-card-header">
     <span class="mc-card-label">GROUP C · MD 1</span>
     <span class="mc-conf-badge conf-low">LOW</span>
   </div>
   <div class="mc-venue-row">MetLife Stadium · New York/New Jersey · 13 Jun · 17:00 COL</div>
+  <span class="countdown-timer"></span>
   <div class="mc-lineup-wrap"><div class="mc-lineup-badge lineup-pending">STARTING XI PENDING</div></div>
   <div class="teams-score-row">
     <div class="mc-team">
@@ -992,7 +1071,7 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-03 15:39 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-03 16:03 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
@@ -1002,6 +1081,68 @@ function toggleConf() {
 function toggleBracket() {
   document.getElementById('bracket-section').classList.toggle('open');
 }
+
+// Skeleton loader: fade out after 800ms
+setTimeout(() => {
+  const sk = document.getElementById('skeleton-overlay');
+  if (sk) {
+    sk.style.transition = 'opacity 400ms';
+    sk.style.opacity = '0';
+    setTimeout(() => sk.remove(), 400);
+  }
+}, 800);
+
+// Intersection Observer: scroll-triggered card entrance
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const cards = document.querySelectorAll('.match-card, .bracket-match-card');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  cards.forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 400ms ease, transform 400ms ease';
+    observer.observe(card);
+  });
+}
+
+// Live countdown timers
+function updateCountdowns() {
+  document.querySelectorAll('[data-kickoff]').forEach(card => {
+    const kickoff = new Date(card.dataset.kickoff);
+    const now = new Date();
+    const diff = kickoff - now;
+    const el = card.querySelector('.countdown-timer');
+    if (!el) return;
+    if (diff <= 0) {
+      el.textContent = 'LIVE / COMPLETED';
+      el.style.color = '#22C55E';
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hrs  = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (days > 0) {
+      el.textContent = `IN ${days}D ${hrs}H`;
+    } else if (hrs > 0) {
+      el.textContent = `IN ${hrs}H ${mins}M`;
+    } else {
+      el.textContent = `IN ${mins} MIN`;
+      el.style.color = '#E8002D';
+    }
+  });
+}
+updateCountdowns();
+setInterval(updateCountdowns, 60000);
 </script>
 
 </body>
