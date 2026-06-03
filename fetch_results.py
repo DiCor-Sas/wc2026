@@ -93,93 +93,92 @@ def fetch_url_browser(url):
         return r.read().decode("utf-8", errors="replace")
 
 
-def _parse_espn_friendlies(html):
-    """Extract completed friendly scores from ESPN HTML (best-effort JSON blob parsing)."""
-    matches = []
-    for pattern in [
-        r"window\[.?__espnfitt__.?\]\s*=\s*(\{.+?\});\s*</script>",
-        r'"scoreboard"\s*:\s*(\{.+?"events".+?\})',
-    ]:
-        try:
-            m = re.search(pattern, html, re.DOTALL)
-            if not m:
-                continue
-            blob = json.loads(m.group(1))
-            events = (
-                blob.get("page", {}).get("content", {}).get("scoreboard", {}).get("events", [])
-                or blob.get("events", [])
-                or blob.get("scoreboard", {}).get("events", [])
-            )
-            for evt in events:
-                state = evt.get("status", {}).get("type", {}).get("state", "")
-                if state != "post":
-                    continue
-                comps = evt.get("competitions", [evt])
-                for comp in comps:
-                    competitors = comp.get("competitors", [])
-                    if len(competitors) < 2:
-                        continue
-                    home = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
-                    away = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
-                    h_name = _fn(home.get("team", {}).get("displayName", ""))
-                    a_name = _fn(away.get("team", {}).get("displayName", ""))
-                    if not (_is_wc(h_name) or _is_wc(a_name)):
-                        continue
-                    try:
-                        h_s = int(home.get("score", ""))
-                        a_s = int(away.get("score", ""))
-                    except (ValueError, TypeError):
-                        continue
-                    date_str = evt.get("date", "")[:10]
-                    matches.append({"date": date_str, "home_team": h_name, "away_team": a_name,
-                                    "home_score": h_s, "away_score": a_s})
-            if matches:
-                break
-        except Exception:
+def _parse_espn_evts_html(html):
+    """Parse ESPN's inline evts[] compact format. Only Method 3 — confirmed working."""
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    decoder = json.JSONDecoder()
+
+    for script in soup.find_all("script"):
+        text = script.string or ""
+        if '"evts"' not in text or "competitors" not in text:
             continue
-    return matches
+        # raw_decode handles scripts with multiple consecutive JSON assignments
+        pos = 0
+        while pos < len(text):
+            start = text.find("{", pos)
+            if start < 0:
+                break
+            try:
+                blob, _ = decoder.raw_decode(text, start)
+                if isinstance(blob, dict):
+                    evts = _find_evts_key(blob)
+                    if evts:
+                        return _parse_evts_list(evts)
+            except Exception:
+                pass
+            pos = start + 1
+    return []
 
 
-def _parse_flashscore_html(html):
-    """Extract completed friendly scores from Flashscore HTML (best-effort)."""
+def _find_evts_key(obj):
+    """Recursively find the first 'evts' list in a nested dict."""
+    if isinstance(obj, dict):
+        if "evts" in obj:
+            return obj["evts"]
+        for v in obj.values():
+            result = _find_evts_key(v)
+            if result is not None:
+                return result
+    return None
+
+
+def _parse_evts_list(evts):
+    """Convert ESPN evts[] entries to normalised match dicts, WC teams only."""
     matches = []
-    try:
-        parts = html.split("¬")
-        for i, part in enumerate(parts):
-            if ":" not in part or len(part) > 7:
-                continue
-            scores = part.split(":")
-            if len(scores) != 2 or not scores[0].isdigit() or not scores[1].isdigit():
-                continue
-            h_name = _fn(parts[i - 1].strip()) if i > 0 else ""
-            a_name = _fn(parts[i + 1].strip()) if i < len(parts) - 1 else ""
-            if not (_is_wc(h_name) or _is_wc(a_name)):
-                continue
-            matches.append({"date": date.today().isoformat(), "home_team": h_name, "away_team": a_name,
-                            "home_score": int(scores[0]), "away_score": int(scores[1])})
-    except Exception:
-        pass
+    for evt in evts:
+        if not isinstance(evt, dict) or not evt.get("completed", False):
+            continue
+        competitors = evt.get("competitors", [])
+        if len(competitors) < 2:
+            continue
+        home = next((c for c in competitors if c.get("isHome") is True), competitors[0])
+        away = next((c for c in competitors if c.get("isHome") is False), competitors[1])
+        h_name = _fn(home.get("displayName", home.get("name", home.get("abbrev", ""))))
+        a_name = _fn(away.get("displayName", away.get("name", away.get("abbrev", ""))))
+        if not (_is_wc(h_name) or _is_wc(a_name)):
+            continue
+        try:
+            h_s = int(home.get("score", ""))
+            a_s = int(away.get("score", ""))
+        except (ValueError, TypeError):
+            continue
+        evt_date = (evt.get("date", "") or "")[:10]
+        matches.append({"date": evt_date, "home_team": h_name, "away_team": a_name,
+                        "home_score": h_s, "away_score": a_s})
     return matches
 
 
-def _parse_bbc_html(html):
-    """Extract completed match scores from BBC Sport HTML (best-effort regex)."""
-    matches = []
+def _scrape_espn_matches(url):
+    """Playwright fallback scraper — only fires when lightweight sources return nothing."""
     try:
-        pattern = re.compile(
-            r'([A-Z][a-zA-Z\s\-\'\.]+?)\s+(\d)\s*[-–]\s*(\d)\s+([A-Z][a-zA-Z\s\-\'\.]+?)(?=\s*<|\s*\n)',
-            re.MULTILINE,
-        )
-        for m in pattern.finditer(html):
-            h_name = _fn(m.group(1).strip())
-            a_name = _fn(m.group(4).strip())
-            if not (_is_wc(h_name) or _is_wc(a_name)):
-                continue
-            matches.append({"date": date.today().isoformat(), "home_team": h_name, "away_team": a_name,
-                            "home_score": int(m.group(2)), "away_score": int(m.group(3))})
-    except Exception:
-        pass
-    return matches
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            html = page.content()
+            browser.close()
+        return _parse_espn_evts_html(html)
+    except Exception as e:
+        print(f"[playwright] Scraper failed: {e}")
+        return []
+
+
 
 
 def parse_openfootball(data):
@@ -283,6 +282,33 @@ def fetch_results():
             print(f"[fetch] worldcup26.ir failed: {e}")
             matches = []
 
+    # ── Playwright ESPN WC fallback (last resort, only after June 11) ─────────
+    today = date.today()
+    tournament_started = today >= date(2026, 6, 11)
+    if not matches and tournament_started:
+        wc_url = (
+            f"https://www.espn.com/soccer/scoreboard"
+            f"/_/date/{today.strftime('%Y%m%d')}"
+            f"/league/fifa.worldcup"
+        )
+        print("[fetch] Both primary sources empty after June 11 — trying Playwright ESPN WC fallback")
+        try:
+            pw_matches = _scrape_espn_matches(wc_url)
+            if pw_matches:
+                source = "espn-playwright-wc"
+                # Normalise to wc2026_results.json format
+                matches = [
+                    {"date": m["date"], "group": "", "round": "",
+                     "team1": m["home_team"], "team2": m["away_team"],
+                     "home_score": m["home_score"], "away_score": m["away_score"]}
+                    for m in pw_matches
+                ]
+                print(f"[fetch] Playwright ESPN WC fallback: {len(matches)} completed match(es)")
+            else:
+                print("[fetch] Playwright ESPN WC fallback: no completed WC matches found")
+        except Exception as e:
+            print(f"[fetch] Playwright ESPN WC fallback failed: {e}")
+
     # Sort by date
     matches.sort(key=lambda m: m.get("date", ""))
 
@@ -299,47 +325,129 @@ def fetch_results():
 # ── DAILY INTERNATIONAL RESULTS ───────────────────────────────────────────────
 
 def fetch_daily_results():
-    """Fetch completed international friendly results from the last 48h and apply ELO updates."""
-    now_utc = datetime.now(timezone.utc)
-    cutoff = (now_utc - timedelta(hours=48)).date().isoformat()
+    """Fetch completed international friendly results for yesterday + today and apply ELO updates.
 
-    sources = [
-        ("espn",       "https://www.espn.com/soccer/scoreboard/_/league/fifa.friendly",            _parse_espn_friendlies),
-        ("flashscore", "https://www.flashscoreusa.com/soccer/world/friendly-international/",       _parse_flashscore_html),
-        ("bbc",        "https://www.bbc.com/sport/football/scores-fixtures",                       _parse_bbc_html),
-    ]
+    Priority chain:
+    1. openfootball int.json  (lightweight, checked every run in case it gets published)
+    2. Playwright ESPN date-specific scraper  (fallback if openfootball returns 404)
+    3. FOX Sports HTML fallback if ESPN Playwright is blocked
+    """
+    now_utc = datetime.now(timezone.utc)
+    today_str   = now_utc.date().strftime("%Y%m%d")
+    yesterday_str = (now_utc.date() - timedelta(days=1)).strftime("%Y%m%d")
+    cutoff = (now_utc - timedelta(hours=48)).date().isoformat()
 
     matches = []
     source_used = "none"
 
-    for src_name, url, parser in sources:
+    # ── 1. openfootball int.json (primary, lightweight) ───────────────────────
+    openfootball_int_url = (
+        "https://raw.githubusercontent.com/openfootball/football.json/"
+        "master/2026/int.json"
+    )
+    try:
+        raw = fetch_url(openfootball_int_url)
+        data = json.loads(raw)
+        parsed = []
+        for rnd in data.get("rounds", []):
+            for m in rnd.get("matches", []):
+                ft = m.get("score", {}).get("ft")
+                if not ft or len(ft) < 2 or ft[0] is None:
+                    continue
+                h = _fn(m.get("team1", {}).get("name", ""))
+                a = _fn(m.get("team2", {}).get("name", ""))
+                if not (_is_wc(h) or _is_wc(a)):
+                    continue
+                parsed.append({"date": m.get("date", ""), "home_team": h, "away_team": a,
+                                "home_score": ft[0], "away_score": ft[1]})
+        filtered = [m for m in parsed if m.get("date", "") >= cutoff]
+        if filtered:
+            matches = filtered
+            source_used = "openfootball-int"
+            print(f"[daily] openfootball int.json: {len(matches)} relevant match(es) found")
+        else:
+            print(f"[daily] openfootball int.json: connected but no relevant matches in window")
+    except Exception as e:
+        print(f"[daily] openfootball int.json: {e} — trying Playwright ESPN fallback")
+
+    # ── 2. Playwright ESPN date-specific scraper (fallback) ───────────────────
+    if not matches:
+        espn_dates = [yesterday_str, today_str]
+        espn_matches = []
+        for date_str in espn_dates:
+            url = (f"https://www.espn.com/soccer/scoreboard"
+                   f"/_/date/{date_str}/league/fifa.friendly")
+            try:
+                found = _scrape_espn_matches(url)
+                filtered = [m for m in found if m.get("date", "") >= cutoff]
+                if filtered:
+                    espn_matches.extend(filtered)
+                    print(f"[daily] ESPN Playwright {date_str}: {len(filtered)} match(es) found")
+                else:
+                    print(f"[daily] ESPN Playwright {date_str}: no relevant matches")
+            except Exception as e:
+                print(f"[daily] ESPN Playwright {date_str} failed: {e}")
+        # Deduplicate by (date, home_team, away_team)
+        seen = set()
+        for m in espn_matches:
+            key = (m["date"], m["home_team"], m["away_team"])
+            if key not in seen:
+                seen.add(key)
+                matches.append(m)
+        if matches:
+            source_used = "espn-playwright"
+            print(f"[daily] Using Playwright ESPN fallback: {len(matches)} total match(es)")
+
+    # ── 3. FOX Sports HTML fallback if ESPN Playwright blocked ────────────────
+    if not matches:
+        fox_url = "https://www.foxsports.com/soccer/friendlies-men"
         try:
-            html = fetch_url_browser(url)
-            parsed = parser(html)
-            filtered = [m for m in parsed if m.get("date", "") >= cutoff]
-            if filtered:
-                matches = filtered
-                source_used = src_name
-                print(f"[daily] {src_name}: {len(matches)} relevant match(es) found")
-                break
+            html = fetch_url_browser(fox_url)
+            # Best-effort score regex: "TeamA N-N TeamB"
+            pattern = re.compile(
+                r'([A-Z][a-zA-Z\s\-\'\.]+?)\s+(\d+)\s*[-–]\s*(\d+)\s+([A-Z][a-zA-Z\s\-\'\.]+?)(?=\s*[<\n])',
+                re.MULTILINE,
+            )
+            fox_matches = []
+            for m in pattern.finditer(html):
+                h = _fn(m.group(1).strip())
+                a = _fn(m.group(4).strip())
+                if not (_is_wc(h) or _is_wc(a)):
+                    continue
+                fox_matches.append({"date": now_utc.date().isoformat(), "home_team": h, "away_team": a,
+                                    "home_score": int(m.group(2)), "away_score": int(m.group(3))})
+            if fox_matches:
+                matches = fox_matches
+                source_used = "foxsports"
+                print(f"[daily] FOX Sports fallback: {len(matches)} match(es) found")
             else:
-                print(f"[daily] {src_name}: connected but no relevant matches")
+                print("[daily] FOX Sports: connected but no WC team matches parsed")
         except Exception as e:
-            print(f"[daily] {src_name} failed: {e}")
+            print(f"[daily] FOX Sports fallback failed: {e}")
+
+    # Load previously applied match keys to prevent double-counting ELO on re-runs
+    daily_path = ROOT / "daily_results.json"
+    try:
+        with open(daily_path) as f:
+            prev = json.load(f)
+        applied_keys = set(tuple(k) for k in prev.get("applied_keys", []))
+    except Exception:
+        applied_keys = set()
 
     out = {
         "fetched_at": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": source_used,
         "matches": matches,
+        "applied_keys": [list(k) for k in applied_keys],  # persisted; updated below
     }
-    with open(ROOT / "daily_results.json", "w") as f:
+    with open(daily_path, "w") as f:
         json.dump(out, f, indent=2)
 
     if not matches:
         print("[daily] Daily results: all sources blocked, no updates")
         return
 
-    # Apply ELO updates with K=20 (friendly weight)
+    # Apply ELO updates with K=20 — skip any match already applied in a previous run
     K_FRIENDLY = 20
     elo_path = ROOT / "elo_ratings.json"
     with open(elo_path) as f:
@@ -347,11 +455,17 @@ def fetch_daily_results():
     elo = {team: d["elo"] for team, d in elo_data.items()}
 
     wc_updates = 0
+    newly_applied = set()
     for m in matches:
         h_team, a_team = m["home_team"], m["away_team"]
         h_s, a_s = m["home_score"], m["away_score"]
         h_wc, a_wc = _is_wc(h_team), _is_wc(a_team)
         if not (h_wc or a_wc):
+            continue
+
+        match_key = (m.get("date", ""), h_team, a_team)
+        if match_key in applied_keys:
+            print(f"[daily] Skipping {h_team} vs {a_team} on {m.get('date','')} — ELO already applied")
             continue
 
         h_elo = elo.get(h_team, DEFAULT_ELO)
@@ -380,6 +494,8 @@ def fetch_daily_results():
             print(f"[daily] {a_team} ELO: {a_elo} → {new_a} after {a_s}-{h_s} {res_a} vs {h_team} (friendly K=20)")
             wc_updates += 1
 
+        newly_applied.add(match_key)
+
     for team in elo_data:
         if team in elo:
             elo_data[team]["elo"] = elo[team]
@@ -402,6 +518,12 @@ def fetch_daily_results():
         s["final_strength"] = round(base * 0.70 + squad_elo_like * 0.30, 2)
     with open(ts_path, "w") as f:
         json.dump(ts, f, indent=2)
+
+    # Persist the full set of applied keys (old + new) back to daily_results.json
+    all_applied = applied_keys | newly_applied
+    out["applied_keys"] = [list(k) for k in all_applied]
+    with open(daily_path, "w") as f:
+        json.dump(out, f, indent=2)
 
     print(f"[daily] Daily results: {len(matches)} matches fetched from {source_used}, "
           f"{wc_updates} World Cup team(s) ELO updated")
@@ -832,6 +954,296 @@ def update_bracket_state():
 
 # ── LINEUP FETCH ──────────────────────────────────────────────────────────────
 
+def _is_wc_match(home_team, away_team):
+    """Return True if this pair appears in fixtures.json (either order)."""
+    try:
+        with open(ROOT / "fixtures.json") as f:
+            fixtures = json.load(f)
+        for fx in fixtures:
+            h = _fn(fx.get("home", ""))
+            a = _fn(fx.get("away", ""))
+            if (h == home_team and a == away_team) or (h == away_team and a == home_team):
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def _espn_find_game_id(match_date_str, home_team, away_team):
+    """Find ESPN game ID by scraping the WC scoreboard for a given date."""
+    date_nodash = match_date_str.replace("-", "")
+    url = (f"https://www.espn.com/soccer/scoreboard"
+           f"/_/date/{date_nodash}/league/fifa.worldcup")
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            html = page.content()
+            browser.close()
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, "html.parser")
+        except ImportError:
+            return None
+        decoder = json.JSONDecoder()
+        for script in soup.find_all("script"):
+            text = script.string or ""
+            if '"evts"' not in text:
+                continue
+            pos = 0
+            while pos < len(text):
+                start = text.find("{", pos)
+                if start < 0:
+                    break
+                try:
+                    blob, end_pos = decoder.raw_decode(text, start)
+                    if isinstance(blob, dict):
+                        evts = _find_evts_key(blob)
+                        if evts:
+                            for evt in evts:
+                                competitors = evt.get("competitors", [])
+                                names = [
+                                    _fn(c.get("displayName", c.get("name", c.get("abbrev", ""))))
+                                    for c in competitors
+                                ]
+                                if home_team in names and away_team in names:
+                                    game_id = str(evt.get("id", ""))
+                                    if game_id:
+                                        print(f"[lineup] ESPN game ID found: {game_id}")
+                                        return game_id
+                    pos = end_pos
+                except Exception:
+                    pos = start + 1
+    except Exception as e:
+        print(f"[lineup] ESPN scoreboard scrape failed: {e}")
+    return None
+
+
+def _extract_lineup_blob(obj, home_team, away_team, depth=0):
+    """Recursively search a JSON blob for team starting XI arrays."""
+    if depth > 8 or not isinstance(obj, dict):
+        return [], []
+    home_xi, away_xi = [], []
+
+    # Handle homeTeam/awayTeam or home/away keys
+    for home_key, away_key in (("homeTeam", "awayTeam"), ("home", "away")):
+        home_obj = obj.get(home_key, {})
+        away_obj = obj.get(away_key, {})
+        if not isinstance(home_obj, dict) or not isinstance(away_obj, dict):
+            continue
+        for sub_key in ("startingLineup", "starters", "athletes", "roster"):
+            for team_obj, container in ((home_obj, "home"), (away_obj, "away")):
+                athletes = team_obj.get(sub_key, [])
+                if not isinstance(athletes, list):
+                    continue
+                names = []
+                for a in athletes:
+                    if not isinstance(a, dict):
+                        continue
+                    n = (a.get("displayName") or a.get("name") or
+                         (a.get("athlete") or {}).get("displayName") or
+                         (a.get("athlete") or {}).get("name") or "")
+                    starter = a.get("starter", a.get("isStarter", True))
+                    if n and starter is not False:
+                        names.append(n)
+                if len(names) >= 5:
+                    if container == "home":
+                        home_xi = names
+                    else:
+                        away_xi = names
+        if home_xi or away_xi:
+            return home_xi, away_xi
+
+    # Handle competitors[] array
+    competitors = obj.get("competitors", [])
+    if isinstance(competitors, list) and len(competitors) >= 2:
+        for comp in competitors:
+            if not isinstance(comp, dict):
+                continue
+            cname = _fn(comp.get("displayName", comp.get("name", "")))
+            for sub_key in ("startingLineup", "starters", "athletes", "roster"):
+                athletes = comp.get(sub_key, [])
+                if not isinstance(athletes, list):
+                    continue
+                names = []
+                for a in athletes:
+                    if not isinstance(a, dict):
+                        continue
+                    n = (a.get("displayName") or a.get("name") or
+                         (a.get("athlete") or {}).get("displayName") or
+                         (a.get("athlete") or {}).get("name") or "")
+                    starter = a.get("starter", a.get("isStarter", True))
+                    if n and starter is not False:
+                        names.append(n)
+                if len(names) >= 5:
+                    if cname == home_team:
+                        home_xi = names
+                    elif cname == away_team:
+                        away_xi = names
+        if home_xi or away_xi:
+            return home_xi, away_xi
+
+    # Recurse into nested dicts and lists
+    for v in obj.values():
+        if isinstance(v, dict):
+            h, a = _extract_lineup_blob(v, home_team, away_team, depth + 1)
+            if h or a:
+                return h, a
+        elif isinstance(v, list):
+            for item in v:
+                if isinstance(item, dict):
+                    h, a = _extract_lineup_blob(item, home_team, away_team, depth + 1)
+                    if h or a:
+                        return h, a
+    return [], []
+
+
+def _parse_espn_lineup_html(html, home_team, away_team):
+    """Extract starting XI from ESPN match page HTML."""
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, "html.parser")
+        decoder = json.JSONDecoder()
+        for script in soup.find_all("script"):
+            text = script.string or ""
+            if not any(k in text for k in ("startingLineup", "starters", "starter", "roster")):
+                continue
+            pos = 0
+            while pos < len(text):
+                start = text.find("{", pos)
+                if start < 0:
+                    break
+                try:
+                    blob, end_pos = decoder.raw_decode(text, start)
+                    if isinstance(blob, dict):
+                        h, a = _extract_lineup_blob(blob, home_team, away_team)
+                        if h or a:
+                            return h, a
+                    pos = end_pos
+                except Exception:
+                    pos = start + 1
+    except Exception as e:
+        print(f"[lineup] ESPN lineup parse error: {e}")
+    return [], []
+
+
+def _espn_fetch_lineup(game_id, home_team, away_team):
+    """Fetch and parse starting XI from ESPN match page given a game ID."""
+    url = f"https://www.espn.com/soccer/match/_/gameId/{game_id}"
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            html = page.content()
+            browser.close()
+        return _parse_espn_lineup_html(html, home_team, away_team)
+    except Exception as e:
+        print(f"[lineup] ESPN match page scrape failed: {e}")
+        return [], []
+
+
+def _parse_bbc_lineup_html(html, home_team, away_team):
+    """Extract starting XI from BBC Sport match page HTML."""
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, "html.parser")
+        decoder = json.JSONDecoder()
+
+        # JSON-LD script tags
+        for script in soup.find_all("script", type="application/ld+json"):
+            try:
+                data = json.loads(script.string or "")
+                h, a = _extract_lineup_blob(data if isinstance(data, dict) else {}, home_team, away_team)
+                if h or a:
+                    return h, a
+            except Exception:
+                pass
+
+        # Embedded JSON in regular script tags
+        for script in soup.find_all("script"):
+            text = script.string or ""
+            if not any(k in text for k in ("lineup", "startingEleven", "formation", "teamSheet")):
+                continue
+            pos = 0
+            while pos < len(text):
+                start = text.find("{", pos)
+                if start < 0:
+                    break
+                try:
+                    blob, end_pos = decoder.raw_decode(text, start)
+                    if isinstance(blob, dict):
+                        h, a = _extract_lineup_blob(blob, home_team, away_team)
+                        if h or a:
+                            return h, a
+                    pos = end_pos
+                except Exception:
+                    pos = start + 1
+
+        # CSS class-based fallback
+        name_re = re.compile(r'\b([A-Z][a-z]+(?:\s[A-Z][a-z\-]+){1,3})\b')
+        for cls in ("team-lineups", "starting-eleven", "lineup", "team-sheet"):
+            container = soup.find(class_=re.compile(cls, re.I))
+            if not container:
+                continue
+            teams_divs = container.find_all(recursive=False)
+            if len(teams_divs) >= 2:
+                h_names = list(dict.fromkeys(name_re.findall(teams_divs[0].get_text())))[:11]
+                a_names = list(dict.fromkeys(name_re.findall(teams_divs[1].get_text())))[:11]
+                if len(h_names) >= 5 or len(a_names) >= 5:
+                    return h_names, a_names
+    except Exception as e:
+        print(f"[lineup] BBC lineup parse error: {e}")
+    return [], []
+
+
+def _bbc_fetch_lineup(match_date_str, home_team, away_team):
+    """Find and scrape BBC Sport match page for lineup data."""
+    fixtures_url = f"https://www.bbc.com/sport/football/scores-fixtures/{match_date_str}"
+    try:
+        from playwright.sync_api import sync_playwright
+        from bs4 import BeautifulSoup
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+
+            # Step A: find the match page link
+            page = browser.new_page()
+            page.goto(fixtures_url, wait_until="domcontentloaded", timeout=30000)
+            html = page.content()
+
+            soup = BeautifulSoup(html, "html.parser")
+            match_url = None
+            home_lower = home_team.lower()
+            away_lower = away_team.lower()
+            for a_tag in soup.find_all("a", href=True):
+                link_text = (a_tag.get_text() or "").strip().lower()
+                href = a_tag["href"]
+                if (home_lower in link_text and away_lower in link_text
+                        and "/sport/football/" in href):
+                    match_url = ("https://www.bbc.com" + href
+                                 if href.startswith("/") else href)
+                    break
+
+            if not match_url:
+                browser.close()
+                print(f"[lineup] BBC: no match link for {home_team} vs {away_team} on {match_date_str}")
+                return [], []
+
+            # Step B: fetch match page
+            page2 = browser.new_page()
+            page2.goto(match_url, wait_until="domcontentloaded", timeout=30000)
+            match_html = page2.content()
+            browser.close()
+
+        return _parse_bbc_lineup_html(match_html, home_team, away_team)
+    except Exception as e:
+        print(f"[lineup] BBC scrape failed: {e}")
+        return [], []
+
+
 def _parse_lineup_from_html(html, home_team, away_team):
     """Best-effort extraction of player name lists from search result HTML."""
     home_xi, away_xi = [], []
@@ -876,9 +1288,17 @@ def _detect_key_absences(lineup_data, home_team, away_team):
             continue
         ranked = sorted(
             [p for p in players if p.get("minutes", 0) > 0],
-            key=lambda p: p.get("goals", 0) / p["minutes"] * 90,
+            key=lambda p: (p.get("goals", 0) * 0.6 + p.get("assists", 0) * 0.4) / (p["minutes"] / 90),
             reverse=True,
         )
+        # Gap 5: log when fewer than 3 players have tracked minutes
+        if len(ranked) < 3:
+            ts_data = team_strength.get(team, {})
+            sq_norm = ts_data.get("squad_score_norm", None)
+            sq_str = f"{sq_norm:.3f}" if sq_norm is not None else "N/A"
+            print(f"[lineup] {team}: only {len(ranked)} player(s) with tracked minutes "
+                  f"(squad_score_norm={sq_str}). "
+                  f"{3 - len(ranked)} slot(s) cannot be checked — using proxy contribution=0.25.")
         xi_lower = [n.lower() for n in xi]
         for player in ranked[:3]:
             pname = player.get("name", "")
@@ -888,8 +1308,9 @@ def _detect_key_absences(lineup_data, home_team, away_team):
             in_xi = any(pname_lower in xi_n or xi_n in pname_lower for xi_n in xi_lower)
             if in_xi:
                 continue
-            g90 = player.get("goals", 0) / player["minutes"] * 90
-            contribution = g90 / 1.5
+            g90 = player.get("goals", 0) / (player["minutes"] / 90)
+            a90 = player.get("assists", 0) / (player["minutes"] / 90)
+            contribution = (g90 * 0.6 + a90 * 0.4) / 1.5
             penalty = min(contribution * 0.4, 0.30)
             ts = team_strength.get(team, {})
             base_s = ts.get("final_strength", avg_strength)
@@ -927,11 +1348,26 @@ def _detect_key_absences(lineup_data, home_team, away_team):
 
 
 def fetch_lineup(home_team, away_team, match_date):
-    """Fetch starting lineup via API-Football (primary) or Google search (fallback)."""
+    """Fetch starting lineup for a WC match via cascading fallback chain.
+
+    Source 1: API-Football
+    Source 2: ESPN Playwright (scoreboard → match page)
+    Source 3: BBC Sport Playwright (fixtures page → match page)
+    Source 4: Graceful degradation (unavailable)
+
+    Returns None if the pair is not a confirmed WC fixture.
+    """
+    if not _is_wc_match(home_team, away_team):
+        print(f"[lineup] {home_team} vs {away_team} is not a WC fixture — skipping")
+        return None
+
     api_key = os.environ.get("API_FOOTBALL_KEY", "")
     ctx = ssl.create_default_context()
-    lineup_data = None
+    home_xi: list = []
+    away_xi: list = []
+    source = "unavailable"
 
+    # ── Source 1: API-Football ────────────────────────────────────────────────
     if api_key:
         try:
             fix_url = (f"https://v3.football.api-sports.io/fixtures"
@@ -970,49 +1406,76 @@ def fetch_lineup(home_team, away_team, match_date):
                             return []
                         return [p.get("player", {}).get("name", "") for p in lu_entry.get("startXI", [])]
 
-                    lineup_data = {
-                        "match": f"{home_team} vs {away_team}",
-                        "date": match_date,
-                        "kickoff_cot": "",
-                        "source": "api-football",
-                        "home_xi": _xi(home_lu),
-                        "away_xi": _xi(away_lu),
-                        "key_absences": [],
-                        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    }
+                    h_xi = _xi(home_lu)
+                    a_xi = _xi(away_lu)
+                    if len(h_xi) >= 5 or len(a_xi) >= 5:
+                        home_xi, away_xi = h_xi, a_xi
+                        source = "api-football"
+                        print(f"[lineup] API-Football lineup: {len(home_xi)} home, {len(away_xi)} away players")
+                    else:
+                        print(f"[lineup] API-Football lineup: insufficient data "
+                              f"({len(h_xi)} home, {len(a_xi)} away) — trying ESPN")
+                else:
+                    print(f"[lineup] API-Football lineup: no lineup data for fixture {fixture_id} — trying ESPN")
+            else:
+                print(f"[lineup] API-Football lineup: fixture not found for "
+                      f"{home_team} vs {away_team} on {match_date} — trying ESPN")
         except Exception as e:
-            print(f"[lineup] API-Football failed: {e}")
+            print(f"[lineup] API-Football failed: {e} — trying ESPN")
+    else:
+        print(f"[lineup] API-Football: no API key — trying ESPN")
 
-    if not lineup_data or not (lineup_data.get("home_xi") or lineup_data.get("away_xi")):
+    # ── Source 2: ESPN Playwright ─────────────────────────────────────────────
+    if not (len(home_xi) >= 5 or len(away_xi) >= 5):
         try:
-            query = f"{home_team} {away_team} starting lineup World Cup 2026 {match_date}"
-            url = "https://www.google.com/search?q=" + query.replace(" ", "+")
-            html = fetch_url_browser(url)
-            home_xi, away_xi = _parse_lineup_from_html(html, home_team, away_team)
-            lineup_data = {
-                "match": f"{home_team} vs {away_team}",
-                "date": match_date,
-                "kickoff_cot": "",
-                "source": "web-search" if (home_xi or away_xi) else "none",
-                "home_xi": home_xi,
-                "away_xi": away_xi,
-                "key_absences": [],
-                "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            }
+            game_id = _espn_find_game_id(match_date, home_team, away_team)
+            if game_id:
+                h_xi, a_xi = _espn_fetch_lineup(game_id, home_team, away_team)
+                if len(h_xi) >= 5 or len(a_xi) >= 5:
+                    home_xi, away_xi = h_xi, a_xi
+                    source = "espn-playwright"
+                    print(f"[lineup] ESPN Playwright lineup: found "
+                          f"{len(home_xi)} home players, {len(away_xi)} away players")
+                else:
+                    print(f"[lineup] ESPN Playwright lineup: insufficient data "
+                          f"({len(h_xi)} home, {len(a_xi)} away) — trying BBC")
+            else:
+                print(f"[lineup] ESPN Playwright: game not found on scoreboard — trying BBC")
         except Exception as e:
-            print(f"[lineup] Google fallback failed: {e}")
+            print(f"[lineup] ESPN Playwright failed: {e} — trying BBC")
 
-    if not lineup_data:
-        lineup_data = {
-            "match": f"{home_team} vs {away_team}",
-            "date": match_date,
-            "kickoff_cot": "",
-            "source": "none",
-            "home_xi": [],
-            "away_xi": [],
-            "key_absences": [],
-            "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        }
+    # ── Source 3: BBC Sport Playwright ────────────────────────────────────────
+    if not (len(home_xi) >= 5 or len(away_xi) >= 5):
+        try:
+            h_xi, a_xi = _bbc_fetch_lineup(match_date, home_team, away_team)
+            if len(h_xi) >= 5 or len(a_xi) >= 5:
+                home_xi, away_xi = h_xi, a_xi
+                source = "bbc-playwright"
+                print(f"[lineup] BBC Playwright lineup: found "
+                      f"{len(home_xi)} home, {len(away_xi)} away players")
+            else:
+                print(f"[lineup] BBC Playwright lineup: insufficient data "
+                      f"({len(h_xi)} home, {len(a_xi)} away)")
+        except Exception as e:
+            print(f"[lineup] BBC Playwright failed: {e}")
+
+    # ── Source 4: Graceful degradation ───────────────────────────────────────
+    if not (len(home_xi) >= 5 or len(away_xi) >= 5):
+        print(f"[lineup] All lineup sources failed for {home_team} vs {away_team}. "
+              f"Badge: STARTING XI PENDING")
+        source = "unavailable"
+        home_xi, away_xi = [], []
+
+    lineup_data = {
+        "match": f"{home_team} vs {away_team}",
+        "date": match_date,
+        "kickoff_cot": "",
+        "source": source,
+        "home_xi": home_xi,
+        "away_xi": away_xi,
+        "key_absences": [],
+        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
 
     _detect_key_absences(lineup_data, home_team, away_team)
 
@@ -1031,10 +1494,8 @@ def fetch_lineup(home_team, away_team, match_date):
     with open(lineups_path, "w") as f:
         json.dump(all_lineups, f, indent=2)
 
-    src = lineup_data["source"]
-    h_count = len(lineup_data["home_xi"])
-    a_count = len(lineup_data["away_xi"])
-    print(f"[lineup] {home_team} vs {away_team}: source={src}, home_xi={h_count}, away_xi={a_count}")
+    print(f"[lineup] {home_team} vs {away_team}: source={source}, "
+          f"home_xi={len(home_xi)}, away_xi={len(away_xi)}")
     return lineup_data
 
 
@@ -1070,14 +1531,26 @@ def _lineup_only_run():
             fetched += 1
 
     if fetched == 0:
-        print("[lineup-only] Lineup fetch: pending, no matches within 75 min window yet")
+        print("[lineup-only] Lineup fetch: pending, no matches within 90 min window yet")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     if "--lineup-only" in sys.argv:
-        _lineup_only_run()
+        if "--match" in sys.argv:
+            idx = sys.argv.index("--match")
+            try:
+                forced_home = sys.argv[idx + 1]
+                forced_away = sys.argv[idx + 2]
+                forced_date = sys.argv[idx + 3]
+                print(f"[lineup] Force-fetching lineup: {forced_home} vs {forced_away} on {forced_date}")
+                fetch_lineup(forced_home, forced_away, forced_date)
+            except IndexError:
+                print("[lineup] --match requires three arguments: home_team away_team YYYY-MM-DD")
+                sys.exit(1)
+        else:
+            _lineup_only_run()
         sys.exit(0)
 
     print("=" * 60)
