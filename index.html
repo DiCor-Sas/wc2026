@@ -446,6 +446,148 @@
       border-radius: 4px;
     }
 
+    /* ── SECTION: Knockout Bracket ── */
+    .bracket-section {
+      margin: 14px 16px 0;
+      max-width: 468px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .bracket-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 44px;
+    }
+    .bracket-toggle-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .bracket-arrow {
+      font-size: 12px;
+      color: var(--fifa-text-muted);
+      transition: transform 300ms ease;
+    }
+    .bracket-section.open .bracket-arrow { transform: rotate(180deg); }
+    .bracket-section.open .bracket-toggle {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-color: transparent;
+    }
+    .bracket-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms ease-in-out;
+      background: var(--fifa-navy);
+      border: 1px solid var(--fifa-border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+    }
+    .bracket-section.open .bracket-body { max-height: 2000px; }
+    .bracket-inner { padding: 14px 16px; }
+    .bracket-placeholder {
+      text-align: center;
+      color: var(--fifa-text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 16px 0;
+    }
+    .bk-groups-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .bk-group-card {
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 10px 8px;
+    }
+    .bk-group-letter {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--fifa-gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .bk-slot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .bk-slot-rank {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fifa-text-muted);
+      width: 18px;
+      flex-shrink: 0;
+    }
+    .bk-team-confirmed {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fifa-text-primary);
+    }
+    .bk-team-projected {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--fifa-text-muted);
+    }
+    .bk-team-eliminated {
+      font-size: 12px;
+      color: #4A6080;
+      text-decoration: line-through;
+    }
+    .bk-third-note {
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      margin-top: 4px;
+    }
+    .bk-r32-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bk-match-card {
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bk-match-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--fifa-text-muted);
+      width: 32px;
+      flex-shrink: 0;
+    }
+    .bk-matchup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .bk-vs {
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      flex-shrink: 0;
+    }
+
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {
       *,
@@ -695,7 +837,22 @@
 </div>
 
 <!-- ══════════════════════════════════════════
-     SECTION 3 — MODEL CONFIDENCE (collapsible)
+     SECTION 3 — KNOCKOUT BRACKET (collapsible)
+     ══════════════════════════════════════════ -->
+<div class="bracket-section" id="bracket-section">
+  <div class="bracket-toggle" onclick="toggleBracket()">
+    <span class="bracket-toggle-label">KNOCKOUT BRACKET · <span style="color:#C9A84C">0 CONFIRMED</span> · <span style="color:#4A6080">63 PENDING</span></span>
+    <span class="bracket-arrow" id="bracket-arrow">&#9662;</span>
+  </div>
+  <div class="bracket-body" id="bracket-body">
+    <div class="bracket-inner">
+<div class="bracket-placeholder">Bracket will fill in as group stage results are confirmed. Check back from June 24 onward.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — MODEL CONFIDENCE (collapsible)
      ══════════════════════════════════════════ -->
 <div class="confidence-section" id="conf-section">
   <div class="confidence-toggle" onclick="toggleConf()">
@@ -714,12 +871,15 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-03 14:18 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-03 14:31 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
 function toggleConf() {
   document.getElementById('conf-section').classList.toggle('open');
+}
+function toggleBracket() {
+  document.getElementById('bracket-section').classList.toggle('open');
 }
 </script>
 

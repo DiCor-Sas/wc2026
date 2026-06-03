@@ -12,6 +12,7 @@ PLAYER_STATS_FILE  = "/Users/diegofelipecortessastoque/Desktop/wc2026/player_sta
 TEAM_STRENGTH_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json"
 FIXTURES_FILE      = "/Users/diegofelipecortessastoque/Desktop/wc2026/fixtures.json"
 LINEUPS_FILE       = "/Users/diegofelipecortessastoque/Desktop/wc2026/lineups.json"
+BRACKET_STATE_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/bracket_state.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 
@@ -516,6 +517,128 @@ def _compute_golden_boot(data):
     }
 
 
+def _bracket_section_html():
+    """Build the collapsible Knockout Bracket section HTML body."""
+    try:
+        with open(BRACKET_STATE_FILE) as f:
+            bracket = json.load(f)
+    except Exception:
+        bracket = {}
+
+    confirmed_count = sum(1 for v in bracket.values() if v.get("status") == "CONFIRMED")
+    total_slots = len(bracket)
+    pending_count = total_slots - confirmed_count
+
+    # Phase detection
+    if confirmed_count == 0:
+        phase = 1
+    elif confirmed_count < 32:
+        phase = 2
+    else:
+        phase = 3
+
+    # Header counts
+    header_label = (
+        f'KNOCKOUT BRACKET'
+        f' · <span style="color:#C9A84C">{confirmed_count} CONFIRMED</span>'
+        f' · <span style="color:#4A6080">{pending_count} PENDING</span>'
+    )
+
+    # Body content
+    if phase == 1:
+        body_html = (
+            '<div class="bracket-placeholder">'
+            'Bracket will fill in as group stage results are confirmed.'
+            ' Check back from June 24 onward.'
+            '</div>'
+        )
+    elif phase == 2:
+        # Collect groups A–L
+        groups = {}
+        for slot_key, slot_val in bracket.items():
+            # Only group-stage slots: "Group X 1st" / "Group X 2nd"
+            parts = slot_key.split()
+            if len(parts) == 3 and parts[0] == "Group" and parts[2] in ("1st", "2nd"):
+                grp_letter = parts[1]
+                rank = parts[2]
+                groups.setdefault(grp_letter, {})[rank] = slot_val
+
+        group_cards = ""
+        for grp_letter in sorted(groups.keys()):
+            slots = groups[grp_letter]
+            cards_html = ""
+            for rank in ("1st", "2nd"):
+                slot_val = slots.get(rank)
+                if slot_val:
+                    status = slot_val.get("status", "PROJECTED")
+                    team = slot_val.get("team", "TBD")
+                    prob = slot_val.get("probability", 0)
+                    prob_pct = round(prob * 100)
+                    if status == "CONFIRMED":
+                        team_html = f'<span class="bk-team-confirmed">&#10003; {h(team)}</span>'
+                    else:
+                        team_html = f'<span class="bk-team-projected">{h(team)} ({prob_pct}%)</span>'
+                else:
+                    team_html = '<span class="bk-team-projected">TBD</span>'
+                cards_html += (
+                    f'<div class="bk-slot">'
+                    f'<span class="bk-slot-rank">{rank}</span>'
+                    f'{team_html}'
+                    f'</div>'
+                )
+            group_cards += (
+                f'<div class="bk-group-card">'
+                f'<div class="bk-group-letter">GROUP {h(grp_letter)}</div>'
+                f'{cards_html}'
+                f'<div class="bk-third-note">Best 3rd place pool</div>'
+                f'</div>'
+            )
+        body_html = f'<div class="bk-groups-grid">{group_cards}</div>'
+    else:
+        # Phase 3: Round of 32 matchup cards
+        r32_slots = {k: v for k, v in bracket.items() if "Round of 32" in k or "R32" in k}
+        # Fallback: match slots M73–M88
+        matchup_keys = [k for k in bracket if k.startswith("M") and k[1:].isdigit()]
+        matchup_keys.sort(key=lambda k: int(k[1:]))
+
+        cards_html = ""
+        match_num_start = 73
+        for i in range(16):
+            match_num = match_num_start + i
+            home_key = f"M{match_num} home"
+            away_key = f"M{match_num} away"
+            home_slot = bracket.get(home_key, {})
+            away_slot = bracket.get(away_key, {})
+
+            def _team_display(slot):
+                if not slot:
+                    return '<span class="bk-team-projected">TBD</span>'
+                status = slot.get("status", "PROJECTED")
+                team = slot.get("team", "TBD")
+                prob = slot.get("probability", 0)
+                prob_pct = round(prob * 100)
+                if status == "ELIMINATED":
+                    return f'<span class="bk-team-eliminated">&#10007; {h(team)}</span>'
+                elif status == "CONFIRMED":
+                    return f'<span class="bk-team-confirmed">&#10003; {h(team)}</span>'
+                else:
+                    return f'<span class="bk-team-projected">{h(team)} ({prob_pct}%)</span>'
+
+            cards_html += (
+                f'<div class="bk-match-card">'
+                f'<div class="bk-match-num">M{match_num}</div>'
+                f'<div class="bk-matchup">'
+                f'{_team_display(home_slot)}'
+                f'<span class="bk-vs">vs</span>'
+                f'{_team_display(away_slot)}'
+                f'</div>'
+                f'</div>'
+            )
+        body_html = f'<div class="bk-r32-grid">{cards_html}</div>'
+
+    return header_label, body_html
+
+
 def build_html(data):
     sims = data["simulations"]
     winner = data["predicted_winner"]
@@ -538,6 +661,7 @@ def build_html(data):
 
     matches = _upcoming_matches(data)
     match_cards = _match_cards_html(matches)
+    bracket_header_label, bracket_body_html = _bracket_section_html()
 
     today = date.today()
     kickoff_date = date(2026, 6, 11)
@@ -1014,6 +1138,148 @@ def build_html(data):
       border-radius: 4px;
     }}
 
+    /* ── SECTION: Knockout Bracket ── */
+    .bracket-section {{
+      margin: 14px 16px 0;
+      max-width: 468px;
+      margin-left: auto;
+      margin-right: auto;
+    }}
+    .bracket-toggle {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 44px;
+    }}
+    .bracket-toggle-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }}
+    .bracket-arrow {{
+      font-size: 12px;
+      color: var(--fifa-text-muted);
+      transition: transform 300ms ease;
+    }}
+    .bracket-section.open .bracket-arrow {{ transform: rotate(180deg); }}
+    .bracket-section.open .bracket-toggle {{
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-color: transparent;
+    }}
+    .bracket-body {{
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms ease-in-out;
+      background: var(--fifa-navy);
+      border: 1px solid var(--fifa-border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+    }}
+    .bracket-section.open .bracket-body {{ max-height: 2000px; }}
+    .bracket-inner {{ padding: 14px 16px; }}
+    .bracket-placeholder {{
+      text-align: center;
+      color: var(--fifa-text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 16px 0;
+    }}
+    .bk-groups-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }}
+    .bk-group-card {{
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 10px 8px;
+    }}
+    .bk-group-letter {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--fifa-gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }}
+    .bk-slot {{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }}
+    .bk-slot-rank {{
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fifa-text-muted);
+      width: 18px;
+      flex-shrink: 0;
+    }}
+    .bk-team-confirmed {{
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fifa-text-primary);
+    }}
+    .bk-team-projected {{
+      font-size: 12px;
+      font-style: italic;
+      color: var(--fifa-text-muted);
+    }}
+    .bk-team-eliminated {{
+      font-size: 12px;
+      color: #4A6080;
+      text-decoration: line-through;
+    }}
+    .bk-third-note {{
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      margin-top: 4px;
+    }}
+    .bk-r32-grid {{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .bk-match-card {{
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }}
+    .bk-match-num {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--fifa-text-muted);
+      width: 32px;
+      flex-shrink: 0;
+    }}
+    .bk-matchup {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }}
+    .bk-vs {{
+      font-size: 11px;
+      color: var(--fifa-text-muted);
+      flex-shrink: 0;
+    }}
+
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {{
       *,
@@ -1071,7 +1337,22 @@ def build_html(data):
 </div>
 
 <!-- ══════════════════════════════════════════
-     SECTION 3 — MODEL CONFIDENCE (collapsible)
+     SECTION 3 — KNOCKOUT BRACKET (collapsible)
+     ══════════════════════════════════════════ -->
+<div class="bracket-section" id="bracket-section">
+  <div class="bracket-toggle" onclick="toggleBracket()">
+    <span class="bracket-toggle-label">{bracket_header_label}</span>
+    <span class="bracket-arrow" id="bracket-arrow">&#9662;</span>
+  </div>
+  <div class="bracket-body" id="bracket-body">
+    <div class="bracket-inner">
+{bracket_body_html}
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — MODEL CONFIDENCE (collapsible)
      ══════════════════════════════════════════ -->
 <div class="confidence-section" id="conf-section">
   <div class="confidence-toggle" onclick="toggleConf()">
@@ -1091,6 +1372,9 @@ def build_html(data):
 <script>
 function toggleConf() {{
   document.getElementById('conf-section').classList.toggle('open');
+}}
+function toggleBracket() {{
+  document.getElementById('bracket-section').classList.toggle('open');
 }}
 </script>
 
