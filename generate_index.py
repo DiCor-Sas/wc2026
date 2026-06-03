@@ -555,7 +555,9 @@ def build_html(data):
             f'</div>\n'
         )
 
-    ts = now_utc.strftime("%Y-%m-%d %H:%M UTC")
+    COT = timezone(timedelta(hours=-5))
+    now_cot = datetime.now(COT)
+    ts = now_cot.strftime("%Y-%m-%d %H:%M COT")
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
