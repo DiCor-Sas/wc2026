@@ -639,18 +639,23 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
         for key, g in sim_goals.items():
             goals_acc[key] += g
 
+    _proxy_suffixes = ("Striker", "Forward 2", "Forward 3")
+
     results = []
     for (pname, tname), wins in win_count.items():
         mean_goals   = goals_acc[(pname, tname)] / n_sims
         mean_matches = match_cnt_acc[tname] / n_sims
         p_entry      = next((p for p in player_pool.get(tname, []) if p["player"] == pname), {})
+        is_proxy     = any(pname.endswith(s) for s in _proxy_suffixes)
+        display_name = f"{tname} (squad avg)" if is_proxy else pname
         results.append({
-            "player":           pname,
+            "player":           display_name,
             "team":             tname,
             "golden_boot_pct":  round(wins / n_sims * 100, 2),
             "mean_goals":       round(mean_goals, 2),
             "expected_matches": round(mean_matches, 2),
             "is_penalty_taker": p_entry.get("is_penalty_taker", False),
+            "is_proxy":         is_proxy,
         })
 
     results.sort(key=lambda x: -x["golden_boot_pct"])
