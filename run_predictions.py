@@ -499,6 +499,9 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
         "Portugal":    ["ronaldo"],
         "Netherlands": ["depay", "gakpo"],
         "Brazil":      ["firmino", "vinicius", "neymar"],
+        "Morocco":     ["en-nesyri", "en nesyri"],
+        "Uruguay":     ["nunez"],
+        "Senegal":     ["mane"],
     }
 
     def _build_pool(tname, players):
