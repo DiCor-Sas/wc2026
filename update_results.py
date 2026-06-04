@@ -51,37 +51,39 @@ def step2_recalculate_team_strength():
     with open(ROOT / "team_strength.json") as f:
         ts = json.load(f)
 
-    updated = 0
+    elo_changed = 0
+    rd_penalized = 0
     for team, s in ts.items():
         if team not in elo_data:
             print(f"  [warn] {team} not in elo_ratings.json — skipping")
             continue
 
         new_elo = elo_data[team]["elo"]
-        if new_elo == s["elo"]:
-            continue  # no change
+        rd = elo_data[team].get("rd", 200.0)
 
-        # Update stored ELO
-        s["elo"] = new_elo
+        if new_elo != s["elo"]:
+            # Update stored ELO and recompute blend
+            s["elo"] = new_elo
 
-        # Recompute: base = ELO*0.50 + FIFA*0.30 + form*0.20
-        base = (new_elo * 0.50) + (s["fifa_score"] * 0.30) + (s["form_score"] * 0.20)
+            # Recompute: base = ELO*0.50 + FIFA*0.30 + form*0.20
+            base = (new_elo * 0.50) + (s["fifa_score"] * 0.30) + (s["form_score"] * 0.20)
 
-        # Squad layer: squad_elo_like = 800 + norm * 1400
-        squad_elo_like = SQUAD_SCALE_MIN + s["squad_score_norm"] * (SQUAD_SCALE_MAX - SQUAD_SCALE_MIN)
+            # Squad layer: squad_elo_like = 800 + norm * 1400
+            squad_elo_like = SQUAD_SCALE_MIN + s["squad_score_norm"] * (SQUAD_SCALE_MAX - SQUAD_SCALE_MIN)
 
-        # Blend: 70% base + 30% squad
-        s["final_strength"] = round(base * 0.70 + squad_elo_like * 0.30, 2)
-        updated += 1
-        print(f"  {team}: ELO updated → {new_elo}  final_strength={s['final_strength']}")
+            # Blend: 70% base + 30% squad
+            s["final_strength"] = round(base * 0.70 + squad_elo_like * 0.30, 2)
+            elo_changed += 1
+
+        # Always apply RD penalty so all teams reflect current uncertainty
+        s["final_strength"] = round(s["final_strength"] * (1 - 0.0001 * rd), 2)  # Glicko-1 RD uncertainty penalty
+        rd_penalized += 1
+        print(f"  {team}: ELO={new_elo}  rd={rd:.1f}  final_strength={s['final_strength']}")
 
     with open(ROOT / "team_strength.json", "w") as f:
         json.dump(ts, f, indent=2)
 
-    if updated == 0:
-        print("  No ELO changes — team_strength.json unchanged.")
-    else:
-        print(f"  ✓ {updated} teams updated. team_strength.json saved.")
+    print(f"  ✓ {elo_changed} ELO update(s), RD penalty applied to {rd_penalized} teams. team_strength.json saved.")
 
 
 def step3_run_simulation():

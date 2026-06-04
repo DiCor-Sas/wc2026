@@ -14,6 +14,15 @@ import urllib.request
 from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 
+import math as _math
+
+HALF_LIFE_DAYS = 180
+
+def _decay_weight(date_str):
+    from datetime import date
+    days_ago = (date.today() - date.fromisoformat(date_str)).days
+    return _math.exp(-_math.log(2) / HALF_LIFE_DAYS * max(0, days_ago))
+
 ROOT = Path(__file__).parent.resolve()
 
 # ── WC 2026 groups (from wc_2026_teams.json) ──────────────────────────────────
@@ -522,12 +531,18 @@ def fetch_daily_results():
         print("[daily] Daily results: all sources blocked, no updates")
         return
 
-    # Apply ELO updates with K=20 — skip any match already applied in a previous run
-    K_FRIENDLY = 20
+    # Apply ELO updates with decay-weighted K — skip any match already applied in a previous run
     elo_path = ROOT / "elo_ratings.json"
     with open(elo_path) as f:
         elo_data = json.load(f)
+
+    # Initialize rd/volatility for any team missing these fields
+    for team, d in elo_data.items():
+        d.setdefault("rd", 200.0)
+        d.setdefault("volatility", 0.06)
+
     elo = {team: d["elo"] for team, d in elo_data.items()}
+    rd_updates = {}
 
     wc_updates = 0
     newly_applied = set()
@@ -543,6 +558,7 @@ def fetch_daily_results():
             print(f"[daily] Skipping {h_team} vs {a_team} on {m.get('date','')} — ELO already applied")
             continue
 
+        K_FRIENDLY = 20 * _decay_weight(m.get("date", date.today().isoformat()))
         h_elo = elo.get(h_team, DEFAULT_ELO)
         a_elo = elo.get(a_team, DEFAULT_ELO)
 
@@ -560,20 +576,44 @@ def fetch_daily_results():
         new_h = round(h_elo + K_FRIENDLY * (act_h - exp_h), 1)
         new_a = round(a_elo + K_FRIENDLY * (act_a - exp_a), 1)
 
+        # Glicko-1 RD update — both teams updated symmetrically
+        q = _math.log(10) / 400
+        rd_h = elo_data.get(h_team, {}).get("rd", 200.0)
+        rd_a = elo_data.get(a_team, {}).get("rd", 200.0)
+
+        if h_wc and h_team in elo_data:
+            g_rd_a = 1 / _math.sqrt(1 + 3 * q**2 * rd_a**2 / _math.pi**2)
+            E_h = 1 / (1 + 10 ** (-(h_elo - a_elo) / 400))
+            d_sq_h = 1 / (q**2 * g_rd_a**2 * E_h * (1 - E_h))
+            rd_h_new = _math.sqrt(1 / (1/rd_h**2 + 1/d_sq_h))
+            rd_updates[h_team] = max(30.0, min(350.0, rd_h_new))
+
+        if a_wc and a_team in elo_data:
+            g_rd_h = 1 / _math.sqrt(1 + 3 * q**2 * rd_h**2 / _math.pi**2)
+            E_a = 1 / (1 + 10 ** (-(a_elo - h_elo) / 400))
+            d_sq_a = 1 / (q**2 * g_rd_h**2 * E_a * (1 - E_a))
+            rd_a_new = _math.sqrt(1 / (1/rd_a**2 + 1/d_sq_a))
+            rd_updates[a_team] = max(30.0, min(350.0, rd_a_new))
+
         if h_wc and h_team in elo:
             elo[h_team] = new_h
-            print(f"[daily] {h_team} ELO: {h_elo} → {new_h} after {h_s}-{a_s} {res_h} vs {a_team} (friendly K=20)")
+            print(f"[daily] {h_team} ELO: {h_elo} → {new_h} after {h_s}-{a_s} {res_h} vs {a_team} (friendly K={K_FRIENDLY:.1f})")
             wc_updates += 1
         if a_wc and a_team in elo:
             elo[a_team] = new_a
-            print(f"[daily] {a_team} ELO: {a_elo} → {new_a} after {a_s}-{h_s} {res_a} vs {h_team} (friendly K=20)")
+            print(f"[daily] {a_team} ELO: {a_elo} → {new_a} after {a_s}-{h_s} {res_a} vs {h_team} (friendly K={K_FRIENDLY:.1f})")
             wc_updates += 1
 
         newly_applied.add(match_key)
 
+    # Write back elo, rd, and volatility together
     for team in elo_data:
         if team in elo:
             elo_data[team]["elo"] = elo[team]
+        if team in rd_updates:
+            elo_data[team]["rd"] = rd_updates[team]
+        if "volatility" not in elo_data[team]:
+            elo_data[team]["volatility"] = 0.06
     with open(elo_path, "w") as f:
         json.dump(elo_data, f, indent=2)
 
@@ -606,8 +646,6 @@ def fetch_daily_results():
 
 # ── TASK 2: Update ELO from results ───────────────────────────────────────────
 
-K = 40
-
 def expected_score(elo_a, elo_b):
     return 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 400.0))
 
@@ -625,14 +663,21 @@ def update_elo_from_results():
         print("[elo] No completed matches — ELO unchanged.")
         return
 
+    # Initialize rd/volatility for any team missing these fields
+    for team, d in elo_data.items():
+        d.setdefault("rd", 200.0)
+        d.setdefault("volatility", 0.06)
+
     # Build mutable elo dict {team: elo_value}
     elo = {team: d["elo"] for team, d in elo_data.items()}
+    rd_updates = {}
 
     for m in matches:
         t1 = m["team1"]
         t2 = m["team2"]
         hs = m["home_score"]
         as_ = m["away_score"]
+        K = 40 * _decay_weight(m.get("date", date.today().isoformat()))
 
         if t1 not in elo or t2 not in elo:
             missing = [t for t in [t1, t2] if t not in elo]
@@ -657,14 +702,40 @@ def update_elo_from_results():
         elo[t1] = round(e1 + delta1, 1)
         elo[t2] = round(e2 + delta2, 1)
 
+        # Glicko-1 RD update — both teams updated symmetrically
+        q = _math.log(10) / 400
+        rd1 = elo_data.get(t1, {}).get("rd", 200.0)
+        rd2 = elo_data.get(t2, {}).get("rd", 200.0)
+
+        # Team 1 RD update (uses opponent rd2 as rd_opp)
+        g_rd2 = 1 / _math.sqrt(1 + 3 * q**2 * rd2**2 / _math.pi**2)
+        E1 = 1 / (1 + 10 ** (-(e1 - e2) / 400))
+        d_sq1 = 1 / (q**2 * g_rd2**2 * E1 * (1 - E1))
+        rd1_new = _math.sqrt(1 / (1/rd1**2 + 1/d_sq1))
+        rd1_new = max(30.0, min(350.0, rd1_new))
+
+        # Team 2 RD update (uses opponent rd1 as rd_opp)
+        g_rd1 = 1 / _math.sqrt(1 + 3 * q**2 * rd1**2 / _math.pi**2)
+        E2 = 1 / (1 + 10 ** (-(e2 - e1) / 400))
+        d_sq2 = 1 / (q**2 * g_rd1**2 * E2 * (1 - E2))
+        rd2_new = _math.sqrt(1 / (1/rd2**2 + 1/d_sq2))
+        rd2_new = max(30.0, min(350.0, rd2_new))
+
+        rd_updates[t1] = rd1_new
+        rd_updates[t2] = rd2_new
+
         print(f"[elo] {t1} {hs}-{as_} {t2}  |  "
               f"{t1}: {e1}→{elo[t1]} ({delta1:+.1f})  "
               f"{t2}: {e2}→{elo[t2]} ({delta2:+.1f})")
 
-    # Write back
+    # Write back elo, rd, and volatility together
     for team in elo_data:
         if team in elo:
             elo_data[team]["elo"] = elo[team]
+        if team in rd_updates:
+            elo_data[team]["rd"] = rd_updates[team]
+        if "volatility" not in elo_data[team]:
+            elo_data[team]["volatility"] = 0.06
 
     with open(elo_path, "w") as f:
         json.dump(elo_data, f, indent=2)
