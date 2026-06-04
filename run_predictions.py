@@ -24,6 +24,9 @@ ko_wins = defaultdict(Counter)         # match_num -> {team_name: n_times_won_th
 # Track actual scores: match_num -> (winner_name, w_goals, l_goals) counter
 ko_score_tracker = defaultdict(Counter)  # match_num -> Counter of (winner, w_g, l_g)
 
+# Per-iteration team-level scores: list of lists of {"team": str, "goals": int}
+per_sim_scores = []
+
 KNOCKOUT_STAGES = [
     STAGE.ROUND_OF_32,
     STAGE.ROUND_OF_16,
@@ -43,6 +46,15 @@ for i in range(NUM_SIMULATIONS):
         match_class=ModeledMatch,
     )
     comp.simulate()
+
+    # ── Record per-iteration team scores (group + knockout) ───────────────
+    sim_record = []
+    for _m in comp.all_matches:
+        if _m.home_team is not None and _m.home_score is not None:
+            sim_record.append({"team": _m.home_team.name, "goals": _m.home_score})
+        if _m.away_team is not None and _m.away_score is not None:
+            sim_record.append({"team": _m.away_team.name, "goals": _m.away_score})
+    per_sim_scores.append(sim_record)
 
     # ── FIX 1: Hard constraint — group-stage finishers can only appear in one slot ──
     # Build per-simulation mapping: team_name -> R32 match number they were assigned
@@ -90,6 +102,7 @@ for i in range(NUM_SIMULATIONS):
                     l_g = match.away_score if is_home_winner else match.home_score
                     ko_score_tracker[mn][(winner.name, w_g, l_g)] += 1
 
+print(f"[golden_boot] per_sim_scores populated: {len(per_sim_scores)} iterations")
 total = sum(winners.values())
 
 # ── Load team_strength for Poisson score calculation (Fix 3) ──────────────────
@@ -432,6 +445,160 @@ assert fin_teams.isdisjoint(tp_teams), (
 print(f"✓ Final teams: {fin_teams}")
 print(f"✓ 3P teams:    {tp_teams}  (all distinct from Final) ✓")
 
+def simulate_golden_boot(per_sim_scores, player_stats_path):
+    import random as _rng_mod
+
+    with open(player_stats_path) as f:
+        raw_stats = json.load(f)
+
+    valid_teams = {k: v for k, v in raw_stats.items() if isinstance(v, list)}
+
+    # Compute proxy goals_per_match: mean over all Attacker-position entries
+    # (excluding Germany stub) with appearances > 0
+    attacker_rates = []
+    for tname, players in valid_teams.items():
+        if tname == "Germany":
+            continue
+        for p in players:
+            if p.get("position") == "Attacker" and p.get("appearances", 0) > 0:
+                attacker_rates.append(p["goals"] / p["appearances"])
+    proxy_rate = sum(attacker_rates) / len(attacker_rates) if attacker_rates else 0.45
+    print(f"[golden_boot] proxy goals_per_match = {proxy_rate:.4f}")
+
+    _penalty_hints = {
+        "Spain":       ["oyarzabal"],
+        "France":      ["mbappe", "mbapp"],
+        "Argentina":   ["messi"],
+        "England":     ["kane"],
+        "Portugal":    ["ronaldo"],
+        "Netherlands": ["depay", "gakpo"],
+        "Brazil":      ["firmino", "vinicius", "neymar"],
+    }
+
+    def _build_pool(tname, players):
+        attackers   = sorted([p for p in players if p.get("position") == "Attacker"],
+                             key=lambda x: -x["goals"])
+        midfielders = sorted([p for p in players if p.get("position") == "Midfielder"],
+                             key=lambda x: -x["goals"])
+        selected = (attackers + midfielders)[:3]
+        if not selected:
+            selected = sorted(players, key=lambda x: -x["goals"])[:3]
+
+        total_g = sum(p["goals"] for p in selected)
+        entries = []
+        for p in selected:
+            app   = p.get("appearances", 0)
+            gpm   = p["goals"] / app if app > 0 else 0.01
+            share = p["goals"] / total_g if total_g > 0 else 1.0 / len(selected)
+            entries.append({
+                "player":           p["name"],
+                "team":             tname,
+                "goals_per_match":  gpm,
+                "goal_share":       share,
+                "is_penalty_taker": False,
+                "goals_raw":        p["goals"],
+            })
+        s = sum(e["goal_share"] for e in entries)
+        if s > 0:
+            for e in entries:
+                e["goal_share"] /= s
+
+        hints    = _penalty_hints.get(tname, [])
+        assigned = False
+        for hint in hints:
+            for e in entries:
+                if hint in e["player"].lower():
+                    e["is_penalty_taker"] = True
+                    assigned = True
+                    break
+            if assigned:
+                break
+        if not assigned:
+            max(entries, key=lambda x: x["goals_raw"])["is_penalty_taker"] = True
+        return entries
+
+    player_pool = {}
+    for tname, players in valid_teams.items():
+        if tname == "Germany":
+            continue
+        player_pool[tname] = _build_pool(tname, players)
+
+    # Determine all teams present in simulations; build proxy entries for missing ones
+    all_sim_teams = {entry["team"] for sim in per_sim_scores for entry in sim}
+    for tname in all_sim_teams - set(player_pool.keys()):
+        player_pool[tname] = [{
+            "player":           f"{tname} Striker",
+            "team":             tname,
+            "goals_per_match":  proxy_rate,
+            "goal_share":       1.0,
+            "is_penalty_taker": False,
+            "goals_raw":        0,
+        }]
+
+    n_sims        = len(per_sim_scores)
+    win_count     = defaultdict(float)
+    goals_acc     = defaultdict(float)
+    match_cnt_acc = defaultdict(int)   # team -> total matches across all sims
+
+    for sim_record in per_sim_scores:
+        team_matches = defaultdict(list)
+        for entry in sim_record:
+            team_matches[entry["team"]].append(entry["goals"])
+
+        sim_goals = defaultdict(float)
+
+        for tname, match_goals_list in team_matches.items():
+            players = player_pool.get(tname)
+            if not players:
+                continue
+            shares  = np.array([p["goal_share"] for p in players], dtype=float)
+            shares /= shares.sum()
+            n_p     = len(players)
+            pen_idx = next((j for j, p in enumerate(players) if p["is_penalty_taker"]), 0)
+
+            match_cnt_acc[tname] += len(match_goals_list)
+
+            for team_goals in match_goals_list:
+                dist = [0] * n_p
+                for _ in range(int(team_goals)):
+                    dist[np.random.choice(n_p, p=shares)] += 1
+
+                pen_bonus = 1 if _rng_mod.random() < 0.22 else 0
+
+                for j, p in enumerate(players):
+                    bonus  = pen_bonus if j == pen_idx else 0
+                    capped = min(4, dist[j] + bonus)
+                    sim_goals[(p["player"], tname)] += capped
+
+        if sim_goals:
+            max_g = max(sim_goals.values())
+            if max_g > 0:
+                sim_winners = [k for k, g in sim_goals.items() if g == max_g]
+                credit = 1.0 / len(sim_winners)
+                for w in sim_winners:
+                    win_count[w] += credit
+
+        for key, g in sim_goals.items():
+            goals_acc[key] += g
+
+    results = []
+    for (pname, tname), wins in win_count.items():
+        mean_goals   = goals_acc[(pname, tname)] / n_sims
+        mean_matches = match_cnt_acc[tname] / n_sims
+        p_entry      = next((p for p in player_pool.get(tname, []) if p["player"] == pname), {})
+        results.append({
+            "player":           pname,
+            "team":             tname,
+            "golden_boot_pct":  round(wins / n_sims * 100, 2),
+            "mean_goals":       round(mean_goals, 2),
+            "expected_matches": round(mean_matches, 2),
+            "is_penalty_taker": p_entry.get("is_penalty_taker", False),
+        })
+
+    results.sort(key=lambda x: -x["golden_boot_pct"])
+    return results[:20]
+
+
 with open(_ROOT / "predictions.json", "w") as f:
     json.dump(output, f, indent=2)
 
@@ -439,3 +606,13 @@ print(f"\n✓ Predicted winner : {output['predicted_winner']} ({output['predicte
 print(f"✓ Runner-up: {output['runners_up'][0]['team']} ({output['runners_up'][0]['probability']}%)")
 print(f"✓ Third place: {output['third_place'][0]['team']} ({output['third_place'][0]['probability']}%)")
 print("✓ Saved to predictions.json")
+
+# ── Golden Boot simulation ─────────────────────────────────────────────────
+top20 = simulate_golden_boot(per_sim_scores, _ROOT / "player_stats.json")
+with open(_ROOT / "predictions.json") as f:
+    output = json.load(f)
+output["golden_boot_probabilities"] = top20
+with open(_ROOT / "predictions.json", "w") as f:
+    json.dump(output, f, indent=2)
+print(f"✓ Golden Boot top scorer: {top20[0]['player']} ({top20[0]['team']}) "
+      f"{top20[0]['golden_boot_pct']}%")
