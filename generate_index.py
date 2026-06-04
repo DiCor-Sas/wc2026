@@ -823,9 +823,11 @@ def build_html(data):
             f'</div>\n'
         )
 
+    import time as _time
     COT = timezone(timedelta(hours=-5))
     now_cot = datetime.now(COT)
     ts = now_cot.strftime("%Y-%m-%d %H:%M COT")
+    version = int(_time.time())
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -837,6 +839,10 @@ def build_html(data):
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <!-- version: {version} -->
   <style>
     *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
     :root {{
@@ -1738,7 +1744,13 @@ def build_html(data):
 </div>
 
 <div class="site-footer">
-  Updated {ts} &bull; Monte Carlo {sims:,} runs &bull; dicor-sas.github.io/wc2026
+  <div class="footer-text">
+    <span id="footer-refreshed">Data refreshed: {ts}</span>
+    <span class="footer-sep"> &middot; </span>
+    <span id="footer-now"></span>
+    <span class="footer-sep"> &middot; </span>
+    Monte Carlo {sims:,} runs &bull; dicor-sas.github.io/wc2026
+  </div>
 </div>
 
 <script>
@@ -1873,6 +1885,21 @@ document.addEventListener('click', () => {{
 }});
 </script>
 
+<script>
+function updateFooterTime() {{
+  const el = document.getElementById('footer-now');
+  if (!el) return;
+  const now = new Date();
+  const cot = new Date(now.getTime() - 5*60*60*1000);
+  const pad = n => String(n).padStart(2, '0');
+  el.textContent = 'Now: ' + cot.getFullYear() + '-' +
+    pad(cot.getMonth()+1) + '-' + pad(cot.getDate()) + ' ' +
+    pad(cot.getHours()) + ':' + pad(cot.getMinutes()) + ' COT';
+}}
+updateFooterTime();
+setInterval(updateFooterTime, 60000);
+</script>
+
 </body>
 </html>"""
     return html
@@ -1888,6 +1915,13 @@ if __name__ == "__main__":
         f.write(html)
 
     print(f"✓ Written {OUTPUT_FILE}")
+
+    import time as _time
+    version = int(_time.time())
+    with open(_ROOT / "version.txt", "w") as f:
+        f.write(str(version))
+    print(f"✓ Written version.txt ({version})")
+
     # Count teams with asterisk
     pending = [t["team"] for t in data["all_teams"] if "*" in t["team"]]
     print(f"✓ Pending teams marked with *: {pending}")
