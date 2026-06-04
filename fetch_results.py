@@ -324,51 +324,126 @@ def fetch_results():
 
 # ── DAILY INTERNATIONAL RESULTS ───────────────────────────────────────────────
 
+def _parse_skysports_internationals():
+    """Fetch completed international matches from Sky Sports using embedded data-state JSON.
+
+    Returns list of dicts: {date, home_team, away_team, home_score, away_score}.
+    Only matches with data-match-state="post" (completed) are returned.
+    """
+    try:
+        import sys as _sys
+        _sys.path.insert(0, '/Users/diegofelipecortessastoque/Library/Python/3.9/lib/python/site-packages')
+        import requests
+        from bs4 import BeautifulSoup
+    except ImportError:
+        return []
+
+    url = "https://www.skysports.com/internationals-scores-fixtures"
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+    try:
+        r = requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"[daily] Sky Sports: request failed: {e}")
+        return []
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    results = []
+    for m in soup.select(".ui-sport-match-score"):
+        if m.get("data-match-state") != "post":
+            continue
+        raw = m.get("data-state", "{}")
+        try:
+            d = json.loads(raw)
+        except Exception:
+            continue
+        home = d["teams"]["home"]["name"]["full"]
+        away = d["teams"]["away"]["name"]["full"]
+        home_score = d["teams"]["home"]["score"]["current"]
+        away_score = d["teams"]["away"]["score"]["current"]
+        # date format: "Tuesday 2nd June" — store as-is; caller normalises
+        date_raw = d["start"]["date"]
+        results.append({
+            "date_raw": date_raw,
+            "home_team": _fn(home),
+            "away_team": _fn(away),
+            "home_score": home_score,
+            "away_score": away_score,
+        })
+    return results
+
+
 def fetch_daily_results():
     """Fetch completed international friendly results for yesterday + today and apply ELO updates.
 
     Priority chain:
-    1. openfootball int.json  (lightweight, checked every run in case it gets published)
-    2. Playwright ESPN date-specific scraper  (fallback if openfootball returns 404)
+    1. Sky Sports internationals (plain HTML, data-state JSON — no JS rendering needed)
+    2. Playwright ESPN date-specific scraper (fallback)
     3. FOX Sports HTML fallback if ESPN Playwright is blocked
     """
     now_utc = datetime.now(timezone.utc)
-    today_str   = now_utc.date().strftime("%Y%m%d")
+    today_str     = now_utc.date().strftime("%Y%m%d")
     yesterday_str = (now_utc.date() - timedelta(days=1)).strftime("%Y%m%d")
     cutoff = (now_utc - timedelta(hours=48)).date().isoformat()
 
     matches = []
     source_used = "none"
 
-    # ── 1. openfootball int.json (primary, lightweight) ───────────────────────
-    openfootball_int_url = (
-        "https://raw.githubusercontent.com/openfootball/football.json/"
-        "master/2026/int.json"
-    )
+    # ── 1. Sky Sports internationals (primary, plain HTML) ────────────────────
     try:
-        raw = fetch_url(openfootball_int_url)
-        data = json.loads(raw)
-        parsed = []
-        for rnd in data.get("rounds", []):
-            for m in rnd.get("matches", []):
-                ft = m.get("score", {}).get("ft")
-                if not ft or len(ft) < 2 or ft[0] is None:
-                    continue
-                h = _fn(m.get("team1", {}).get("name", ""))
-                a = _fn(m.get("team2", {}).get("name", ""))
-                if not (_is_wc(h) or _is_wc(a)):
-                    continue
-                parsed.append({"date": m.get("date", ""), "home_team": h, "away_team": a,
-                                "home_score": ft[0], "away_score": ft[1]})
-        filtered = [m for m in parsed if m.get("date", "") >= cutoff]
-        if filtered:
-            matches = filtered
-            source_used = "openfootball-int"
-            print(f"[daily] openfootball int.json: {len(matches)} relevant match(es) found")
+        raw_matches = _parse_skysports_internationals()
+        wc_matches = [m for m in raw_matches if _is_wc(m["home_team"]) or _is_wc(m["away_team"])]
+        if wc_matches:
+            # Sky Sports dates are human-readable ("Tuesday 2nd June"); convert to ISO
+            # for ELO deduplication.  Use today's year; format is always "Weekday Nth Month".
+            import re as _re
+            _month_map = {
+                "january": "01", "february": "02", "march": "03", "april": "04",
+                "may": "05", "june": "06", "july": "07", "august": "08",
+                "september": "09", "october": "10", "november": "11", "december": "12",
+            }
+            year = now_utc.date().year
+            normalised = []
+            for m in wc_matches:
+                dr = m["date_raw"].lower()
+                day_match = _re.search(r'(\d+)', dr)
+                month_match = None
+                for mon in _month_map:
+                    if mon in dr:
+                        month_match = mon
+                        break
+                if day_match and month_match:
+                    day = int(day_match.group(1))
+                    mon_num = _month_map[month_match]
+                    iso_date = f"{year}-{mon_num}-{day:02d}"
+                else:
+                    iso_date = now_utc.date().isoformat()
+                normalised.append({
+                    "date": iso_date,
+                    "home_team": m["home_team"],
+                    "away_team": m["away_team"],
+                    "home_score": m["home_score"],
+                    "away_score": m["away_score"],
+                })
+            filtered = [m for m in normalised if m["date"] >= cutoff]
+            if filtered:
+                matches = filtered
+                source_used = "skysports"
+                print(f"[daily] Sky Sports: {len(matches)} WC team match(es) in window "
+                      f"({len(wc_matches)} total WC matches on page)")
+            else:
+                print(f"[daily] Sky Sports: {len(wc_matches)} WC match(es) found but none within "
+                      f"{cutoff} cutoff — trying ESPN Playwright")
         else:
-            print(f"[daily] openfootball int.json: connected but no relevant matches in window")
+            print(f"[daily] Sky Sports: connected ({len(raw_matches)} total matches) "
+                  f"but no WC team matches found — trying ESPN Playwright")
     except Exception as e:
-        print(f"[daily] openfootball int.json: {e} — trying Playwright ESPN fallback")
+        print(f"[daily] Sky Sports failed: {e} — trying ESPN Playwright")
 
     # ── 2. Playwright ESPN date-specific scraper (fallback) ───────────────────
     if not matches:
