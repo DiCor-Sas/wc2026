@@ -1,5 +1,9 @@
 name: Auto Update WC 2026 Dashboard
 
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+
 on:
   schedule:
     # Main pipeline — every 2 hours from 10:00 to 02:00 UTC (12 runs per day)
@@ -34,8 +38,22 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Verify project structure
+        run: |
+          echo "Working dir: $(pwd)"
+          ls -la
+          test -f requirements.txt && \
+          echo "requirements.txt FOUND" || \
+          echo "requirements.txt MISSING"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          pip install playwright
+          playwright install chromium
+        continue-on-error: true
 
       - name: Run full pipeline
         env:
@@ -89,8 +107,22 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Verify project structure
+        run: |
+          echo "Working dir: $(pwd)"
+          ls -la
+          test -f requirements.txt && \
+          echo "requirements.txt FOUND" || \
+          echo "requirements.txt MISSING"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          pip install playwright
+          playwright install chromium
+        continue-on-error: true
 
       - name: Fetch lineups for upcoming matches
         env:
