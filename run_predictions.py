@@ -502,24 +502,46 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
     }
 
     def _build_pool(tname, players):
-        attackers   = sorted([p for p in players if p.get("position") == "Attacker"],
-                             key=lambda x: -x["goals"])
-        midfielders = sorted([p for p in players if p.get("position") == "Midfielder"],
-                             key=lambda x: -x["goals"])
-        selected = (attackers + midfielders)[:3]
+        # Issue 2: prefer players with appearances >= 3; fallback to best available
+        def _sort_key(p): return -p["goals"]
+        q_att = sorted([p for p in players
+                        if p.get("position") == "Attacker" and p.get("appearances", 0) >= 3],
+                       key=_sort_key)
+        q_mid = sorted([p for p in players
+                        if p.get("position") == "Midfielder" and p.get("appearances", 0) >= 3],
+                       key=_sort_key)
+        selected = (q_att + q_mid)[:3]
+
+        if len(selected) < 3:
+            already = {id(p) for p in selected}
+            fb_att  = sorted([p for p in players if p.get("position") == "Attacker"],
+                             key=_sort_key)
+            fb_mid  = sorted([p for p in players if p.get("position") == "Midfielder"],
+                             key=_sort_key)
+            fb_rest = sorted(players, key=_sort_key)
+            for p in fb_att + fb_mid + fb_rest:
+                if id(p) not in already:
+                    selected.append(p)
+                    already.add(id(p))
+                if len(selected) == 3:
+                    break
+
         if not selected:
-            selected = sorted(players, key=lambda x: -x["goals"])[:3]
+            selected = sorted(players, key=_sort_key)[:3]
 
         total_g = sum(p["goals"] for p in selected)
         entries = []
         for p in selected:
-            app   = p.get("appearances", 0)
-            gpm   = p["goals"] / app if app > 0 else 0.01
-            share = p["goals"] / total_g if total_g > 0 else 1.0 / len(selected)
+            app     = p.get("appearances", 0)
+            raw_gpm = p["goals"] / app if app > 0 else 0.01
+            # Issue 1: Bayesian shrinkage toward proxy_rate for low-appearance players
+            cred    = app / (app + 5)
+            adj_gpm = cred * raw_gpm + (1 - cred) * proxy_rate
+            share   = p["goals"] / total_g if total_g > 0 else 1.0 / len(selected)
             entries.append({
                 "player":           p["name"],
                 "team":             tname,
-                "goals_per_match":  gpm,
+                "goals_per_match":  round(adj_gpm, 4),
                 "goal_share":       share,
                 "is_penalty_taker": False,
                 "goals_raw":        p["goals"],
@@ -550,12 +572,13 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
         player_pool[tname] = _build_pool(tname, players)
 
     def _proxy_entries(tname):
+        # Proxy players have 0 appearances → credibility=0 → adj_gpm = proxy_rate (identity)
         return [
-            {"player": f"{tname} Striker",   "team": tname, "goals_per_match": proxy_rate,
+            {"player": f"{tname} Striker",   "team": tname, "goals_per_match": round(proxy_rate, 4),
              "goal_share": mean_shares[0], "is_penalty_taker": True,  "goals_raw": 0},
-            {"player": f"{tname} Forward 2",  "team": tname, "goals_per_match": proxy_rate,
+            {"player": f"{tname} Forward 2",  "team": tname, "goals_per_match": round(proxy_rate, 4),
              "goal_share": mean_shares[1], "is_penalty_taker": False, "goals_raw": 0},
-            {"player": f"{tname} Forward 3",  "team": tname, "goals_per_match": proxy_rate,
+            {"player": f"{tname} Forward 3",  "team": tname, "goals_per_match": round(proxy_rate, 4),
              "goal_share": mean_shares[2], "is_penalty_taker": False, "goals_raw": 0},
         ]
 
