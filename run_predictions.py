@@ -2,8 +2,9 @@ import sys
 import json
 import math
 from collections import Counter, defaultdict
+from pathlib import Path
 
-sys.path.insert(0, "/Users/diegofelipecortessastoque/Desktop/wc2026/fifa-wc-2026-simulation")
+_ROOT = Path(__file__).parent.resolve()
 
 from engine import Competition, STAGE
 from engine.match import ModeledMatch
@@ -36,7 +37,7 @@ for i in range(NUM_SIMULATIONS):
         print(f"  {i + 1:,}/{NUM_SIMULATIONS:,} done...")
 
     comp = Competition.from_json_file(
-        "/Users/diegofelipecortessastoque/Desktop/wc2026/fifa-wc-2026-simulation/data/wc_2026_teams.json",
+        str(_ROOT / "fifa-wc-2026-simulation" / "data" / "wc_2026_teams.json"),
         match_class=ModeledMatch,
     )
     comp.simulate()
@@ -91,7 +92,7 @@ total = sum(winners.values())
 
 # ── Load team_strength for Poisson score calculation (Fix 3) ──────────────────
 _TEAM_STRENGTH = json.load(
-    open("/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json")
+    open(_ROOT / "team_strength.json")
 )
 def _poisson_pmf(lam, k):
     return (lam ** k) * math.exp(-lam) / math.factorial(k)
@@ -374,7 +375,7 @@ assert fin_teams.isdisjoint(tp_teams), (
 print(f"✓ Final teams: {fin_teams}")
 print(f"✓ 3P teams:    {tp_teams}  (all distinct from Final) ✓")
 
-with open("/Users/diegofelipecortessastoque/Desktop/wc2026/predictions.json", "w") as f:
+with open(_ROOT / "predictions.json", "w") as f:
     json.dump(output, f, indent=2)
 
 print(f"\n✓ Predicted winner : {output['predicted_winner']} ({output['predicted_winner_probability_pct']}%)")

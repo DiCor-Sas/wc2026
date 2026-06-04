@@ -5,14 +5,17 @@ Run after run_predictions.py produces the JSON.
 import json
 import math
 from datetime import date, datetime, timezone, timedelta
+from pathlib import Path
 
-PREDICTIONS_FILE   = "/Users/diegofelipecortessastoque/Desktop/wc2026/predictions.json"
-OUTPUT_FILE        = "/Users/diegofelipecortessastoque/Desktop/wc2026/index.html"
-PLAYER_STATS_FILE  = "/Users/diegofelipecortessastoque/Desktop/wc2026/player_stats.json"
-TEAM_STRENGTH_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/team_strength.json"
-FIXTURES_FILE      = "/Users/diegofelipecortessastoque/Desktop/wc2026/fixtures.json"
-LINEUPS_FILE       = "/Users/diegofelipecortessastoque/Desktop/wc2026/lineups.json"
-BRACKET_STATE_FILE = "/Users/diegofelipecortessastoque/Desktop/wc2026/bracket_state.json"
+_ROOT = Path(__file__).parent.resolve()
+
+PREDICTIONS_FILE   = _ROOT / "predictions.json"
+OUTPUT_FILE        = _ROOT / "index.html"
+PLAYER_STATS_FILE  = _ROOT / "player_stats.json"
+TEAM_STRENGTH_FILE = _ROOT / "team_strength.json"
+FIXTURES_FILE      = _ROOT / "fixtures.json"
+LINEUPS_FILE       = _ROOT / "lineups.json"
+BRACKET_STATE_FILE = _ROOT / "bracket_state.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 

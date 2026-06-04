@@ -14,7 +14,7 @@ import urllib.request
 from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path("/Users/diegofelipecortessastoque/Desktop/wc2026")
+ROOT = Path(__file__).parent.resolve()
 
 # ── WC 2026 groups (from wc_2026_teams.json) ──────────────────────────────────
 GROUPS = {

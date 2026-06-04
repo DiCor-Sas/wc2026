@@ -13,7 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path("/Users/diegofelipecortessastoque/Desktop/wc2026")
+ROOT = Path(__file__).parent.resolve()
 
 SQUAD_SCALE_MIN = 800
 SQUAD_SCALE_MAX = 2200
