@@ -874,7 +874,7 @@
   <div class="skeleton" style="height:200px; margin:12px; border-radius:8px;"></div>
   <div class="skeleton" style="height:200px; margin:12px; border-radius:8px; opacity:0.7;"></div>
 </div>
-<div class="countdown-banner">TOURNAMENT STARTS IN 8 DAYS · FIRST KICKOFF JUNE 11</div>
+<div class="countdown-banner" id="main-banner"><span id="banner-text">Loading...</span></div>
 
 <div class="date-header">THURSDAY · 11 JUN</div>
 <div class="matches-grid">
@@ -1105,7 +1105,7 @@
 </div>
 
 <div class="site-footer">
-  Updated 2026-06-03 16:12 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
+  Updated 2026-06-04 11:08 COT &bull; Monte Carlo 10,000 runs &bull; dicor-sas.github.io/wc2026
 </div>
 
 <script>
@@ -1177,6 +1177,49 @@ function updateCountdowns() {
 }
 updateCountdowns();
 setInterval(updateCountdowns, 60000);
+
+// Live banner countdown — pure JS, no hardcoded dates
+const TOURNAMENT_OPEN = new Date('2026-06-11T19:00:00Z');
+const WC_MATCHES = [{"label":"MEX vs RSA","utc":"2026-06-11T19:00:00Z"},{"label":"KOR vs CZE","utc":"2026-06-12T02:00:00Z"},{"label":"CAN vs BOS","utc":"2026-06-12T19:00:00Z"},{"label":"USA vs PAR","utc":"2026-06-13T01:00:00Z"},{"label":"QAT vs SUI","utc":"2026-06-13T19:00:00Z"},{"label":"BRA vs MAR","utc":"2026-06-13T22:00:00Z"},{"label":"HAI vs SCO","utc":"2026-06-14T01:00:00Z"},{"label":"AUS vs TUR","utc":"2026-06-14T04:00:00Z"},{"label":"GER vs CUW","utc":"2026-06-14T17:00:00Z"},{"label":"NED vs JPN","utc":"2026-06-14T20:00:00Z"},{"label":"CIV vs ECU","utc":"2026-06-14T23:00:00Z"},{"label":"SWE vs TUN","utc":"2026-06-15T02:00:00Z"},{"label":"ESP vs CPV","utc":"2026-06-15T16:00:00Z"},{"label":"BEL vs EGY","utc":"2026-06-15T19:00:00Z"},{"label":"KSA vs URU","utc":"2026-06-15T22:00:00Z"},{"label":"IRN vs NZL","utc":"2026-06-16T01:00:00Z"},{"label":"FRA vs SEN","utc":"2026-06-16T19:00:00Z"},{"label":"IRQ vs NOR","utc":"2026-06-16T22:00:00Z"},{"label":"ARG vs ALG","utc":"2026-06-17T01:00:00Z"},{"label":"AUT vs JOR","utc":"2026-06-17T04:00:00Z"},{"label":"POR vs COD","utc":"2026-06-17T17:00:00Z"},{"label":"ENG vs CRO","utc":"2026-06-17T20:00:00Z"},{"label":"GHA vs PAN","utc":"2026-06-17T23:00:00Z"},{"label":"UZB vs COL","utc":"2026-06-18T02:00:00Z"},{"label":"CZE vs RSA","utc":"2026-06-18T16:00:00Z"},{"label":"SUI vs BOS","utc":"2026-06-18T19:00:00Z"},{"label":"CAN vs QAT","utc":"2026-06-18T22:00:00Z"},{"label":"MEX vs KOR","utc":"2026-06-19T01:00:00Z"},{"label":"USA vs AUS","utc":"2026-06-19T19:00:00Z"},{"label":"SCO vs MAR","utc":"2026-06-19T22:00:00Z"},{"label":"BRA vs HAI","utc":"2026-06-20T01:00:00Z"},{"label":"TUR vs PAR","utc":"2026-06-20T04:00:00Z"},{"label":"NED vs SWE","utc":"2026-06-20T17:00:00Z"},{"label":"GER vs CIV","utc":"2026-06-20T20:00:00Z"},{"label":"ECU vs CUW","utc":"2026-06-21T02:00:00Z"},{"label":"TUN vs JPN","utc":"2026-06-21T04:00:00Z"},{"label":"ESP vs KSA","utc":"2026-06-21T16:00:00Z"},{"label":"BEL vs IRN","utc":"2026-06-21T19:00:00Z"},{"label":"URU vs CPV","utc":"2026-06-21T22:00:00Z"},{"label":"NZL vs EGY","utc":"2026-06-22T01:00:00Z"},{"label":"ARG vs AUT","utc":"2026-06-22T17:00:00Z"},{"label":"FRA vs IRQ","utc":"2026-06-22T21:00:00Z"},{"label":"NOR vs SEN","utc":"2026-06-23T00:00:00Z"},{"label":"JOR vs ALG","utc":"2026-06-23T03:00:00Z"},{"label":"POR vs UZB","utc":"2026-06-23T17:00:00Z"},{"label":"ENG vs GHA","utc":"2026-06-23T20:00:00Z"},{"label":"PAN vs CRO","utc":"2026-06-23T23:00:00Z"},{"label":"COL vs COD","utc":"2026-06-24T02:00:00Z"},{"label":"SUI vs CAN","utc":"2026-06-24T19:00:00Z"},{"label":"BOS vs QAT","utc":"2026-06-24T19:00:00Z"},{"label":"SCO vs BRA","utc":"2026-06-24T22:00:00Z"},{"label":"MAR vs HAI","utc":"2026-06-24T22:00:00Z"},{"label":"CZE vs MEX","utc":"2026-06-25T01:00:00Z"},{"label":"RSA vs KOR","utc":"2026-06-25T01:00:00Z"},{"label":"CUW vs CIV","utc":"2026-06-25T20:00:00Z"},{"label":"ECU vs GER","utc":"2026-06-25T20:00:00Z"},{"label":"JPN vs SWE","utc":"2026-06-25T23:00:00Z"},{"label":"TUN vs NED","utc":"2026-06-25T23:00:00Z"},{"label":"TUR vs USA","utc":"2026-06-26T02:00:00Z"},{"label":"PAR vs AUS","utc":"2026-06-26T02:00:00Z"},{"label":"NOR vs FRA","utc":"2026-06-26T19:00:00Z"},{"label":"SEN vs IRQ","utc":"2026-06-26T19:00:00Z"},{"label":"CPV vs KSA","utc":"2026-06-27T00:00:00Z"},{"label":"URU vs ESP","utc":"2026-06-27T00:00:00Z"},{"label":"EGY vs IRN","utc":"2026-06-27T03:00:00Z"},{"label":"NZL vs BEL","utc":"2026-06-27T03:00:00Z"},{"label":"PAN vs ENG","utc":"2026-06-27T21:00:00Z"},{"label":"CRO vs GHA","utc":"2026-06-27T21:00:00Z"},{"label":"COL vs POR","utc":"2026-06-27T23:30:00Z"},{"label":"COD vs UZB","utc":"2026-06-27T23:30:00Z"},{"label":"ALG vs AUT","utc":"2026-06-28T02:00:00Z"},{"label":"JOR vs ARG","utc":"2026-06-28T02:00:00Z"}];
+
+function formatCountdown(diffMs) {
+  const days  = Math.floor(diffMs / (1000*60*60*24));
+  const hours = Math.floor((diffMs % (1000*60*60*24)) / (1000*60*60));
+  const mins  = Math.floor((diffMs % (1000*60*60)) / (1000*60));
+  if (days  > 0) return `${days}D ${hours}H`;
+  if (hours > 0) return `${hours}H ${mins}M`;
+  return `${mins}M`;
+}
+
+function getNextMatch() {
+  const now = new Date();
+  return WC_MATCHES.find(m => new Date(m.utc) > now);
+}
+
+function updateBanner() {
+  const now = new Date();
+  const banner   = document.getElementById('banner-text');
+  const bannerEl = document.getElementById('main-banner');
+  if (!banner || !bannerEl) return;
+  const preTournament = TOURNAMENT_OPEN - now;
+  if (preTournament > 0) {
+    bannerEl.style.background = '#E8002D';
+    banner.textContent = `IN ${formatCountdown(preTournament)} · FIRST KICKOFF JUNE 11`;
+  } else {
+    const next = getNextMatch();
+    if (!next) { bannerEl.style.display = 'none'; return; }
+    const diffToNext = new Date(next.utc) - now;
+    if (diffToNext <= 0 && diffToNext > -110 * 60 * 1000) {
+      bannerEl.style.background = '#22C55E';
+      banner.textContent = `⚽ ${next.label} · LIVE NOW`;
+    } else {
+      bannerEl.style.background = '#E8002D';
+      banner.textContent = `NEXT: ${next.label} · IN ${formatCountdown(diffToNext)}`;
+    }
+  }
+}
+updateBanner();
+setInterval(updateBanner, 60000);
 
 // Confidence badge tooltips — tap to show, tap elsewhere to dismiss
 document.querySelectorAll('.confidence-badge').forEach(badge => {

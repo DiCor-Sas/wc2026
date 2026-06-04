@@ -702,6 +702,38 @@ def _bracket_section_html():
     return header_label, body_html
 
 
+def _build_wc_matches_json():
+    """Build JS array of all match kickoff times in UTC from fixtures.json."""
+    try:
+        with open(FIXTURES_FILE) as f:
+            raw = json.load(f)
+    except Exception:
+        return "[]"
+    matches = []
+    for fx in raw:
+        date_str = fx.get("date", "")
+        time_str = fx.get("time", "00:00")
+        home = _norm(fx.get("home", "TBD"))
+        away = _norm(fx.get("away", "TBD"))
+        try:
+            hour, minute = int(time_str[:2]), int(time_str[3:5])
+        except Exception:
+            hour, minute = 0, 0
+        ko_col = datetime(
+            int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
+            hour, minute,
+        )
+        ko_utc = ko_col + timedelta(hours=5)  # COT = UTC-5, so UTC = COT + 5
+        utc_str = ko_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+        home_code = COUNTRY_CODE.get(home, home[:3].upper())
+        away_code = COUNTRY_CODE.get(away, away[:3].upper())
+        home_code = home_code[:3] if len(home_code) > 3 else home_code
+        away_code = away_code[:3] if len(away_code) > 3 else away_code
+        matches.append({"label": f"{home_code} vs {away_code}", "utc": utc_str})
+    matches.sort(key=lambda m: m["utc"])
+    return json.dumps(matches, separators=(",", ":"))
+
+
 def build_html(data):
     sims = data["simulations"]
     winner = data["predicted_winner"]
@@ -726,16 +758,8 @@ def build_html(data):
     match_cards = _match_cards_html(matches)
     bracket_header_label, bracket_body_html = _bracket_section_html()
 
-    today = date.today()
-    kickoff_date = date(2026, 6, 11)
-    days_until = (kickoff_date - today).days
-    if days_until > 0:
-        countdown_text = f"TOURNAMENT STARTS IN {days_until} DAYS · FIRST KICKOFF JUNE 11"
-        countdown_html = f'<div class="countdown-banner">{countdown_text}</div>'
-    elif days_until == 0:
-        countdown_html = '<div class="countdown-banner">TOURNAMENT STARTS TODAY · FIRST KICKOFF 14:00 COT</div>'
-    else:
-        countdown_html = '<div class="countdown-banner" style="display:none"></div>'
+    countdown_html = '<div class="countdown-banner" id="main-banner"><span id="banner-text">Loading...</span></div>'
+    wc_matches_json = _build_wc_matches_json()
 
     top5_rows = ""
     for i, item in enumerate(all_teams[:5]):
@@ -1735,6 +1759,49 @@ function updateCountdowns() {{
 }}
 updateCountdowns();
 setInterval(updateCountdowns, 60000);
+
+// Live banner countdown — pure JS, no hardcoded dates
+const TOURNAMENT_OPEN = new Date('2026-06-11T19:00:00Z');
+const WC_MATCHES = {wc_matches_json};
+
+function formatCountdown(diffMs) {{
+  const days  = Math.floor(diffMs / (1000*60*60*24));
+  const hours = Math.floor((diffMs % (1000*60*60*24)) / (1000*60*60));
+  const mins  = Math.floor((diffMs % (1000*60*60)) / (1000*60));
+  if (days  > 0) return `${{days}}D ${{hours}}H`;
+  if (hours > 0) return `${{hours}}H ${{mins}}M`;
+  return `${{mins}}M`;
+}}
+
+function getNextMatch() {{
+  const now = new Date();
+  return WC_MATCHES.find(m => new Date(m.utc) > now);
+}}
+
+function updateBanner() {{
+  const now = new Date();
+  const banner   = document.getElementById('banner-text');
+  const bannerEl = document.getElementById('main-banner');
+  if (!banner || !bannerEl) return;
+  const preTournament = TOURNAMENT_OPEN - now;
+  if (preTournament > 0) {{
+    bannerEl.style.background = '#E8002D';
+    banner.textContent = `IN ${{formatCountdown(preTournament)}} · FIRST KICKOFF JUNE 11`;
+  }} else {{
+    const next = getNextMatch();
+    if (!next) {{ bannerEl.style.display = 'none'; return; }}
+    const diffToNext = new Date(next.utc) - now;
+    if (diffToNext <= 0 && diffToNext > -110 * 60 * 1000) {{
+      bannerEl.style.background = '#22C55E';
+      banner.textContent = `⚽ ${{next.label}} · LIVE NOW`;
+    }} else {{
+      bannerEl.style.background = '#E8002D';
+      banner.textContent = `NEXT: ${{next.label}} · IN ${{formatCountdown(diffToNext)}}`;
+    }}
+  }}
+}}
+updateBanner();
+setInterval(updateBanner, 60000);
 
 // Confidence badge tooltips — tap to show, tap elsewhere to dismiss
 document.querySelectorAll('.confidence-badge').forEach(badge => {{
