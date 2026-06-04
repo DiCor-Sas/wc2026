@@ -11,7 +11,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- version: 1780612757 -->
+  <!-- version: 1780612968 -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1117,7 +1117,7 @@
 
 <div class="site-footer">
   <div class="footer-text">
-    <span id="footer-refreshed">Data refreshed: 2026-06-04 17:39 COT</span>
+    <span id="footer-refreshed">Data refreshed: 2026-06-04 17:42 COT</span>
     <span class="footer-sep"> &middot; </span>
     <span id="footer-now"></span>
     <span class="footer-sep"> &middot; </span>
@@ -1262,11 +1262,16 @@ function updateFooterTime() {
   const el = document.getElementById('footer-now');
   if (!el) return;
   const now = new Date();
-  const cot = new Date(now.getTime() - 5*60*60*1000);
-  const pad = n => String(n).padStart(2, '0');
-  el.textContent = 'Now: ' + cot.getFullYear() + '-' +
-    pad(cot.getMonth()+1) + '-' + pad(cot.getDate()) + ' ' +
-    pad(cot.getHours()) + ':' + pad(cot.getMinutes()) + ' COT';
+  const cotString = now.toLocaleString('es-CO', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  el.textContent = 'Now: ' + cotString.replace(',', '') + ' COT';
 }
 updateFooterTime();
 setInterval(updateFooterTime, 60000);

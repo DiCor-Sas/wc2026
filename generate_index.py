@@ -1890,11 +1890,16 @@ function updateFooterTime() {{
   const el = document.getElementById('footer-now');
   if (!el) return;
   const now = new Date();
-  const cot = new Date(now.getTime() - 5*60*60*1000);
-  const pad = n => String(n).padStart(2, '0');
-  el.textContent = 'Now: ' + cot.getFullYear() + '-' +
-    pad(cot.getMonth()+1) + '-' + pad(cot.getDate()) + ' ' +
-    pad(cot.getHours()) + ':' + pad(cot.getMinutes()) + ' COT';
+  const cotString = now.toLocaleString('es-CO', {{
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }});
+  el.textContent = 'Now: ' + cotString.replace(',', '') + ' COT';
 }}
 updateFooterTime();
 setInterval(updateFooterTime, 60000);
