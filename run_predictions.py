@@ -465,6 +465,32 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
     proxy_rate = sum(attacker_rates) / len(attacker_rates) if attacker_rates else 0.45
     print(f"[golden_boot] proxy goals_per_match = {proxy_rate:.4f}")
 
+    # Compute mean goal_share at positions 1, 2, 3 across real teams (sorted desc)
+    # Used to give proxy teams a realistic 3-player distribution instead of 1.0/0/0
+    _share_by_pos = [[], [], []]
+    for tname, players in valid_teams.items():
+        if tname == "Germany":
+            continue
+        attackers   = sorted([p for p in players if p.get("position") == "Attacker"],
+                             key=lambda x: -x["goals"])
+        midfielders = sorted([p for p in players if p.get("position") == "Midfielder"],
+                             key=lambda x: -x["goals"])
+        sel = (attackers + midfielders)[:3]
+        if len(sel) < 3:
+            sel = sorted(players, key=lambda x: -x["goals"])[:3]
+        total_g = sum(p["goals"] for p in sel)
+        raw = [p["goals"] / total_g if total_g > 0 else 1.0 / 3 for p in sel]
+        s = sum(raw)
+        normed = sorted([v / s for v in raw], reverse=True)
+        for pos, v in enumerate(normed[:3]):
+            _share_by_pos[pos].append(v)
+    mean_shares = [sum(col) / len(col) for col in _share_by_pos]
+    # Renormalize so shares sum to exactly 1.0
+    ms_total = sum(mean_shares)
+    mean_shares = [v / ms_total for v in mean_shares]
+    print(f"[golden_boot] mean_shares pos1={mean_shares[0]:.4f}  "
+          f"pos2={mean_shares[1]:.4f}  pos3={mean_shares[2]:.4f}")
+
     _penalty_hints = {
         "Spain":       ["oyarzabal"],
         "France":      ["mbappe", "mbapp"],
@@ -523,17 +549,23 @@ def simulate_golden_boot(per_sim_scores, player_stats_path):
             continue
         player_pool[tname] = _build_pool(tname, players)
 
+    def _proxy_entries(tname):
+        return [
+            {"player": f"{tname} Striker",   "team": tname, "goals_per_match": proxy_rate,
+             "goal_share": mean_shares[0], "is_penalty_taker": True,  "goals_raw": 0},
+            {"player": f"{tname} Forward 2",  "team": tname, "goals_per_match": proxy_rate,
+             "goal_share": mean_shares[1], "is_penalty_taker": False, "goals_raw": 0},
+            {"player": f"{tname} Forward 3",  "team": tname, "goals_per_match": proxy_rate,
+             "goal_share": mean_shares[2], "is_penalty_taker": False, "goals_raw": 0},
+        ]
+
     # Determine all teams present in simulations; build proxy entries for missing ones
     all_sim_teams = {entry["team"] for sim in per_sim_scores for entry in sim}
     for tname in all_sim_teams - set(player_pool.keys()):
-        player_pool[tname] = [{
-            "player":           f"{tname} Striker",
-            "team":             tname,
-            "goals_per_match":  proxy_rate,
-            "goal_share":       1.0,
-            "is_penalty_taker": False,
-            "goals_raw":        0,
-        }]
+        player_pool[tname] = _proxy_entries(tname)
+
+    # Germany: real data is a stub (goals=0) — treat as proxy
+    player_pool["Germany"] = _proxy_entries("Germany")
 
     n_sims        = len(per_sim_scores)
     win_count     = defaultdict(float)
