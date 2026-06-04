@@ -331,6 +331,63 @@ def fetch_results():
     return matches, source
 
 
+# ── PREDICTION ACCURACY TRACKER ───────────────────────────────────────────────
+
+def score_prediction_accuracy(home_team, away_team, home_score, away_score, match_date):
+    """Compute Brier score and RPS for one completed match and persist to model_accuracy.json."""
+    predictions_path = ROOT / "predictions.json"
+    accuracy_path    = ROOT / "model_accuracy.json"
+
+    # 1. load — read predictions.json; init model_accuracy.json if missing
+    with open(predictions_path) as f:
+        pred = json.load(f)
+    try:
+        with open(accuracy_path) as f:
+            accuracy = json.load(f)
+    except FileNotFoundError:
+        accuracy = {"matches_scored": 0, "mean_brier": None, "mean_rps": None, "history": []}
+
+    # 2. lookup — index match_probabilities by (home, away) for O(1) access
+    mp_index = {(e["home"], e["away"]): e for e in pred.get("match_probabilities", [])}
+    entry = mp_index.get((home_team, away_team))
+    if entry is None:
+        return  # no Skellam data for this match; nothing to score
+
+    # 3. deduplicate — skip if this (home|away|date) key is already in history
+    scored_key = f"{home_team}|{away_team}|{match_date}"
+    if any(e["key"] == scored_key for e in accuracy["history"]):
+        return
+
+    # 4. compute — Brier score and RPS from Skellam probs vs actuals
+    p_win  = entry["skellam_win"]
+    p_draw = entry["skellam_draw"]
+    p_loss = entry["skellam_loss"]
+    actual_win  = 1.0 if home_score > away_score else 0.0
+    actual_draw = 1.0 if home_score == away_score else 0.0
+    actual_loss = 1.0 if home_score < away_score else 0.0
+    brier = (p_win - actual_win)**2 + (p_draw - actual_draw)**2 + (p_loss - actual_loss)**2
+    cum_pred   = [p_win, p_win + p_draw]
+    cum_actual = [actual_win, actual_win + actual_draw]
+    rps = 0.5 * sum((cum_pred[i] - cum_actual[i])**2 for i in range(2))
+
+    # 5. write — append record, recompute means, save model_accuracy.json
+    accuracy["history"].append({
+        "key": scored_key,
+        "home": home_team, "away": away_team, "date": match_date,
+        "home_score": home_score, "away_score": away_score,
+        "p_win": p_win, "p_draw": p_draw, "p_loss": p_loss,
+        "brier": round(brier, 6), "rps": round(rps, 6),
+    })
+    n = len(accuracy["history"])
+    accuracy["matches_scored"] = n
+    accuracy["mean_brier"] = round(sum(e["brier"] for e in accuracy["history"]) / n, 6)
+    accuracy["mean_rps"]   = round(sum(e["rps"]   for e in accuracy["history"]) / n, 6)
+    with open(accuracy_path, "w") as f:
+        json.dump(accuracy, f, indent=2)
+    print(f"[accuracy] Scored {home_team} {home_score}-{away_score} {away_team}: "
+          f"BS={brier:.4f} RPS={rps:.4f}  (n={n} mean_BS={accuracy['mean_brier']:.4f})")
+
+
 # ── DAILY INTERNATIONAL RESULTS ───────────────────────────────────────────────
 
 def _parse_skysports_internationals():
@@ -558,6 +615,7 @@ def fetch_daily_results():
             print(f"[daily] Skipping {h_team} vs {a_team} on {m.get('date','')} — ELO already applied")
             continue
 
+        score_prediction_accuracy(h_team, a_team, h_s, a_s, m.get("date", ""))
         K_FRIENDLY = 20 * _decay_weight(m.get("date", date.today().isoformat()))
         h_elo = elo.get(h_team, DEFAULT_ELO)
         a_elo = elo.get(a_team, DEFAULT_ELO)
@@ -684,6 +742,7 @@ def update_elo_from_results():
             print(f"[elo] WARNING: team(s) not in elo_ratings.json: {missing} — skipping")
             continue
 
+        score_prediction_accuracy(t1, t2, hs, as_, m.get("date", ""))
         e1 = elo[t1]
         e2 = elo[t2]
         exp1 = expected_score(e1, e2)

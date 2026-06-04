@@ -361,6 +361,8 @@ def _match_label(round_label, group):
 def _upcoming_matches(data):
     """Return list of next 6 (pre-tournament) or next 48h (during) match dicts with computed stats."""
     sim_probs = {_norm(t["team"]): t["probability"] for t in data.get("all_teams", [])}
+    skellam_index = {(e["home"], e["away"]): e
+                     for e in data.get("match_probabilities", [])}
 
     now_utc = datetime.now(timezone.utc)
     now_col = (now_utc + COLOMBIA_OFFSET).replace(tzinfo=None)
@@ -387,15 +389,21 @@ def _upcoming_matches(data):
     for date_str, ko_col, t1_raw, t2_raw, group, round_label in upcoming:
         t1 = _norm(t1_raw)
         t2 = _norm(t2_raw)
-        p1 = sim_probs.get(t1, 1.0)
-        p2 = sim_probs.get(t2, 1.0)
-        total_p = p1 + p2 if (p1 + p2) > 0 else 1.0
-        draw_boost = 0.25
-        r1 = p1 / total_p
-        r2 = p2 / total_p
-        win_p1 = round(r1 * (1 - draw_boost) * 100)
-        win_p2 = round(r2 * (1 - draw_boost) * 100)
-        draw_p = 100 - win_p1 - win_p2
+        sk = skellam_index.get((t1, t2))
+        if sk:
+            win_p1 = round(sk["skellam_win"]  * 100)
+            win_p2 = round(sk["skellam_loss"] * 100)
+            draw_p = 100 - win_p1 - win_p2
+        else:
+            p1 = sim_probs.get(t1, 1.0)
+            p2 = sim_probs.get(t2, 1.0)
+            total_p = p1 + p2 if (p1 + p2) > 0 else 1.0
+            draw_boost = 0.25
+            r1 = p1 / total_p
+            r2 = p2 / total_p
+            win_p1 = round(r1 * (1 - draw_boost) * 100)
+            win_p2 = round(r2 * (1 - draw_boost) * 100)
+            draw_p = 100 - win_p1 - win_p2
 
         lam1, lam2 = _strength_lambdas(t1, t2)
         score1, score2 = _most_probable_score(lam1, lam2)
@@ -429,6 +437,9 @@ def _upcoming_matches(data):
             "venue": venue, "ko_fmt": ko_fmt, "match_lbl": match_lbl,
             "date_str": date_str,
             "kickoff_utc": kickoff_utc_iso,
+            "skellam_win":  sk["skellam_win"]  if sk else None,
+            "skellam_draw": sk["skellam_draw"] if sk else None,
+            "skellam_loss": sk["skellam_loss"] if sk else None,
         })
     return results
 
@@ -477,6 +488,29 @@ def _match_cards_html(matches):
             colombia_style = ' style="border-left:3px solid #C9A84C"' if "Colombia" in (t1, t2) else ""
             lineup_badge = _lineup_badge_html(t1, t2, lineups)
             venue_time = f'{h(m["venue"])} · {h(m["ko_fmt"])}'
+            sk_win  = m.get("skellam_win")
+            sk_draw = m.get("skellam_draw")
+            sk_loss = m.get("skellam_loss")
+            if sk_win is not None:
+                w_pct = round(sk_win  * 100)
+                d_pct = round(sk_draw * 100)
+                l_pct = max(0, 100 - w_pct - d_pct)
+                w_lbl = f'{w_pct}%' if w_pct > 15 else ''
+                d_lbl = f'{d_pct}%' if d_pct > 15 else ''
+                l_lbl = f'{l_pct}%' if l_pct > 15 else ''
+                skellam_bar = (
+                    f'<div style="display:flex;height:18px;border-radius:4px;overflow:hidden;'
+                    f'margin:0 12px 8px;font-size:10px;font-weight:700;letter-spacing:0.04em;">'
+                    f'<div style="width:{w_pct}%;background:#22C55E;display:flex;align-items:center;'
+                    f'justify-content:center;color:#fff;">{w_lbl}</div>'
+                    f'<div style="width:{d_pct}%;background:#4A6080;display:flex;align-items:center;'
+                    f'justify-content:center;color:#fff;">{d_lbl}</div>'
+                    f'<div style="width:{l_pct}%;background:#E8002D;display:flex;align-items:center;'
+                    f'justify-content:center;color:#fff;">{l_lbl}</div>'
+                    f'</div>'
+                )
+            else:
+                skellam_bar = ''
             score_chip = f'SCORE {m["score1"]}-{m["score2"]} 15pts'
             if m["winner"] == "DRAW":
                 win_chip = 'DRAW 8pts'
@@ -509,6 +543,7 @@ def _match_cards_html(matches):
       <span class="mc-prob">{m["win_p2"]}%</span>
     </div>
   </div>
+  {skellam_bar}
   <div class="mc-chips">
     <div class="mc-chip chip-gold">{score_chip}</div>
     <div class="mc-chip chip-red">{win_chip}</div>
@@ -745,6 +780,9 @@ def build_html(data):
 
     runner = all_teams[1] if len(all_teams) > 1 else {"team": "—", "probability": 0}
     third  = all_teams[2] if len(all_teams) > 2 else {"team": "—", "probability": 0}
+    winner_entry = all_teams[0] if all_teams else {}
+    winner_ci_low  = round(winner_entry.get("ci_low",  winner_pct), 1)
+    winner_ci_high = round(winner_entry.get("ci_high", winner_pct), 1)
 
     runner_prob = runner["probability"]
     third_prob  = third["probability"]
@@ -753,6 +791,12 @@ def build_html(data):
         f"({runner['team']} {runner_prob}% vs {third['team']} {third_prob}%)"
     )
     golden_boot = _compute_golden_boot(data)
+
+    try:
+        with open(_ROOT / "elo_ratings.json") as f:
+            elo_data = json.load(f)
+    except Exception:
+        elo_data = {}
 
     matches = _upcoming_matches(data)
     match_cards = _match_cards_html(matches)
@@ -764,10 +808,16 @@ def build_html(data):
     top5_rows = ""
     for i, item in enumerate(all_teams[:5]):
         bar_w = round(item["probability"] / winner_pct * 100)
+        _rd = elo_data.get(item["team"], {}).get("rd", 0)
+        _rd_dot = (
+            f' <span style="color:#EF9F27;font-size:10px;" '
+            f'title="Rating uncertainty high — fewer matches observed">&#9679;</span>'
+            if _rd > 150 else ""
+        )
         top5_rows += (
             f'<div class="conf-row">'
             f'<span class="conf-rank">{i+1}</span>'
-            f'<span class="conf-team">{_flag(item["team"])} {h(item["team"]).upper()}</span>'
+            f'<span class="conf-team">{_flag(item["team"])} {h(item["team"]).upper()}{_rd_dot}</span>'
             f'<div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:{bar_w}%"></div></div>'
             f'<span class="conf-pct">{item["probability"]}%</span>'
             f'</div>\n'
@@ -1619,6 +1669,7 @@ def build_html(data):
       <span class="pick-mini-flag">{_flag(winner)}</span>
       <div class="pick-mini-team">{h(winner)}</div>
       <div class="pick-mini-pct">{winner_pct}%</div>
+      <div style="font-size:11px;color:var(--fifa-text-secondary);margin-top:1px;">80% CI: {winner_ci_low}%–{winner_ci_high}%</div>
       <div class="pick-mini-pts">50 PTS</div>
     </div>
     <div class="pick-mini silver">
