@@ -1,6 +1,8 @@
 import sys
 import json
 import math
+import numpy as np
+from scipy.stats import poisson as sp_poisson, skellam as sp_skellam
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -98,32 +100,47 @@ def _poisson_pmf(lam, k):
     return (lam ** k) * math.exp(-lam) / math.factorial(k)
 
 
-def _poisson_most_probable_score(team1_name, team2_name, max_goals=5):
+def tau(x, y, lh, la, rho=0.08):
+    if x == 0 and y == 0: return 1 - lh * la * rho
+    if x == 1 and y == 0: return 1 + la * rho
+    if x == 0 and y == 1: return 1 + lh * rho
+    if x == 1 and y == 1: return 1 - rho
+    return 1.0
+
+
+def _poisson_most_probable_score(team1_name, team2_name, max_goals=7):
     """
     lambda = 1.5 * (s_attack / s_defend) ^ 2.0, capped [0.3, 3.5].
-    For even matches where 1-1 is modal but win-prob diff > 15pp,
-    return the 2nd most probable scoreline instead.
+    Joint probability matrix corrected via Dixon-Coles tau for low-scoring cells.
+    Score is sampled from the corrected distribution.
+    1-1 override applied after sampling: if win-prob diff > 15pp, pick 2nd most probable.
     """
     s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
     s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
-    lam1 = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
-    lam2 = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+    lh = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
+    la = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
 
-    scores = {}
-    for g1 in range(max_goals + 1):
-        for g2 in range(max_goals + 1):
-            scores[(g1, g2)] = _poisson_pmf(lam1, g1) * _poisson_pmf(lam2, g2)
+    goals = list(range(max_goals + 1))
+    h_pmf = sp_poisson.pmf(goals, lh)
+    a_pmf = sp_poisson.pmf(goals, la)
 
-    ranked = sorted(scores.items(), key=lambda x: -x[1])
-    best_s = ranked[0][0]
+    # Build Dixon-Coles corrected joint probability matrix
+    scores = [(g1, g2) for g1 in goals for g2 in goals]
+    raw = [h_pmf[g1] * a_pmf[g2] * tau(g1, g2, lh, la) for g1, g2 in scores]
+    total_p = sum(raw)
+    probs = [p / total_p for p in raw]
 
-    # Override 1-1 when one team has a clear win probability advantage
+    # Sample score from corrected distribution
+    idx = np.random.choice(len(scores), p=probs)
+    best_s = scores[idx]
+
+    # 1-1 override: if sampled (1,1) but one team has a clear win advantage
     if best_s == (1, 1):
-        total_p = sum(scores.values())
-        win1 = sum(p for (g1, g2), p in scores.items() if g1 > g2) / total_p * 100
-        win2 = sum(p for (g1, g2), p in scores.items() if g2 > g1) / total_p * 100
-        if abs(win1 - win2) > 15:
-            best_s = ranked[1][0]
+        win1 = sum(probs[i] for i, (g1, g2) in enumerate(scores) if g1 > g2)
+        win2 = sum(probs[i] for i, (g1, g2) in enumerate(scores) if g2 > g1)
+        if abs(win1 - win2) * 100 > 15:
+            ranked = sorted(zip(scores, probs), key=lambda x: -x[1])
+            best_s = next(s for s, _ in ranked if s != (1, 1))
 
     return best_s
 
@@ -132,6 +149,17 @@ def _poisson_most_probable_score(team1_name, team2_name, max_goals=5):
 
 def pct(n, d):
     return round(n / d * 100, 2) if d else 0.0
+
+def wilson_ci(wins, n=10000, z=1.282):
+    """80% Wilson score confidence interval. Returns (ci_low, ci_high) as percentages."""
+    p_hat = wins / n
+    denom = 1 + z**2 / n
+    center = (p_hat + z**2 / (2 * n)) / denom
+    margin = z * math.sqrt(p_hat * (1 - p_hat) / n + z**2 / (4 * n**2)) / denom
+    return (
+        round(max(0.0, center - margin) * 100, 4),
+        round(min(1.0, center + margin) * 100, 4),
+    )
 
 def format_team_list(counter, top_n=None):
     items = sorted(counter.items(), key=lambda x: -x[1])
@@ -312,15 +340,44 @@ assert runner_entry["team"] != third_entry["team"], "Runner-Up and Third Place a
 print(f"✓ Top predictions — distinct teams: Winner={winner_team}, "
       f"Runner-Up={runner_entry['team']}, Third={third_entry['team']}")
 
+# ── Task 2: Skellam win/draw/loss for every group-stage fixture ───────────────
+_fixtures = json.load(open(_ROOT / "fixtures.json"))
+
+match_probabilities = []
+for fx in _fixtures:
+    home = fx["home"]
+    away = fx["away"]
+    sh = _TEAM_STRENGTH.get(home, {}).get("final_strength", 1600.0)
+    sa = _TEAM_STRENGTH.get(away, {}).get("final_strength", 1600.0)
+    lh = max(0.3, min(3.5, 1.5 * (sh / sa) ** 2.0))
+    la = max(0.3, min(3.5, 1.5 * (sa / sh) ** 2.0))
+
+    sk = sp_skellam(mu1=lh, mu2=la)
+    match_probabilities.append({
+        "home":         home,
+        "away":         away,
+        "lambda_home":  round(lh, 4),
+        "lambda_away":  round(la, 4),
+        "skellam_win":  round(float(1 - sk.cdf(0)), 6),
+        "skellam_draw": round(float(sk.pmf(0)),     6),
+        "skellam_loss": round(float(sk.cdf(-1)),    6),
+    })
+
 output = {
     "simulations": total,
     "predicted_winner": winner_team,
     "predicted_winner_probability_pct": winner_pct,
-    "all_teams": format_team_list(winners),
+    "all_teams": [
+        {**entry,
+         "ci_low":  wilson_ci(winners[entry["team"]])[0],
+         "ci_high": wilson_ci(winners[entry["team"]])[1]}
+        for entry in format_team_list(winners)
+    ],
     "runners_up": [runner_entry] + [e for e in format_team_list(runners_up, 10)
                                      if e["team"] != winner_team and e["team"] != runner_entry["team"]],
     "third_place": [third_entry] + [e for e in format_team_list(third_place_counter, 10)
                                      if e["team"] != winner_team and e["team"] != third_entry["team"]],
+    "match_probabilities": match_probabilities,
     "knockout_bracket": {
         "round_of_32": r32_matches,
         "round_of_16": [format_ko_match(mn) for mn in range(89, 97)],
