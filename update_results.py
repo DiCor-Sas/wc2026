@@ -116,27 +116,17 @@ def step4_regenerate_html():
 
 def step5_commit_and_push():
     print("\n" + "═" * 60)
-    print("STEP 5 — Commit and push to GitHub")
+    print("STEP 5 — Stage files for commit (commit/push handled by CI)")
     print("═" * 60)
 
-    # Check for changes
-    diff = subprocess.run(
-        ["git", "diff", "--quiet"],
-        cwd=str(ROOT),
+    subprocess.run(
+        ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"],
+        cwd=str(ROOT), check=False,
     )
-    untracked = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard"],
-        cwd=str(ROOT),
-        capture_output=True,
-        text=True,
+    subprocess.run(
+        ["git", "config", "user.name", "github-actions[bot]"],
+        cwd=str(ROOT), check=False,
     )
-
-    has_diff = diff.returncode != 0
-    has_untracked = bool(untracked.stdout.strip())
-
-    if not has_diff and not has_untracked:
-        print("  No changes to commit.")
-        return
 
     candidates = [
         "wc2026_results.json",
@@ -145,31 +135,15 @@ def step5_commit_and_push():
         "team_strength.json",
         "predictions.json",
         "index.html",
+        "version.txt",
         "daily_results.json",
         "lineups.json",
-        "match_adjustments.json",
     ]
     files_to_add = [f for f in candidates if (ROOT / f).exists()]
 
-    subprocess.run(["git", "add"] + files_to_add, cwd=str(ROOT), check=True)
-
-    from datetime import datetime, timezone
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    msg = f"auto update [{ts}]"
-
-    commit = subprocess.run(
-        ["git", "commit", "-m", msg],
-        cwd=str(ROOT),
-    )
-    if commit.returncode != 0:
-        print("  Nothing new to commit.")
-        return
-
-    push = subprocess.run(["git", "push", "origin", "main"], cwd=str(ROOT))
-    if push.returncode != 0:
-        print("ERROR: git push failed.")
-        sys.exit(1)
-    print(f"✓ Committed and pushed: {msg}")
+    subprocess.run(["git", "add"] + files_to_add, cwd=str(ROOT), check=False)
+    print(f"  Staged: {', '.join(files_to_add)}")
+    print("  ✓ Files staged. CI workflow will commit and push.")
 
 
 if __name__ == "__main__":

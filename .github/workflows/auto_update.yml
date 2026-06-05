@@ -69,7 +69,7 @@ jobs:
         run: |
           git add wc2026_results.json bracket_state.json elo_ratings.json \
                   team_strength.json predictions.json index.html \
-                  daily_results.json lineups.json match_adjustments.json || true
+                  version.txt daily_results.json lineups.json 2>/dev/null || true
 
           # Remove stale PUSH_FAILED.txt if it was committed in a previous failed run
           if git ls-files --error-unmatch PUSH_FAILED.txt 2>/dev/null; then
