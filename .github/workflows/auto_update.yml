@@ -1,5 +1,10 @@
 name: Auto Update WC 2026 Dashboard
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 env:
   PYTHONUNBUFFERED: "1"
   FORCE_COLOR: "1"
@@ -32,6 +37,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git for push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,37 +74,15 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python3 update_results.py
 
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Commit and push if changed
         run: |
           git add wc2026_results.json bracket_state.json elo_ratings.json \
                   team_strength.json predictions.json index.html \
                   version.txt daily_results.json lineups.json 2>/dev/null || true
 
-          # Remove stale PUSH_FAILED.txt if it was committed in a previous failed run
-          if git ls-files --error-unmatch PUSH_FAILED.txt 2>/dev/null; then
-            git rm PUSH_FAILED.txt
-          fi
-
           git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-
-          if git push origin main 2>push_error.txt; then
-            echo "Push succeeded."
-          else
-            TS=$(date -u '+%Y-%m-%d %H:%M UTC')
-            printf "Push failed at: %s\n---\n" "$TS"   > PUSH_FAILED.txt
-            cat push_error.txt                         >> PUSH_FAILED.txt
-            git add PUSH_FAILED.txt
-            git commit -m "record push failure [${TS}]"
-            git push origin main 2>/dev/null || true
-            echo "::warning::git push failed — PUSH_FAILED.txt recorded. Check token scope."
-            exit 0
-          fi
+          git push origin main
 
   lineup_fetch:
     runs-on: ubuntu-latest
@@ -101,6 +93,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git for push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -129,32 +130,10 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python3 fetch_results.py --lineup-only
 
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Commit lineup data if changed
         run: |
-          git add lineups.json match_adjustments.json || true
-
-          # Remove stale PUSH_FAILED.txt if it was committed in a previous failed run
-          if git ls-files --error-unmatch PUSH_FAILED.txt 2>/dev/null; then
-            git rm PUSH_FAILED.txt
-          fi
+          git add lineups.json 2>/dev/null || true
 
           git diff --quiet && git diff --staged --quiet && echo "No lineup changes" && exit 0
           git commit -m "lineup update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-
-          if git push origin main 2>push_error.txt; then
-            echo "Push succeeded."
-          else
-            TS=$(date -u '+%Y-%m-%d %H:%M UTC')
-            printf "Push failed at: %s\n---\n" "$TS"   > PUSH_FAILED.txt
-            cat push_error.txt                         >> PUSH_FAILED.txt
-            git add PUSH_FAILED.txt
-            git commit -m "record push failure [${TS}]"
-            git push origin main 2>/dev/null || true
-            echo "::warning::git push failed — PUSH_FAILED.txt recorded. Check token scope."
-            exit 0
-          fi
+          git push origin main
