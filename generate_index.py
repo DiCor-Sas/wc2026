@@ -778,8 +778,10 @@ def build_html(data):
     all_teams = data["all_teams"]
     now_utc = datetime.now(timezone.utc)
 
-    runner = all_teams[1] if len(all_teams) > 1 else {"team": "—", "probability": 0}
-    third  = all_teams[2] if len(all_teams) > 2 else {"team": "—", "probability": 0}
+    # Runner-up and third place come from their dedicated lists, not all_teams rank.
+    # all_teams ranks by champion probability, which differs from finishing position.
+    runner = runners_up[0]   if runners_up   else {"team": "—", "probability": 0}
+    third  = third_place[0]  if third_place  else {"team": "—", "probability": 0}
     winner_entry = all_teams[0] if all_teams else {}
     winner_ci_low  = round(winner_entry.get("ci_low",  winner_pct), 1)
     winner_ci_high = round(winner_entry.get("ci_high", winner_pct), 1)
