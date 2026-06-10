@@ -16,6 +16,7 @@ TEAM_STRENGTH_FILE = _ROOT / "team_strength.json"
 FIXTURES_FILE      = _ROOT / "fixtures.json"
 LINEUPS_FILE       = _ROOT / "lineups.json"
 BRACKET_STATE_FILE = _ROOT / "bracket_state.json"
+RESULTS_FILE       = _ROOT / "wc2026_results.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
 
@@ -534,8 +535,9 @@ def _match_cards_html(matches):
       <span class="mc-prob">{m["win_p1"]}%</span>
     </div>
     <div class="mc-score-block">
-      <div class="mc-score">{m["score1"]}–{m["score2"]}</div>
+      <div class="mc-score score-display" data-home="{m["score1"]}" data-away="{m["score2"]}"><span class="home-score">{m["score1"]}</span>–<span class="away-score">{m["score2"]}</span></div>
       <div class="mc-score-label">PREDICTED</div>
+      <div class="live-score-display"><span class="live-dot"></span><span class="live-label">LIVE</span></div>
     </div>
     <div class="mc-team mc-team-right">
       <span class="mc-flag">{_flag(t2)}</span>
@@ -769,6 +771,144 @@ def _build_wc_matches_json():
     return json.dumps(matches, separators=(",", ":"))
 
 
+def _elo_impact_str(t1, t2, hs, as_, date_str, elo_data):
+    """Estimate per-match ELO impact (same K/formula as fetch_results.py).
+
+    elo_ratings.json only stores current ratings, so this recomputes the
+    delta from them — error vs the applied delta is well under one point.
+    Returns "" when either team is missing, so nothing is shown over zeros.
+    """
+    d1 = elo_data.get(t1, {})
+    d2 = elo_data.get(t2, {})
+    if "elo" not in d1 or "elo" not in d2:
+        return ""
+    try:
+        days_ago = (date.today() - date.fromisoformat(date_str)).days
+    except Exception:
+        days_ago = 0
+    k = 40 * math.exp(-math.log(2) / 180 * max(0, days_ago))
+    e1, e2 = d1["elo"], d2["elo"]
+    exp1 = 1.0 / (1.0 + 10 ** ((e2 - e1) / 400.0))
+    if hs > as_:
+        act1 = 1.0
+    elif hs < as_:
+        act1 = 0.0
+    else:
+        act1 = 0.5
+    delta1 = k * (act1 - exp1)
+    delta2 = -delta1
+    c1 = COUNTRY_CODE.get(t1, t1[:3].upper())[:3]
+    c2 = COUNTRY_CODE.get(t2, t2[:3].upper())[:3]
+    return f"{c1} {delta1:+.1f} · {c2} {delta2:+.1f}"
+
+
+def _results_section_html():
+    """Build the MATCH RESULTS section from wc2026_results.json.
+
+    Hidden entirely (display:none, no placeholder) while no completed
+    matches exist; appears automatically on the first regeneration after
+    the pipeline writes a result.
+    """
+    try:
+        with open(RESULTS_FILE) as f:
+            results = json.load(f)
+        if not isinstance(results, list):
+            results = []
+    except Exception:
+        results = []
+
+    if not results:
+        return '<div class="results-section" id="results-section" style="display:none"></div>'
+
+    try:
+        with open(_ROOT / "elo_ratings.json") as f:
+            elo_data = json.load(f)
+    except Exception:
+        elo_data = {}
+
+    # Fixture lookup for kickoff time, group and matchday
+    fixture_info = {}
+    try:
+        with open(FIXTURES_FILE) as f:
+            for fx in json.load(f):
+                fixture_info[(_norm(fx.get("home", "")), _norm(fx.get("away", "")))] = fx
+    except Exception:
+        pass
+
+    entries = []
+    for r in results:
+        t1 = _norm(r.get("team1", "TBD"))
+        t2 = _norm(r.get("team2", "TBD"))
+        hs = r.get("home_score", 0)
+        as_ = r.get("away_score", 0)
+        date_str = r.get("date", "")
+        fx = fixture_info.get((t1, t2)) or fixture_info.get((t2, t1)) or {}
+        time_str = fx.get("time", "15:00")
+        try:
+            hour, minute = int(time_str[:2]), int(time_str[3:5])
+        except Exception:
+            hour, minute = 15, 0
+        try:
+            ko_col = datetime(
+                int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
+                hour, minute,
+            )
+        except Exception:
+            ko_col = TOURNAMENT_START
+        # Match end ≈ kickoff + 110 min; COT = UTC-5
+        ended_utc = ko_col + timedelta(hours=5, minutes=110)
+        group = r.get("group") or fx.get("group", "")
+        rnd = r.get("round", "")
+        if group:
+            md = fx.get("matchday", "")
+            label = f"GROUP {group} · MD {md}" if md else f"GROUP {group}"
+        elif rnd:
+            label = rnd.upper()
+        else:
+            label = date_str
+        entries.append((ended_utc, t1, t2, hs, as_, date_str, label))
+
+    entries.sort(key=lambda e: e[0], reverse=True)
+
+    def _card(e):
+        ended_utc, t1, t2, hs, as_, date_str, label = e
+        if hs > as_:
+            accent, c1, c2 = "#22C55E", "rc-win", "rc-lose"
+        elif hs < as_:
+            accent, c1, c2 = "#E8002D", "rc-lose", "rc-win"
+        else:
+            accent, c1, c2 = "#C9A84C", "rc-win", "rc-win"
+        elo_line = _elo_impact_str(t1, t2, hs, as_, date_str, elo_data)
+        elo_html = f'\n  <div class="rc-elo">{h(elo_line)}</div>' if elo_line else ""
+        ended_iso = ended_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return f'''<div class="result-card" style="border-left:3px solid {accent}" data-ended="{ended_iso}">
+  <div class="rc-meta"><span>{h(label)}</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team {c1}"><span class="rc-flag">{_flag(t1)}</span><span class="rc-name">{h(t1)}</span></div>
+    <div class="rc-score">{hs}–{as_}</div>
+    <div class="rc-team rc-right {c2}"><span class="rc-flag">{_flag(t2)}</span><span class="rc-name">{h(t2)}</span></div>
+  </div>{elo_html}
+</div>'''
+
+    visible = "\n".join(_card(e) for e in entries[:6])
+    extra = ""
+    toggle = ""
+    if len(entries) > 6:
+        extra_cards = "\n".join(_card(e) for e in entries[6:])
+        extra = f'\n<div class="results-extra" id="results-extra" style="display:none">\n{extra_cards}\n</div>'
+        toggle = (
+            f'\n  <div class="results-show-all" id="results-show-all" '
+            f'onclick="toggleAllResults()">Show all {len(entries)} results &#9662;</div>'
+        )
+
+    return f'''<div class="results-section" id="results-section">
+  <div class="results-header">MATCH RESULTS<span class="results-live-dot" id="results-live-dot" style="display:none"></span></div>
+  <div class="results-list">
+{visible}{extra}
+  </div>{toggle}
+</div>'''
+
+
 def build_html(data):
     sims = data["simulations"]
     winner = data["predicted_winner"]
@@ -803,6 +943,7 @@ def build_html(data):
     matches = _upcoming_matches(data)
     match_cards = _match_cards_html(matches)
     bracket_header_label, bracket_body_html = _bracket_section_html()
+    results_section_html = _results_section_html()
 
     countdown_html = '<div class="countdown-banner" id="main-banner"><span id="banner-text">Loading...</span></div>'
     wc_matches_json = _build_wc_matches_json()
@@ -898,6 +1039,36 @@ def build_html(data):
       0%   {{ transform: rotate(0deg) scale(1);   opacity: 0.6; }}
       50%  {{ transform: rotate(180deg) scale(1.1); opacity: 0.8; }}
       100% {{ transform: rotate(360deg) scale(1);  opacity: 0.6; }}
+    }}
+    /* Pitch grass layer — sits above the ::before aurora, barely perceptible */
+    body::after {{
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.04;
+      background-image: repeating-linear-gradient(
+        105deg,
+        transparent,
+        transparent 40px,
+        rgba(34, 197, 94, 0.6) 40px,
+        rgba(34, 197, 94, 0.6) 41px
+      ),
+      radial-gradient(
+        circle at 50% 40%,
+        rgba(34, 197, 94, 0.03) 0%,
+        rgba(34, 197, 94, 0.01) 200px,
+        transparent 400px
+      );
+      animation: grassDrift 8s linear infinite;
+    }}
+    @keyframes grassDrift {{
+      0%   {{ background-position: 0 0, 0 0; }}
+      100% {{ background-position: 80px 80px, 0 0; }}
     }}
 
     /* ── SECTION 1: Picks Header ── */
@@ -1382,6 +1553,57 @@ def build_html(data):
       margin: 4px 0;
     }}
 
+    /* ── Live Match Pulse ── */
+    .match-card.live-now {{
+      border: 1px solid rgba(232, 0, 45, 0.6);
+      box-shadow:
+        0 0 0 0 rgba(232, 0, 45, 0.4),
+        0 0 20px rgba(232, 0, 45, 0.1);
+      animation: livePulse 2s ease-in-out infinite;
+    }}
+    @keyframes livePulse {{
+      0%, 100% {{
+        box-shadow:
+          0 0 0 0 rgba(232, 0, 45, 0.4),
+          0 0 20px rgba(232, 0, 45, 0.1);
+      }}
+      50% {{
+        box-shadow:
+          0 0 0 8px rgba(232, 0, 45, 0),
+          0 0 30px rgba(232, 0, 45, 0.2);
+      }}
+    }}
+    /* LIVE indicator replaces the predicted score while a match is in play */
+    .live-score-display {{ display: none; }}
+    .match-card.live-now .score-display,
+    .match-card.live-now .mc-score-label {{ display: none; }}
+    .match-card.live-now .live-score-display {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+    }}
+    .live-dot {{
+      width: 8px;
+      height: 8px;
+      background: #E8002D;
+      border-radius: 50%;
+      display: inline-block;
+      animation: dotBlink 1s ease-in-out infinite;
+      margin-right: 6px;
+    }}
+    @keyframes dotBlink {{
+      0%, 100% {{ opacity: 1; }}
+      50% {{ opacity: 0.3; }}
+    }}
+    .live-label {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #E8002D;
+      letter-spacing: 0.1em;
+    }}
+
     /* ── Skeleton Loader ── */
     .skeleton {{
       background: linear-gradient(
@@ -1649,6 +1871,135 @@ def build_html(data):
       margin: 0 2px;
     }}
 
+    /* ── SECTION: Match Results ── */
+    .results-section {{
+      max-width: 468px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }}
+    .results-header {{
+      display: flex;
+      align-items: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--fifa-gold);
+      padding: 0 4px 8px;
+      border-bottom: 1px solid var(--fifa-border);
+      margin-bottom: 12px;
+    }}
+    .results-live-dot {{
+      width: 8px;
+      height: 8px;
+      background: #22C55E;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 8px;
+      animation: resultsPulse 2s ease-in-out infinite;
+    }}
+    @keyframes resultsPulse {{
+      0%, 100% {{ opacity: 1; transform: scale(1); }}
+      50%      {{ opacity: 0.4; transform: scale(1.4); }}
+    }}
+    .results-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }}
+    .results-extra {{
+      flex-direction: column;
+      gap: 10px;
+    }}
+    .result-card {{
+      background: var(--fifa-card);
+      border: 1px solid var(--fifa-border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }}
+    .rc-meta {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fifa-text-muted);
+      margin-bottom: 8px;
+    }}
+    .rc-time {{
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: var(--fifa-text-muted);
+    }}
+    .rc-row {{
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+    }}
+    .rc-team {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }}
+    .rc-right {{
+      flex-direction: row-reverse;
+      text-align: right;
+    }}
+    .rc-flag {{ font-size: 22px; line-height: 1; }}
+    .rc-name {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      line-height: 1.1;
+      overflow-wrap: break-word;
+    }}
+    .rc-win  .rc-name {{ color: var(--fifa-white); }}
+    .rc-lose .rc-name {{ color: var(--fifa-text-secondary); }}
+    .rc-score {{
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 30px;
+      color: var(--fifa-white);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      white-space: nowrap;
+      min-width: 60px;
+      text-align: center;
+    }}
+    .rc-elo {{
+      font-size: 10px;
+      color: var(--fifa-text-muted);
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-top: 6px;
+    }}
+    .results-show-all {{
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--fifa-text-secondary);
+      padding: 12px;
+      margin-top: 4px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }}
+
     /* ── Prefers-Reduced-Motion ── */
     @media (prefers-reduced-motion: reduce) {{
       *,
@@ -1660,7 +2011,11 @@ def build_html(data):
         scroll-behavior: auto !important;
       }}
       body::before {{ animation: none; }}
+      body::after {{ animation: none; }}
       .skeleton {{ animation: none; }}
+      .match-card.live-now {{ animation: none; }}
+      .live-dot {{ animation: none; }}
+      .results-live-dot {{ animation: none; }}
     }}
   </style>
 </head>
@@ -1715,6 +2070,11 @@ def build_html(data):
 {countdown_html}
 {match_cards if match_cards else '<div style="color:var(--fifa-text-muted);text-align:center;padding:40px 0;font-size:14px;">No upcoming matches scheduled.</div>'}
 </div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2.5 — MATCH RESULTS (auto-appears)
+     ══════════════════════════════════════════ -->
+{results_section_html}
 
 <!-- ══════════════════════════════════════════
      SECTION 3 — KNOCKOUT BRACKET (collapsible)
@@ -1773,6 +2133,45 @@ setTimeout(() => {{
   }}
 }}, 800);
 
+// Score count-up reveal — fires once per card via data-animated flag
+function animateScore(card) {{
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {{
+    return;
+  }}
+  const scoreEl = card.querySelector('.score-display');
+  if (!scoreEl || scoreEl.dataset.animated) return;
+  scoreEl.dataset.animated = 'true';
+
+  const homeEl = scoreEl.querySelector('.home-score');
+  const awayEl = scoreEl.querySelector('.away-score');
+  if (!homeEl || !awayEl) return;
+
+  const home = parseInt(scoreEl.dataset.home || '0');
+  const away = parseInt(scoreEl.dataset.away || '0');
+
+  const label = card.querySelector('.mc-score-label');
+  if (label) {{
+    label.style.opacity = '0';
+    label.style.transition = 'opacity 300ms ease';
+    setTimeout(() => {{ label.style.opacity = '1'; }}, 700);
+  }}
+
+  const start = performance.now();
+  function tick(now) {{
+    const elapsed = now - start;
+    const progressHome = Math.min(elapsed / 600, 1);
+    const progressAway = Math.min(elapsed / 400, 1);
+    const easedHome = 1 - Math.pow(1 - progressHome, 3);
+    const easedAway = 1 - Math.pow(1 - progressAway, 3);
+    homeEl.textContent = Math.floor(easedHome * home);
+    awayEl.textContent = Math.floor(easedAway * away);
+    if (progressHome < 1) {{
+      requestAnimationFrame(tick);
+    }}
+  }}
+  requestAnimationFrame(tick);
+}}
+
 // Intersection Observer: scroll-triggered card entrance
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {{
   const cards = document.querySelectorAll('.match-card, .bracket-match-card');
@@ -1782,6 +2181,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {{
         if (entry.isIntersecting) {{
           entry.target.style.opacity = '1';
           entry.target.style.transform = 'translateY(0)';
+          animateScore(entry.target);
           observer.unobserve(entry.target);
         }}
       }});
@@ -1804,8 +2204,17 @@ function updateCountdowns() {{
     const diff = kickoff - now;
     const el = card.querySelector('.countdown-timer');
     if (!el) return;
+    const LIVE_WINDOW_MS = 110 * 60 * 1000;
+    if (diff <= 0 && diff > -LIVE_WINDOW_MS) {{
+      // Match in play: pulse the card and swap score for the LIVE indicator (CSS)
+      card.classList.add('live-now');
+      el.textContent = 'MATCH IN PROGRESS';
+      el.style.color = '#22C55E';
+      return;
+    }}
     if (diff <= 0) {{
-      el.textContent = 'LIVE / COMPLETED';
+      card.classList.remove('live-now');
+      el.textContent = 'COMPLETED';
       el.style.color = '#22C55E';
       return;
     }}
@@ -1885,6 +2294,55 @@ document.addEventListener('click', () => {{
   document.querySelectorAll('.confidence-badge').forEach(b =>
     b.classList.remove('tooltip-visible'));
 }});
+
+// Match results — show-all toggle
+function toggleAllResults() {{
+  const extra = document.getElementById('results-extra');
+  const btn = document.getElementById('results-show-all');
+  if (!extra || !btn) return;
+  if (!btn.dataset.allLabel) btn.dataset.allLabel = btn.textContent;
+  const open = extra.style.display !== 'none';
+  extra.style.display = open ? 'none' : 'flex';
+  btn.textContent = open ? btn.dataset.allLabel : 'Show fewer ▴';
+}}
+
+// Match results — relative "time since ended" + recent-completion dot
+function updateResultTimes() {{
+  const cards = document.querySelectorAll('.result-card[data-ended]');
+  if (!cards.length) return;
+  const now = new Date();
+  let newest = null;
+  cards.forEach(c => {{
+    const ended = new Date(c.dataset.ended);
+    if (!newest || ended > newest) newest = ended;
+    const el = c.querySelector('.rc-time');
+    if (!el) return;
+    const diff = now - ended;
+    if (diff < 0) {{ el.textContent = ''; return; }}
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(mins / 60);
+    if (mins < 60) {{
+      el.textContent = mins + 'm ago';
+    }} else if (hrs < 24) {{
+      el.textContent = hrs + 'h ago';
+    }} else {{
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (ended.toDateString() === yesterday.toDateString()) {{
+        el.textContent = 'Yesterday';
+      }} else {{
+        el.textContent = ended.toLocaleDateString('en-GB', {{ day: 'numeric', month: 'short' }});
+      }}
+    }}
+  }});
+  const dot = document.getElementById('results-live-dot');
+  if (dot && newest) {{
+    const age = now - newest;
+    dot.style.display = (age >= 0 && age <= 2 * 60 * 60 * 1000) ? 'inline-block' : 'none';
+  }}
+}}
+updateResultTimes();
+setInterval(updateResultTimes, 60000);
 </script>
 
 <script>
