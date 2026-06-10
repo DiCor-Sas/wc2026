@@ -1040,9 +1040,11 @@ def build_html(data):
       50%  {{ transform: rotate(180deg) scale(1.1); opacity: 0.8; }}
       100% {{ transform: rotate(360deg) scale(1);  opacity: 0.6; }}
     }}
-    /* Stadium floodlights — two white beams sweep from the top corners,
-       a gold broadcast spotlight breathes at center top. Above the ::before
-       aurora, felt rather than seen (0.03–0.06 alpha). */
+    /* ── Stadium background v2 ──
+       Layer 1 (body::after, z 0): fluorescent mown-pitch stripes.
+       Layer 2 (#floodlights, z 1): warm white corner beams + gold top glow.
+       Layer 3 (#crowd-wave, z 1): color wash cycling red/gold/blue at the
+       bottom edge. Content sections sit at z-index 2. */
     body::after {{
       content: '';
       position: fixed;
@@ -1052,110 +1054,129 @@ def build_html(data):
       height: 100%;
       pointer-events: none;
       z-index: 0;
-      background:
-        radial-gradient(
-          ellipse 60% 40% at -10% 0%,
-          rgba(255, 255, 255, 0.04) 0%,
-          transparent 70%
-        ),
-        radial-gradient(
-          ellipse 60% 40% at 110% 0%,
-          rgba(255, 255, 255, 0.03) 0%,
-          transparent 70%
-        ),
-        radial-gradient(
-          ellipse 30% 50% at 50% -10%,
-          rgba(201, 168, 76, 0.04) 0%,
-          transparent 60%
-        );
-      animation: floodlightSweep 12s ease-in-out infinite alternate;
+      background: repeating-linear-gradient(
+        165deg,
+        rgba(0, 220, 60, 0.12) 0px,
+        rgba(0, 220, 60, 0.12) 60px,
+        rgba(0, 180, 40, 0.06) 60px,
+        rgba(0, 180, 40, 0.06) 120px
+      );
+      animation: pitchShimmer 6s ease-in-out infinite alternate;
     }}
-    @keyframes floodlightSweep {{
+    @keyframes pitchShimmer {{
       0% {{
-        background:
-          radial-gradient(
-            ellipse 60% 40% at -10% 0%,
-            rgba(255, 255, 255, 0.04) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 110% 0%,
-            rgba(255, 255, 255, 0.02) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 30% 50% at 50% -10%,
-            rgba(201, 168, 76, 0.04) 0%,
-            transparent 60%
-          );
-      }}
-      33% {{
-        background:
-          radial-gradient(
-            ellipse 60% 40% at 20% 0%,
-            rgba(255, 255, 255, 0.05) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 80% 0%,
-            rgba(255, 255, 255, 0.03) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 30% 50% at 50% -5%,
-            rgba(201, 168, 76, 0.06) 0%,
-            transparent 60%
-          );
-      }}
-      66% {{
-        background:
-          radial-gradient(
-            ellipse 60% 40% at 0% 0%,
-            rgba(255, 255, 255, 0.03) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 100% 0%,
-            rgba(255, 255, 255, 0.05) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 30% 50% at 50% -10%,
-            rgba(201, 168, 76, 0.03) 0%,
-            transparent 60%
-          );
+        opacity: 0.7;
+        background-position: 0 0;
       }}
       100% {{
-        background:
-          radial-gradient(
-            ellipse 60% 40% at 30% 0%,
-            rgba(255, 255, 255, 0.04) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 70% 0%,
-            rgba(255, 255, 255, 0.04) 0%,
-            transparent 70%
-          ),
-          radial-gradient(
-            ellipse 30% 50% at 50% -5%,
-            rgba(201, 168, 76, 0.05) 0%,
-            transparent 60%
-          );
+        opacity: 1.0;
+        background-position: 20px 20px;
       }}
     }}
-    /* Broadcast film grain — feTurbulence noise on its own fixed layer
-       (a filter on body::after itself would consume the floodlight gradients) */
-    .noise-overlay {{
+    #floodlights {{
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 0;
-      filter: url(#noise);
-      opacity: 0.015;
+      z-index: 1;
+      background:
+        radial-gradient(
+          ellipse 55% 65% at 0% 0%,
+          rgba(255, 255, 200, 0.18) 0%,
+          rgba(255, 255, 200, 0.06) 40%,
+          transparent 70%
+        ),
+        radial-gradient(
+          ellipse 55% 65% at 100% 0%,
+          rgba(255, 255, 200, 0.15) 0%,
+          rgba(255, 255, 200, 0.05) 40%,
+          transparent 70%
+        ),
+        radial-gradient(
+          ellipse 45% 55% at 0% 100%,
+          rgba(255, 255, 200, 0.10) 0%,
+          transparent 60%
+        ),
+        radial-gradient(
+          ellipse 45% 55% at 100% 100%,
+          rgba(255, 255, 200, 0.10) 0%,
+          transparent 60%
+        ),
+        radial-gradient(
+          ellipse 40% 50% at 50% 0%,
+          rgba(201, 168, 76, 0.14) 0%,
+          rgba(201, 168, 76, 0.04) 40%,
+          transparent 65%
+        );
+      animation: floodlightPulse 8s ease-in-out infinite alternate;
+    }}
+    @keyframes floodlightPulse {{
+      0% {{
+        opacity: 0.7;
+        filter: brightness(0.9);
+      }}
+      50% {{
+        opacity: 1.0;
+        filter: brightness(1.2);
+      }}
+      100% {{
+        opacity: 0.85;
+        filter: brightness(1.0);
+      }}
+    }}
+    #crowd-wave {{
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      pointer-events: none;
+      z-index: 1;
+      animation: crowdWave 10s ease-in-out infinite alternate;
+    }}
+    @keyframes crowdWave {{
+      0% {{
+        opacity: 0.6;
+        transform: translateY(8px);
+        background: linear-gradient(
+          to top,
+          rgba(232, 0, 45, 0.14) 0%,
+          rgba(201, 168, 76, 0.08) 35%,
+          transparent 70%
+        );
+      }}
+      33% {{
+        opacity: 0.8;
+        transform: translateY(-4px);
+        background: linear-gradient(
+          to top,
+          rgba(201, 168, 76, 0.16) 0%,
+          rgba(0, 220, 60, 0.06) 35%,
+          transparent 70%
+        );
+      }}
+      66% {{
+        opacity: 0.7;
+        transform: translateY(4px);
+        background: linear-gradient(
+          to top,
+          rgba(14, 165, 233, 0.14) 0%,
+          rgba(232, 0, 45, 0.06) 35%,
+          transparent 70%
+        );
+      }}
+      100% {{
+        opacity: 0.65;
+        transform: translateY(0px);
+        background: linear-gradient(
+          to top,
+          rgba(232, 0, 45, 0.12) 0%,
+          rgba(201, 168, 76, 0.08) 35%,
+          transparent 70%
+        );
+      }}
     }}
 
     /* ── SECTION 1: Picks Header ── */
@@ -1268,7 +1289,7 @@ def build_html(data):
       max-width: 500px;
       margin: 0 auto;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }}
     .matches-grid {{
       display: flex;
@@ -1464,7 +1485,7 @@ def build_html(data):
       margin-left: auto;
       margin-right: auto;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }}
     .confidence-toggle {{
       display: flex;
@@ -1610,7 +1631,7 @@ def build_html(data):
       color: var(--fifa-text-muted);
       line-height: 1.6;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }}
 
     /* ── Cursor and Focus States ── */
@@ -1724,7 +1745,7 @@ def build_html(data):
       padding-top: 16px;
       border-top: 1px solid rgba(201,168,76,0.3);
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }}
     .bracket-toggle {{
       display: flex;
@@ -1964,7 +1985,7 @@ def build_html(data):
       margin: 24px auto 0;
       padding: 0 16px;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }}
     .results-header {{
       display: flex;
@@ -2098,8 +2119,23 @@ def build_html(data):
         scroll-behavior: auto !important;
       }}
       body::before {{ animation: none; }}
-      body::after {{ animation: none; }}
-      .noise-overlay {{ display: none; }}
+      body::after {{
+        animation: none;
+        opacity: 0.6;
+      }}
+      #floodlights {{
+        animation: none;
+        opacity: 0.7;
+      }}
+      #crowd-wave {{
+        animation: none;
+        opacity: 0.4;
+        background: linear-gradient(
+          to top,
+          rgba(232, 0, 45, 0.10) 0%,
+          transparent 60%
+        );
+      }}
       .skeleton {{ animation: none; }}
       .match-card.live-now {{ animation: none; }}
       .live-dot {{ animation: none; }}
@@ -2109,13 +2145,8 @@ def build_html(data):
 </head>
 <body>
 
-<svg style="position:absolute;width:0;height:0" aria-hidden="true">
-  <filter id="noise">
-    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
-    <feColorMatrix type="saturate" values="0"/>
-  </filter>
-</svg>
-<div class="noise-overlay" aria-hidden="true"></div>
+<div id="floodlights" aria-hidden="true"></div>
+<div id="crowd-wave" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════════════════
      SECTION 1 — POLLAYA PICKS HEADER (sticky)
