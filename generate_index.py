@@ -993,10 +993,10 @@ def build_html(data):
       --fifa-red:     #E8002D;
       --fifa-white:   #FFFFFF;
       --fifa-gold:    #C9A84C;
-      --fifa-dark:    #060E1A;
-      --fifa-card:    #111D2E;
+      --fifa-dark:    #000000;
+      --fifa-card:    #0A0F1A;
       --fifa-card-hover: #1A2B40;
-      --fifa-border:  #1E3050;
+      --fifa-border:  #1A2640;
       --fifa-text-primary:   #FFFFFF;
       --fifa-text-secondary: #8BA0BB;
       --fifa-text-muted:     #4A6080;
@@ -1040,7 +1040,9 @@ def build_html(data):
       50%  {{ transform: rotate(180deg) scale(1.1); opacity: 0.8; }}
       100% {{ transform: rotate(360deg) scale(1);  opacity: 0.6; }}
     }}
-    /* Pitch grass layer — sits above the ::before aurora, barely perceptible */
+    /* Stadium floodlights — two white beams sweep from the top corners,
+       a gold broadcast spotlight breathes at center top. Above the ::before
+       aurora, felt rather than seen (0.03–0.06 alpha). */
     body::after {{
       content: '';
       position: fixed;
@@ -1050,25 +1052,110 @@ def build_html(data):
       height: 100%;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.04;
-      background-image: repeating-linear-gradient(
-        105deg,
-        transparent,
-        transparent 40px,
-        rgba(34, 197, 94, 0.6) 40px,
-        rgba(34, 197, 94, 0.6) 41px
-      ),
-      radial-gradient(
-        circle at 50% 40%,
-        rgba(34, 197, 94, 0.03) 0%,
-        rgba(34, 197, 94, 0.01) 200px,
-        transparent 400px
-      );
-      animation: grassDrift 8s linear infinite;
+      background:
+        radial-gradient(
+          ellipse 60% 40% at -10% 0%,
+          rgba(255, 255, 255, 0.04) 0%,
+          transparent 70%
+        ),
+        radial-gradient(
+          ellipse 60% 40% at 110% 0%,
+          rgba(255, 255, 255, 0.03) 0%,
+          transparent 70%
+        ),
+        radial-gradient(
+          ellipse 30% 50% at 50% -10%,
+          rgba(201, 168, 76, 0.04) 0%,
+          transparent 60%
+        );
+      animation: floodlightSweep 12s ease-in-out infinite alternate;
     }}
-    @keyframes grassDrift {{
-      0%   {{ background-position: 0 0, 0 0; }}
-      100% {{ background-position: 80px 80px, 0 0; }}
+    @keyframes floodlightSweep {{
+      0% {{
+        background:
+          radial-gradient(
+            ellipse 60% 40% at -10% 0%,
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 110% 0%,
+            rgba(255, 255, 255, 0.02) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 30% 50% at 50% -10%,
+            rgba(201, 168, 76, 0.04) 0%,
+            transparent 60%
+          );
+      }}
+      33% {{
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 20% 0%,
+            rgba(255, 255, 255, 0.05) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 0%,
+            rgba(255, 255, 255, 0.03) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 30% 50% at 50% -5%,
+            rgba(201, 168, 76, 0.06) 0%,
+            transparent 60%
+          );
+      }}
+      66% {{
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 0% 0%,
+            rgba(255, 255, 255, 0.03) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 100% 0%,
+            rgba(255, 255, 255, 0.05) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 30% 50% at 50% -10%,
+            rgba(201, 168, 76, 0.03) 0%,
+            transparent 60%
+          );
+      }}
+      100% {{
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 30% 0%,
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 70% 0%,
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 30% 50% at 50% -5%,
+            rgba(201, 168, 76, 0.05) 0%,
+            transparent 60%
+          );
+      }}
+    }}
+    /* Broadcast film grain — feTurbulence noise on its own fixed layer
+       (a filter on body::after itself would consume the floodlight gradients) */
+    .noise-overlay {{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      filter: url(#noise);
+      opacity: 0.015;
     }}
 
     /* ── SECTION 1: Picks Header ── */
@@ -2012,6 +2099,7 @@ def build_html(data):
       }}
       body::before {{ animation: none; }}
       body::after {{ animation: none; }}
+      .noise-overlay {{ display: none; }}
       .skeleton {{ animation: none; }}
       .match-card.live-now {{ animation: none; }}
       .live-dot {{ animation: none; }}
@@ -2020,6 +2108,14 @@ def build_html(data):
   </style>
 </head>
 <body>
+
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+</svg>
+<div class="noise-overlay" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════════════════
      SECTION 1 — POLLAYA PICKS HEADER (sticky)
