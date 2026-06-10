@@ -158,6 +158,55 @@ def _poisson_most_probable_score(team1_name, team2_name, max_goals=7):
     return best_s
 
 
+def _extra_time_score(team1_name, team2_name):
+    """
+    Simulate extra time for a knockout match level after 90 minutes.
+    Lambdas are reduced to 28% of the 90-minute lambdas (reflects ~0.3-0.4
+    total ET goals per 30 min vs ~2.5 over 90 min), ET goals capped 0-3 per
+    team. Score is sampled from the resulting Poisson distribution.
+    """
+    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
+    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
+    lh = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
+    la = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+    et_lh = round(lh * 0.28, 4)
+    et_la = round(la * 0.28, 4)
+
+    goals = list(range(4))  # ET goals capped 0-3 per team
+    h_pmf = sp_poisson.pmf(goals, et_lh)
+    a_pmf = sp_poisson.pmf(goals, et_la)
+    scores = [(g1, g2) for g1 in goals for g2 in goals]
+    raw = [h_pmf[g1] * a_pmf[g2] for g1, g2 in scores]
+    total_p = sum(raw)
+    probs = [p / total_p for p in raw]
+    et_g1, et_g2 = scores[np.random.choice(len(scores), p=probs)]
+    return et_g1, et_g2, et_lh, et_la
+
+
+def _knockout_score(team1_name, team2_name, max_goals=7):
+    """
+    Full knockout scoreline for team1 vs team2: the 90-minute most-probable
+    score, plus (if level after 90) extra time with fatigue-adjusted lambdas.
+    Returns "display_score" (the score shown for Pollaya purposes) and, only
+    when 90' was a draw, the ET fields.
+    """
+    g1, g2 = _poisson_most_probable_score(team1_name, team2_name, max_goals)
+    info = {"display_score": (g1, g2)}
+    if g1 == g2:
+        et_g1, et_g2, et_lh, et_la = _extra_time_score(team1_name, team2_name)
+        final1, final2 = g1 + et_g1, g2 + et_g2
+        info.update({
+            "score_90": f"{g1}-{g2}",
+            "score_120": f"{final1}-{final2}",
+            "went_to_et": True,
+            "went_to_penalties": et_g1 == et_g2,
+            "et_lambda_home": et_lh,
+            "et_lambda_away": et_la,
+            "display_score": (final1, final2),
+        })
+    return info
+
+
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def pct(n, d):
@@ -211,17 +260,29 @@ def format_ko_match(match_num, team_pool=None):
         likely_winner = max(teams_out, key=lambda x: x["overall_win_pct"])["name"]
         likely_loser = next((t["name"] for t in teams_out if t["name"] != likely_winner), "?")
 
-        # Fix 3: Use Poisson most-probable score from team_strength.json
-        w_g, l_g = _poisson_most_probable_score(likely_winner, likely_loser)
+        # Fix 3 + ET fix: Poisson most-probable score, with fatigue-adjusted
+        # extra time if level after 90 minutes
+        score_info = _knockout_score(likely_winner, likely_loser)
+        w_g, l_g = score_info["display_score"]
         win_pct = max(teams_out, key=lambda x: x["overall_win_pct"])["overall_win_pct"]
         predicted_score = f"{likely_winner} {w_g}-{l_g} {likely_loser} ({win_pct}%)"
 
-    return {
+    result = {
         "match": match_num,
         "likely_winner": likely_winner,
         "predicted_score": predicted_score,
         "teams": teams_out,
     }
+    if teams_out and "score_90" in score_info:
+        result.update({
+            "score_90": score_info["score_90"],
+            "score_120": score_info["score_120"],
+            "went_to_et": score_info["went_to_et"],
+            "went_to_penalties": score_info["went_to_penalties"],
+            "et_lambda_home": score_info["et_lambda_home"],
+            "et_lambda_away": score_info["et_lambda_away"],
+        })
+    return result
 
 
 def build_r32_deduplicated():
@@ -424,8 +485,9 @@ tp_t1, tp_t2 = m103_entry(m103_top[0]), m103_entry(m103_top[1])
 tp_winner = max([tp_t1, tp_t2], key=lambda t: t["overall_win_pct"])["name"]
 tp_loser = tp_t2["name"] if tp_winner == tp_t1["name"] else tp_t1["name"]
 
-# Poisson-based predicted score for 3rd-place match
-tp_wg, tp_lg = _poisson_most_probable_score(tp_winner, tp_loser)
+# Poisson-based predicted score for 3rd-place match (+ ET fix)
+tp_score_info = _knockout_score(tp_winner, tp_loser)
+tp_wg, tp_lg = tp_score_info["display_score"]
 tp_wp = max(tp_t1, tp_t2, key=lambda t: t["overall_win_pct"])["overall_win_pct"]
 tp_predicted_score = f"{tp_winner} {tp_wg}-{tp_lg} {tp_loser} ({tp_wp}%)"
 
@@ -436,6 +498,15 @@ output["knockout_bracket"]["third_place_match_derived"] = {
     "predicted_score": tp_predicted_score,
     "teams": [tp_t1, tp_t2],
 }
+if "score_90" in tp_score_info:
+    output["knockout_bracket"]["third_place_match_derived"].update({
+        "score_90": tp_score_info["score_90"],
+        "score_120": tp_score_info["score_120"],
+        "went_to_et": tp_score_info["went_to_et"],
+        "went_to_penalties": tp_score_info["went_to_penalties"],
+        "et_lambda_home": tp_score_info["et_lambda_home"],
+        "et_lambda_away": tp_score_info["et_lambda_away"],
+    })
 
 # Verify the four Final/3P teams are all distinct
 tp_teams = {t["name"] for t in output["knockout_bracket"]["third_place_match_derived"]["teams"]}

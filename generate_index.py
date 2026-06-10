@@ -4,6 +4,7 @@ Run after run_predictions.py produces the JSON.
 """
 import json
 import math
+import re
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
@@ -185,14 +186,19 @@ def _load_fixtures():
         time_str = fx.get("time", "00:00")
         home = _norm(fx.get("home", "TBD"))
         away = _norm(fx.get("away", "TBD"))
-        group = fx.get("group", "?")
-        md = fx.get("matchday", 1)
-        round_label = f"Group {group} MD{md}"
+        match_num = fx.get("match_num")
+        if match_num:
+            round_label = f'{fx.get("round_name", "Knockout")} · M{match_num}'
+            group = fx.get("round", "KO")
+        else:
+            group = fx.get("group", "?")
+            md = fx.get("matchday", 1)
+            round_label = f"Group {group} MD{md}"
         try:
             hour, minute = int(time_str[:2]), int(time_str[3:5])
         except Exception:
             hour, minute = 0, 0
-        schedule.append((date_str, hour, minute, home, away, group, round_label))
+        schedule.append((date_str, hour, minute, home, away, group, round_label, match_num))
     return sorted(schedule, key=lambda e: (e[0], e[1], e[2]))
 
 COLOMBIA_OFFSET = timedelta(hours=-5)  # UTC-5
@@ -239,6 +245,43 @@ def _strength_lambdas(team1, team2):
     lam1 = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
     lam2 = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
     return lam1, lam2
+
+
+def _ko_lookup(data):
+    """Flatten knockout_bracket into {match_num: entry} for quick lookup."""
+    kb = data.get("knockout_bracket", {})
+    idx = {}
+    for key in ("round_of_32", "round_of_16", "quarter_finals", "semi_finals"):
+        for m in kb.get(key, []):
+            idx[m["match"]] = m
+    tp = kb.get("third_place_match_derived") or kb.get("third_place_match")
+    if tp:
+        idx[103] = tp
+    if kb.get("final"):
+        idx[104] = kb["final"]
+    return idx
+
+
+def _resolve_ko_slot(label, bracket):
+    """Resolve a knockout fixture slot label to a confirmed real team name.
+
+    Returns (display_name, confirmed). Slots of the form "1ST GROUP A" /
+    "2ND GROUP A" resolve via bracket_state.json once that group position is
+    CONFIRMED. "3RD PLACE (POOL)" and "WINNER M.."/"LOSER M.." slots can't be
+    resolved without engine-level bracket assignment and stay PROJECTED.
+    Anything else is assumed to already be a real team name.
+    """
+    parts = label.split()
+    if len(parts) == 3 and parts[1] == "GROUP" and parts[0] in ("1ST", "2ND"):
+        ord_word = "1st" if parts[0] == "1ST" else "2nd"
+        bk_key = f"Group {parts[2]} {ord_word}"
+        slot = bracket.get(bk_key)
+        if slot and slot.get("status") == "CONFIRMED":
+            return _norm(slot.get("team", label)), True
+        return label, False
+    if label.startswith("WINNER M") or label.startswith("LOSER M") or label == "3RD PLACE (POOL)":
+        return label, False
+    return label, True
 
 
 TOURNAMENT_START = datetime(2026, 6, 11, 0, 0, 0)  # midnight Col time on opening day
@@ -364,6 +407,12 @@ def _upcoming_matches(data):
     sim_probs = {_norm(t["team"]): t["probability"] for t in data.get("all_teams", [])}
     skellam_index = {(e["home"], e["away"]): e
                      for e in data.get("match_probabilities", [])}
+    ko_index = _ko_lookup(data)
+    try:
+        with open(BRACKET_STATE_FILE) as f:
+            bracket = json.load(f)
+    except Exception:
+        bracket = {}
 
     now_utc = datetime.now(timezone.utc)
     now_col = (now_utc + COLOMBIA_OFFSET).replace(tzinfo=None)
@@ -372,7 +421,7 @@ def _upcoming_matches(data):
 
     upcoming = []
     for entry in _load_fixtures():
-        date_str, hour, minute, t1, t2, group, round_label = entry
+        date_str, hour, minute, t1, t2, group, round_label, match_num = entry
         ko_col = datetime(
             int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
             hour, minute, 0,
@@ -381,13 +430,62 @@ def _upcoming_matches(data):
             continue
         if cutoff is not None and ko_col > cutoff:
             continue
-        upcoming.append((date_str, ko_col, t1, t2, group, round_label))
+        upcoming.append((date_str, ko_col, t1, t2, group, round_label, match_num))
 
     if not tournament_started:
         upcoming = upcoming[:6]
 
     results = []
-    for date_str, ko_col, t1_raw, t2_raw, group, round_label in upcoming:
+    for date_str, ko_col, t1_raw, t2_raw, group, round_label, match_num in upcoming:
+        ko_fmt = ko_col.strftime("%-d %b · %H:%M COL")
+        kickoff_utc_iso = (ko_col + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        if match_num:
+            t1_disp, t1_confirmed = _resolve_ko_slot(t1_raw, bracket)
+            t2_disp, t2_confirmed = _resolve_ko_slot(t2_raw, bracket)
+            confirmed = t1_confirmed and t2_confirmed
+            ko_entry = ko_index.get(match_num)
+
+            result = {
+                "is_ko": True,
+                "match_num": match_num,
+                "t1": t1_disp, "t2": t2_disp,
+                "confirmed": confirmed,
+                "venue": MATCH_VENUES.get((t1_disp, t2_disp), ""),
+                "ko_fmt": ko_fmt, "match_lbl": _match_label(round_label, group),
+                "date_str": date_str,
+                "kickoff_utc": kickoff_utc_iso,
+            }
+
+            if confirmed and ko_entry:
+                team_pcts = {t["name"]: t["overall_win_pct"] for t in ko_entry.get("teams", [])}
+                win_p1 = team_pcts.get(t1_disp, 0)
+                win_p2 = team_pcts.get(t2_disp, 0)
+                m_ = re.search(r"(\d+)-(\d+)", ko_entry.get("predicted_score", ""))
+                wg, lg = (int(m_.group(1)), int(m_.group(2))) if m_ else (0, 0)
+                likely_winner = ko_entry.get("likely_winner")
+                if likely_winner == t1_disp:
+                    score1, score2 = wg, lg
+                else:
+                    score1, score2 = lg, wg
+                max_win = max(win_p1, win_p2)
+                if max_win >= 60:
+                    conf, conf_cls = "HIGH", "conf-high"
+                elif max_win >= 45:
+                    conf, conf_cls = "MED", "conf-med"
+                else:
+                    conf, conf_cls = "LOW", "conf-low"
+                result.update({
+                    "win_p1": win_p1, "win_p2": win_p2,
+                    "score1": score1, "score2": score2,
+                    "winner": likely_winner,
+                    "conf": conf, "conf_cls": conf_cls,
+                    "went_to_et": ko_entry.get("went_to_et", False),
+                    "went_to_penalties": ko_entry.get("went_to_penalties", False),
+                })
+            results.append(result)
+            continue
+
         t1 = _norm(t1_raw)
         t2 = _norm(t2_raw)
         sk = skellam_index.get((t1, t2))
@@ -425,11 +523,10 @@ def _upcoming_matches(data):
             conf, conf_cls = "LOW", "conf-low"
 
         venue = MATCH_VENUES.get((t1, t2), f"Group {group}")
-        ko_fmt = ko_col.strftime("%-d %b · %H:%M COL")
         match_lbl = _match_label(round_label, group)
 
-        kickoff_utc_iso = (ko_col + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
         results.append({
+            "is_ko": False,
             "t1": t1, "t2": t2, "group": group,
             "win_p1": win_p1, "win_p2": win_p2, "draw_p": draw_p,
             "score1": score1, "score2": score2,
@@ -479,9 +576,81 @@ def _match_cards_html(matches):
         cards += f'\n<div class="date-header">{day_name} · {day_mon}</div>\n'
         cards += '<div class="matches-grid">\n'
         for m in group_iter:
-            t1, t2 = m["t1"], m["t2"]
             card_index += 1
             delay = card_index * 200
+
+            if m.get("is_ko"):
+                if not m["confirmed"]:
+                    cards += f'''<div class="match-card ko-pending-card" style="animation-delay:{delay}ms" data-kickoff="{m["kickoff_utc"]}">
+  <div class="mc-card-header">
+    <span class="mc-card-label">{h(m["match_lbl"])}</span>
+  </div>
+  <div class="mc-venue-row">{h(m["venue"])} · {h(m["ko_fmt"])}</div>
+  <span class="countdown-timer"></span>
+  <div class="teams-score-row">
+    <div class="mc-team">
+      <span class="mc-name" style="font-style:italic;opacity:0.55">{h(m["t1"])}</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score-label" style="opacity:0.55">TBD</div>
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-name" style="font-style:italic;opacity:0.55">{h(m["t2"])}</span>
+    </div>
+  </div>
+</div>
+'''
+                else:
+                    t1, t2 = m["t1"], m["t2"]
+                    t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
+                    t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
+                    t1_abbr = t1_abbr[:3] if len(t1_abbr) > 3 else t1_abbr
+                    t2_abbr = t2_abbr[:3] if len(t2_abbr) > 3 else t2_abbr
+                    score_chip = f'SCORE {m["score1"]}-{m["score2"]} 15pts'
+                    w_code = COUNTRY_CODE.get(m["winner"], m["winner"][:3].upper())
+                    w_code = w_code[:3] if len(w_code) > 3 else w_code
+                    win_chip = f'WIN {h(w_code)} 8pts'
+                    goals_chip = f'{t1_abbr}{m["score1"]} {t2_abbr}{m["score2"]} 5pts'
+                    extra_label = ""
+                    if m.get("went_to_penalties"):
+                        extra_label = '<div style="font-size:10px;color:#F59E0B;text-align:center;margin-top:4px;letter-spacing:0.05em;">MAY GO TO PENALTIES</div>'
+                    elif m.get("went_to_et"):
+                        extra_label = '<div style="font-size:10px;color:#C9A84C;text-align:center;margin-top:4px;letter-spacing:0.05em;">INCL. EXTRA TIME</div>'
+                    cards += f'''<div class="match-card" style="animation-delay:{delay}ms" data-kickoff="{m["kickoff_utc"]}">
+  <div class="mc-card-header">
+    <span class="mc-card-label">{h(m["match_lbl"])}</span>
+    <span class="mc-conf-badge confidence-badge {m["conf_cls"]}" data-tooltip="{CONF_TOOLTIPS[m["conf"]]}">{m["conf"]} <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span></span>
+  </div>
+  <div class="mc-venue-row">{h(m["venue"])} · {h(m["ko_fmt"])}</div>
+  <span class="countdown-timer"></span>
+  <div class="teams-score-row">
+    <div class="mc-team">
+      <span class="mc-flag">{_flag(t1)}</span>
+      <span class="mc-name">{h(t1)}</span>
+      <span class="mc-prob">{m["win_p1"]}%</span>
+    </div>
+    <div class="mc-score-block">
+      <div class="mc-score score-display" data-home="{m["score1"]}" data-away="{m["score2"]}"><span class="home-score">{m["score1"]}</span>–<span class="away-score">{m["score2"]}</span></div>
+      <div class="mc-score-label">PREDICTED</div>
+      <div class="live-score-display"><span class="live-dot"></span><span class="live-label">LIVE</span></div>
+      {extra_label}
+    </div>
+    <div class="mc-team mc-team-right">
+      <span class="mc-flag">{_flag(t2)}</span>
+      <span class="mc-name">{h(t2)}</span>
+      <span class="mc-prob">{m["win_p2"]}%</span>
+    </div>
+  </div>
+  <div class="mc-chips">
+    <div class="mc-chip chip-gold">{score_chip}</div>
+    <div class="mc-chip chip-red">{win_chip}</div>
+    <div class="mc-chip chip-blue">{goals_chip}</div>
+  </div>
+</div>
+'''
+                continue
+
+            t1, t2 = m["t1"], m["t2"]
             t1_abbr = COUNTRY_CODE.get(t1, t1[:3].upper())
             t2_abbr = COUNTRY_CODE.get(t2, t2[:3].upper())
             t1_abbr = t1_abbr[:3] if len(t1_abbr) > 3 else t1_abbr
@@ -750,8 +919,7 @@ def _build_wc_matches_json():
     for fx in raw:
         date_str = fx.get("date", "")
         time_str = fx.get("time", "00:00")
-        home = _norm(fx.get("home", "TBD"))
-        away = _norm(fx.get("away", "TBD"))
+        match_num = fx.get("match_num")
         try:
             hour, minute = int(time_str[:2]), int(time_str[3:5])
         except Exception:
@@ -762,11 +930,17 @@ def _build_wc_matches_json():
         )
         ko_utc = ko_col + timedelta(hours=5)  # COT = UTC-5, so UTC = COT + 5
         utc_str = ko_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-        home_code = COUNTRY_CODE.get(home, home[:3].upper())
-        away_code = COUNTRY_CODE.get(away, away[:3].upper())
-        home_code = home_code[:3] if len(home_code) > 3 else home_code
-        away_code = away_code[:3] if len(away_code) > 3 else away_code
-        matches.append({"label": f"{home_code} vs {away_code}", "utc": utc_str})
+        if match_num:
+            label = f'{fx.get("round", "KO")} M{match_num}'
+        else:
+            home = _norm(fx.get("home", "TBD"))
+            away = _norm(fx.get("away", "TBD"))
+            home_code = COUNTRY_CODE.get(home, home[:3].upper())
+            away_code = COUNTRY_CODE.get(away, away[:3].upper())
+            home_code = home_code[:3] if len(home_code) > 3 else home_code
+            away_code = away_code[:3] if len(away_code) > 3 else away_code
+            label = f"{home_code} vs {away_code}"
+        matches.append({"label": label, "utc": utc_str})
     matches.sort(key=lambda m: m["utc"])
     return json.dumps(matches, separators=(",", ":"))
 
