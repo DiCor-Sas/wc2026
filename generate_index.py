@@ -1056,12 +1056,12 @@ def build_html(data):
       z-index: 0;
       background: repeating-linear-gradient(
         165deg,
-        rgba(0, 220, 60, 0.12) 0px,
-        rgba(0, 220, 60, 0.12) 60px,
-        rgba(0, 180, 40, 0.06) 60px,
-        rgba(0, 180, 40, 0.06) 120px
+        rgba(60, 255, 110, 0.22) 0px,
+        rgba(60, 255, 110, 0.22) 60px,
+        rgba(40, 230, 90, 0.12) 60px,
+        rgba(40, 230, 90, 0.12) 120px
       );
-      animation: pitchShimmer 6s ease-in-out infinite alternate;
+      animation: pitchShimmer 3s ease-in-out infinite alternate;
     }}
     @keyframes pitchShimmer {{
       0% {{
@@ -1084,33 +1084,33 @@ def build_html(data):
       background:
         radial-gradient(
           ellipse 55% 65% at 0% 0%,
-          rgba(255, 255, 200, 0.18) 0%,
-          rgba(255, 255, 200, 0.06) 40%,
+          rgba(255, 255, 200, 0.30) 0%,
+          rgba(255, 255, 200, 0.10) 40%,
           transparent 70%
         ),
         radial-gradient(
           ellipse 55% 65% at 100% 0%,
-          rgba(255, 255, 200, 0.15) 0%,
-          rgba(255, 255, 200, 0.05) 40%,
+          rgba(255, 255, 200, 0.26) 0%,
+          rgba(255, 255, 200, 0.09) 40%,
           transparent 70%
         ),
         radial-gradient(
           ellipse 45% 55% at 0% 100%,
-          rgba(255, 255, 200, 0.10) 0%,
+          rgba(255, 255, 200, 0.18) 0%,
           transparent 60%
         ),
         radial-gradient(
           ellipse 45% 55% at 100% 100%,
-          rgba(255, 255, 200, 0.10) 0%,
+          rgba(255, 255, 200, 0.18) 0%,
           transparent 60%
         ),
         radial-gradient(
           ellipse 40% 50% at 50% 0%,
-          rgba(201, 168, 76, 0.14) 0%,
-          rgba(201, 168, 76, 0.04) 40%,
+          rgba(201, 168, 76, 0.24) 0%,
+          rgba(201, 168, 76, 0.08) 40%,
           transparent 65%
         );
-      animation: floodlightPulse 8s ease-in-out infinite alternate;
+      animation: floodlightPulse 4s ease-in-out infinite alternate;
     }}
     @keyframes floodlightPulse {{
       0% {{
@@ -1134,7 +1134,7 @@ def build_html(data):
       height: 45%;
       pointer-events: none;
       z-index: 1;
-      animation: crowdWave 10s ease-in-out infinite alternate;
+      animation: crowdWave 5s ease-in-out infinite alternate;
     }}
     @keyframes crowdWave {{
       0% {{
@@ -1142,8 +1142,8 @@ def build_html(data):
         transform: translateY(8px);
         background: linear-gradient(
           to top,
-          rgba(232, 0, 45, 0.14) 0%,
-          rgba(201, 168, 76, 0.08) 35%,
+          rgba(232, 0, 45, 0.24) 0%,
+          rgba(201, 168, 76, 0.14) 35%,
           transparent 70%
         );
       }}
@@ -1152,8 +1152,8 @@ def build_html(data):
         transform: translateY(-4px);
         background: linear-gradient(
           to top,
-          rgba(201, 168, 76, 0.16) 0%,
-          rgba(0, 220, 60, 0.06) 35%,
+          rgba(201, 168, 76, 0.28) 0%,
+          rgba(60, 255, 110, 0.12) 35%,
           transparent 70%
         );
       }}
@@ -1162,8 +1162,8 @@ def build_html(data):
         transform: translateY(4px);
         background: linear-gradient(
           to top,
-          rgba(14, 165, 233, 0.14) 0%,
-          rgba(232, 0, 45, 0.06) 35%,
+          rgba(14, 165, 233, 0.24) 0%,
+          rgba(232, 0, 45, 0.12) 35%,
           transparent 70%
         );
       }}
@@ -1172,8 +1172,8 @@ def build_html(data):
         transform: translateY(0px);
         background: linear-gradient(
           to top,
-          rgba(232, 0, 45, 0.12) 0%,
-          rgba(201, 168, 76, 0.08) 35%,
+          rgba(232, 0, 45, 0.20) 0%,
+          rgba(201, 168, 76, 0.14) 35%,
           transparent 70%
         );
       }}
@@ -2132,7 +2132,7 @@ def build_html(data):
         opacity: 0.4;
         background: linear-gradient(
           to top,
-          rgba(232, 0, 45, 0.10) 0%,
+          rgba(232, 0, 45, 0.18) 0%,
           transparent 60%
         );
       }}
