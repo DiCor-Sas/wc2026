@@ -86,10 +86,14 @@ jobs:
 
           git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-          git pull --rebase --no-edit origin main && \
-          git push origin main || \
-          (git pull --rebase --no-edit origin main && \
-          git push origin main)
+
+          for i in 1 2 3; do
+            git pull --rebase --no-edit origin main && \
+            git push origin main && \
+            break
+            echo "Push attempt $i failed, retrying..."
+            sleep $((i * 10))
+          done
 
   lineup_fetch:
     runs-on: ubuntu-latest
@@ -140,10 +144,14 @@ jobs:
       - name: Commit lineup data if changed
         run: |
           git add lineups.json 2>/dev/null || true
+          if [ -f match_adjustments.json ]; then
+            git add match_adjustments.json
+          fi
 
-          git diff --quiet && git diff --staged --quiet && echo "No lineup changes" && exit 0
+          if git diff --cached --quiet; then
+            echo "No lineup changes to commit"
+            exit 0
+          fi
           git commit -m "lineup update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-          git pull --rebase --no-edit origin main && \
-          git push origin main || \
-          (git pull --rebase --no-edit origin main && \
-          git push origin main)
+          git pull --rebase --no-edit origin main
+          git push origin main
