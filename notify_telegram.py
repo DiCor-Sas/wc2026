@@ -147,12 +147,23 @@ def send_telegram(message):
     req = urllib.request.Request(
         url, data=payload, headers={"Content-Type": "application/json"}
     )
+
+    token_preview = token[:8] + "..."
+    print(f"Using token: {token_preview}")
+    print(f"Chat ID: {chat_id}")
+    print(f"Message length: {len(message)}")
+    print(f"URL: {TELEGRAM_API.format(token=token_preview)}")
+    print(f"Payload: {payload.decode('utf-8')}")
+
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             resp.read()
         print("Telegram reminder sent.")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        print(f"ERROR HTTP {e.code}: {body}")
     except Exception as e:
-        print(f"ERROR sending Telegram message: {e}")
+        print(f"ERROR: {e}")
 
 
 def main():
