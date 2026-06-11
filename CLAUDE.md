@@ -220,6 +220,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   Playwright ESPN date-specific scraper → FOX Sports HTML fallback.
 - **Sky Sports WC-specific URL**: returned 404 pre-tournament — **to be
   re-tested June 11** and added as a WC-results fallback if live (see §9).
+- **Lineup fetch chain** (`fetch_lineup()` in `fetch_results.py`, threshold
+  `len(xi) >= 5` per side): Source 1 API-Football → **Source 2 Rotowire**
+  (`rotowire.com/soccer/lineups.php?league=WOC`, plain `requests` +
+  BeautifulSoup, no Playwright — **confirmed working**, server-side rendered
+  `div.lineup.is-soccer` blocks matched via `lineup__abbr` 3-letter codes,
+  player names from `li.lineup__player a[title]`; team-name → Rotowire-code
+  mapping is `ROTOWIRE_COUNTRY_CODE`) → Source 3 ESPN Playwright
+  (scoreboard → match page) → Source 4 BBC Sport Playwright (fixtures page →
+  match page) → Source 5 graceful degradation (`STARTING XI PENDING`).
+  `_lineup_badge_html()` in `generate_index.py` shows `LINEUP ESTIMATED` for
+  sources `espn-playwright`, `bbc-playwright`, `rotowire`, `web-search`, and
+  `LINEUP CONFIRMED` only for `api-football`.
 - **worldfootball.net**: BLOCKED by Cloudflare 403 — do not retry.
 - **Sofascore**: BLOCKED 403 — do not retry.
 - **API-Football** (`v3.football.api-sports.io`, header `x-apisports-key`):
