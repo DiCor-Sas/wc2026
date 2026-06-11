@@ -19,21 +19,41 @@ on:
     # Main pipeline — every 2 hours from 10:00 to 02:00 UTC (12 runs per day)
     - cron: "0 10,12,14,16,18,20,22,0,2 * * *"
     # Pre-match pipeline reruns — 45 min before each COT kickoff window (UTC)
+    - cron: "15 15 * * *"   # 10:15 COT (11:00 COT kickoff)
     - cron: "15 16 * * *"   # 11:15 COT (12:00 COT kickoff)
+    - cron: "15 17 * * *"   # 12:15 COT (13:00 COT kickoff)
     - cron: "15 18 * * *"   # 13:15 COT (14:00 COT kickoff)
     - cron: "15 19 * * *"   # 14:15 COT (15:00 COT kickoff)
+    - cron: "45 19 * * *"   # 14:45 COT (15:30 COT kickoff)
+    - cron: "15 20 * * *"   # 15:15 COT (16:00 COT kickoff)
+    - cron: "15 21 * * *"   # 16:15 COT (17:00 COT kickoff)
     - cron: "15 22 * * *"   # 17:15 COT (18:00 COT kickoff)
+    - cron: "45 22 * * *"   # 17:45 COT (18:30 COT kickoff)
+    - cron: "15 23 * * *"   # 18:15 COT (19:00 COT kickoff)
+    - cron: "45 23 * * *"   # 18:45 COT (19:30 COT kickoff)
+    - cron: "15 0 * * *"    # 19:15 COT (20:00 COT kickoff)
+    - cron: "45 0 * * *"    # 19:45 COT (20:30 COT kickoff)
     - cron: "15 1 * * *"    # 20:15 COT (21:00 COT kickoff)
-    - cron: "15 4 * * *"    # 23:15 COT (00:00 COT kickoff)
-    - cron: "15 5 * * *"    # 00:15 COT (01:00 COT kickoff)
+    - cron: "15 2 * * *"    # 21:15 COT (22:00 COT kickoff)
+    - cron: "15 3 * * *"    # 22:15 COT (23:00 COT kickoff)
     # Lineup fetch triggers — 50 min before each COT kickoff window (UTC)
+    - cron: "10 15 * * *"   # 10:10 COT (11:00 COT kickoff)
     - cron: "10 16 * * *"   # 11:10 COT (12:00 COT kickoff)
+    - cron: "10 17 * * *"   # 12:10 COT (13:00 COT kickoff)
     - cron: "10 18 * * *"   # 13:10 COT (14:00 COT kickoff)
     - cron: "10 19 * * *"   # 14:10 COT (15:00 COT kickoff)
+    - cron: "40 19 * * *"   # 14:40 COT (15:30 COT kickoff)
+    - cron: "10 20 * * *"   # 15:10 COT (16:00 COT kickoff)
+    - cron: "10 21 * * *"   # 16:10 COT (17:00 COT kickoff)
     - cron: "10 22 * * *"   # 17:10 COT (18:00 COT kickoff)
+    - cron: "40 22 * * *"   # 17:40 COT (18:30 COT kickoff)
+    - cron: "10 23 * * *"   # 18:10 COT (19:00 COT kickoff)
+    - cron: "40 23 * * *"   # 18:40 COT (19:30 COT kickoff)
+    - cron: "10 0 * * *"    # 19:10 COT (20:00 COT kickoff)
+    - cron: "40 0 * * *"    # 19:40 COT (20:30 COT kickoff)
     - cron: "10 1 * * *"    # 20:10 COT (21:00 COT kickoff)
-    - cron: "10 4 * * *"    # 23:10 COT (00:00 COT kickoff)
-    - cron: "10 5 * * *"    # 00:10 COT (01:00 COT kickoff)
+    - cron: "10 2 * * *"    # 21:10 COT (22:00 COT kickoff)
+    - cron: "10 3 * * *"    # 22:10 COT (23:00 COT kickoff)
   workflow_dispatch:
 
 jobs:
@@ -42,13 +62,23 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       github.event.schedule == '0 10,12,14,16,18,20,22,0,2 * * *' ||
+      github.event.schedule == '15 15 * * *' ||
       github.event.schedule == '15 16 * * *' ||
+      github.event.schedule == '15 17 * * *' ||
       github.event.schedule == '15 18 * * *' ||
       github.event.schedule == '15 19 * * *' ||
+      github.event.schedule == '45 19 * * *' ||
+      github.event.schedule == '15 20 * * *' ||
+      github.event.schedule == '15 21 * * *' ||
       github.event.schedule == '15 22 * * *' ||
+      github.event.schedule == '45 22 * * *' ||
+      github.event.schedule == '15 23 * * *' ||
+      github.event.schedule == '45 23 * * *' ||
+      github.event.schedule == '15 0 * * *' ||
+      github.event.schedule == '45 0 * * *' ||
       github.event.schedule == '15 1 * * *' ||
-      github.event.schedule == '15 4 * * *' ||
-      github.event.schedule == '15 5 * * *'
+      github.event.schedule == '15 2 * * *' ||
+      github.event.schedule == '15 3 * * *'
 
     steps:
       - name: Checkout repository
@@ -111,13 +141,23 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'schedule' &&
-      (github.event.schedule == '10 16 * * *' ||
+      (github.event.schedule == '10 15 * * *' ||
+       github.event.schedule == '10 16 * * *' ||
+       github.event.schedule == '10 17 * * *' ||
        github.event.schedule == '10 18 * * *' ||
        github.event.schedule == '10 19 * * *' ||
+       github.event.schedule == '40 19 * * *' ||
+       github.event.schedule == '10 20 * * *' ||
+       github.event.schedule == '10 21 * * *' ||
        github.event.schedule == '10 22 * * *' ||
+       github.event.schedule == '40 22 * * *' ||
+       github.event.schedule == '10 23 * * *' ||
+       github.event.schedule == '40 23 * * *' ||
+       github.event.schedule == '10 0 * * *' ||
+       github.event.schedule == '40 0 * * *' ||
        github.event.schedule == '10 1 * * *' ||
-       github.event.schedule == '10 4 * * *' ||
-       github.event.schedule == '10 5 * * *')
+       github.event.schedule == '10 2 * * *' ||
+       github.event.schedule == '10 3 * * *')
 
     steps:
       - name: Checkout repository
