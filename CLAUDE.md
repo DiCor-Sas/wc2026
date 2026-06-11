@@ -140,16 +140,24 @@ knockout bracket schedules R32→Final).
 - **`update`** (full pipeline): runs `update_results.py`, then commits/pushes
   `wc2026_results.json bracket_state.json elo_ratings.json team_strength.json
   predictions.json index.html version.txt daily_results.json lineups.json`.
-  Triggered only on `workflow_dispatch` or the cron
-  `0 10,12,14,16,18,20,22,0,2 * * *` (every 2h, 10:00–02:00 UTC).
+  Triggered on `workflow_dispatch`, the cron `0 10,12,14,16,18,20,22,0,2 * * *`
+  (every 2h, 10:00–02:00 UTC), and **pre-match reruns 45 min before each COT
+  kickoff window** (`15 16,18,19,22,1,4,5 * * *` UTC, covering
+  12:00/14:00/15:00/18:00/21:00/00:00/01:00 COT kickoffs respectively).
 - **`lineup_fetch`**: runs `fetch_results.py --lineup-only`, commits/pushes
   `lineups.json` (and `match_adjustments.json` if present) **only if something
-  actually changed** — gated by `git diff --cached --quiet`. Triggered by all
-  other schedule entries: June 11 specific kickoff triggers
-  (`45 17 11 6 *` = Match 1 14:00 COT/19:00 UTC; `45 0 12 6 *` = Match 2 21:00
-  COT/02:00 UTC Jun 12) plus general pre-match windows June 12–July 19
-  (`45 10/13/16/17/19/22/23 * * *` UTC, covering 12:00/15:00/18:00/19:00/21:00/
-  00:00/01:00 COT kickoffs respectively).
+  actually changed** — gated by `git diff --cached --quiet`. Triggered
+  **50 min before each COT kickoff window** (`10 16,18,19,22,1,4,5 * * *` UTC,
+  covering 12:00/14:00/15:00/18:00/21:00/00:00/01:00 COT kickoffs
+  respectively).
+
+**Pre-match timing chain** (per kickoff window): lineup fetch fires 50 min
+before kickoff (FIFA's starting-XI submission deadline is 60 min before;
+ESPN/BBC publish 2-5 min later) → full pipeline rerun fires 45 min before
+kickoff, picking up the just-fetched lineups and regenerating
+`predictions.json`/`index.html` with lineup-adjusted simulations → Telegram
+reminder (`notify.yml`, unchanged) fires 20 min before kickoff, by which time
+the dashboard already reflects the lineup-adjusted predictions.
 - Both jobs: `actions/checkout@v4` with `secrets.GITHUB_TOKEN`, git remote
   rewritten to `x-access-token:${GITHUB_TOKEN}@github.com/...`, Python 3.11,
   Playwright + chromium install (`continue-on-error: true`).
