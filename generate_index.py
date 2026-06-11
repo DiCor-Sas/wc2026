@@ -552,7 +552,7 @@ def _lineup_badge_html(t1, t2, lineups):
     home_xi = lu.get("home_xi", [])
     away_xi = lu.get("away_xi", [])
     xi_confirmed = src == "api-football" and len(home_xi) >= 5 and len(away_xi) >= 5
-    xi_estimated = src in ("espn-playwright", "bbc-playwright", "web-search") and bool(home_xi or away_xi)
+    xi_estimated = src in ("espn-playwright", "bbc-playwright", "rotowire", "web-search") and bool(home_xi or away_xi)
     if absences:
         absent_name = absences[0]["player"].split()[-1]
         return f'<div class="mc-lineup-badge lineup-absent">&#9888; {h(absent_name)} OUT</div>'

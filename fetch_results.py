@@ -1449,6 +1449,79 @@ def _bbc_fetch_lineup(match_date_str, home_team, away_team):
         return [], []
 
 
+ROTOWIRE_COUNTRY_CODE = {
+    "Mexico": "MEX", "South Africa": "RSA", "South Korea": "KOR", "Czechia": "CZE",
+    "Canada": "CAN", "Bosnia-Herzegovina": "BIH", "USA": "USA", "Paraguay": "PAR",
+    "Qatar": "QAT", "Switzerland": "SUI", "Brazil": "BRA", "Morocco": "MAR",
+    "Haiti": "HAI", "Scotland": "SCO", "Australia": "AUS", "Türkiye": "TUR",
+    "Germany": "GER", "Curaçao": "CUW", "Ivory Coast": "CIV", "Ecuador": "ECU",
+    "Netherlands": "NED", "Japan": "JPN", "Sweden": "SWE", "Tunisia": "TUN",
+    "Spain": "ESP", "Cabo Verde": "CPV", "Saudi Arabia": "KSA", "Uruguay": "URU",
+    "Belgium": "BEL", "Egypt": "EGY", "Iran": "IRN", "New Zealand": "NZL",
+    "France": "FRA", "Senegal": "SEN", "Iraq": "IRQ", "Norway": "NOR",
+    "Argentina": "ARG", "Algeria": "ALG", "Austria": "AUT", "Jordan": "JOR",
+    "Portugal": "POR", "Colombia": "COL", "Congo DR": "COD", "Uzbekistan": "UZB",
+    "England": "ENG", "Croatia": "CRO", "Ghana": "GHA", "Panama": "PAN",
+}
+
+
+def _rotowire_fetch_lineup(match_date, home_team, away_team):
+    """Scrape Rotowire's WC lineups page (plain HTML, server-side rendered)."""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+
+        home_code = ROTOWIRE_COUNTRY_CODE.get(home_team)
+        away_code = ROTOWIRE_COUNTRY_CODE.get(away_team)
+        if not home_code or not away_code:
+            print(f"[lineup] Rotowire: no country code mapping for "
+                  f"{home_team} or {away_team}")
+            return [], []
+
+        url = "https://www.rotowire.com/soccer/lineups.php?league=WOC"
+        headers = {
+            "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                           "AppleWebKit/537.36 (KHTML, like Gecko) "
+                           "Chrome/120.0.0.0 Safari/537.36"),
+        }
+        r = requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        for block in soup.select("div.lineup.is-soccer"):
+            abbrs = [el.get_text(strip=True) for el in block.select(".lineup__abbr")]
+            if home_code not in abbrs or away_code not in abbrs:
+                continue
+
+            teams = block.select(".lineup__team")
+            home_section = next((t for t in teams if "is-home" in t.get("class", [])), None)
+            home_abbr = home_section.select_one(".lineup__abbr").get_text(strip=True) if home_section else None
+
+            box = block.select_one(".lineup__box")
+            lists = box.select("ul") if box else []
+            if len(lists) < 2:
+                continue
+
+            def _names(ul):
+                return [a["title"] for a in ul.select("li.lineup__player a[title]")]
+
+            list_a, list_b = _names(lists[0]), _names(lists[-1])
+
+            if home_abbr == home_code:
+                home_xi, away_xi = list_a, list_b
+            else:
+                home_xi, away_xi = list_b, list_a
+
+            return home_xi, away_xi
+
+        print(f"[lineup] Rotowire: no matching block for "
+              f"{home_team} ({home_code}) vs {away_team} ({away_code})")
+        return [], []
+    except Exception as e:
+        print(f"[lineup] Rotowire failed: {e}")
+        return [], []
+
+
 def _parse_lineup_from_html(html, home_team, away_team):
     """Best-effort extraction of player name lists from search result HTML."""
     home_xi, away_xi = [], []
@@ -1556,9 +1629,10 @@ def fetch_lineup(home_team, away_team, match_date):
     """Fetch starting lineup for a WC match via cascading fallback chain.
 
     Source 1: API-Football
-    Source 2: ESPN Playwright (scoreboard → match page)
-    Source 3: BBC Sport Playwright (fixtures page → match page)
-    Source 4: Graceful degradation (unavailable)
+    Source 2: Rotowire (plain HTML)
+    Source 3: ESPN Playwright (scoreboard → match page)
+    Source 4: BBC Sport Playwright (fixtures page → match page)
+    Source 5: Graceful degradation (unavailable)
 
     Returns None if the pair is not a confirmed WC fixture.
     """
@@ -1630,7 +1704,22 @@ def fetch_lineup(home_team, away_team, match_date):
     else:
         print(f"[lineup] API-Football: no API key — trying ESPN")
 
-    # ── Source 2: ESPN Playwright ─────────────────────────────────────────────
+    # ── Source 2: Rotowire plain HTML ─────────────────────────────────────────
+    if not (len(home_xi) >= 5 or len(away_xi) >= 5):
+        try:
+            h_xi, a_xi = _rotowire_fetch_lineup(match_date, home_team, away_team)
+            if len(h_xi) >= 5 or len(a_xi) >= 5:
+                home_xi, away_xi = h_xi, a_xi
+                source = "rotowire"
+                print(f"[lineup] Rotowire lineup: found "
+                      f"{len(home_xi)} home players, {len(away_xi)} away players")
+            else:
+                print(f"[lineup] Rotowire lineup: insufficient data "
+                      f"({len(h_xi)} home, {len(a_xi)} away) — trying ESPN")
+        except Exception as e:
+            print(f"[lineup] Rotowire failed: {e} — trying ESPN")
+
+    # ── Source 3: ESPN Playwright ─────────────────────────────────────────────
     if not (len(home_xi) >= 5 or len(away_xi) >= 5):
         try:
             game_id = _espn_find_game_id(match_date, home_team, away_team)
@@ -1649,7 +1738,7 @@ def fetch_lineup(home_team, away_team, match_date):
         except Exception as e:
             print(f"[lineup] ESPN Playwright failed: {e} — trying BBC")
 
-    # ── Source 3: BBC Sport Playwright ────────────────────────────────────────
+    # ── Source 4: BBC Sport Playwright ────────────────────────────────────────
     if not (len(home_xi) >= 5 or len(away_xi) >= 5):
         try:
             h_xi, a_xi = _bbc_fetch_lineup(match_date, home_team, away_team)
@@ -1664,7 +1753,7 @@ def fetch_lineup(home_team, away_team, match_date):
         except Exception as e:
             print(f"[lineup] BBC Playwright failed: {e}")
 
-    # ── Source 4: Graceful degradation ───────────────────────────────────────
+    # ── Source 5: Graceful degradation ───────────────────────────────────────
     if not (len(home_xi) >= 5 or len(away_xi) >= 5):
         print(f"[lineup] All lineup sources failed for {home_team} vs {away_team}. "
               f"Badge: STARTING XI PENDING")
