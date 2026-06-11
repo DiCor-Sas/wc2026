@@ -115,7 +115,11 @@ knockout bracket schedules R32→Final).
 - `fixtures.json` — 104 entries (`id` 1–104). 1–72 = group stage (with `group`,
   `home`, `away`, real team names). 73–104 = knockout (`match_num`, `round`
   R32/R16/QF/SF/3P/F, `home`/`away` as placeholders like `"2ND GROUP A"` /
-  `"WINNER M101"`, resolved at runtime via `bracket_state.json`)
+  `"WINNER M101"`, resolved at runtime via `bracket_state.json`). All 104
+  `time`/`timezone` (COT) values verified 2026-06-11 against the official
+  schedule (source: `WC_Schedule.md`, see §5) — 17 distinct COT kickoff
+  windows across the tournament (11:00, 12:00, 13:00, 14:00, 15:00, 15:30,
+  16:00, 17:00, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30, 21:00, 22:00, 23:00).
 - `friendlies.json`, `squad_strength.json`, `player_stats.json`,
   `model_accuracy.json`, `lineups.json` — supporting data
 - `version.txt` — unix timestamp, used as cache-bust / footer "last updated"
@@ -135,28 +139,34 @@ knockout bracket schedules R32→Final).
 
 ## 5. AUTOMATION AND SCHEDULES
 
+As of 2026-06-11, all three workflows below cover **all 17 distinct COT
+kickoff windows** used across the 104 fixtures (11:00, 12:00, 13:00, 14:00,
+15:00, 15:30, 16:00, 17:00, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30, 21:00,
+22:00, 23:00), derived from the verified source schedule (see "Source of
+truth" below).
+
 `.github/workflows/auto_update.yml`, two jobs:
 
 - **`update`** (full pipeline): runs `update_results.py`, then commits/pushes
   `wc2026_results.json bracket_state.json elo_ratings.json team_strength.json
   predictions.json index.html version.txt daily_results.json lineups.json`.
   Triggered on `workflow_dispatch`, the cron `0 10,12,14,16,18,20,22,0,2 * * *`
-  (every 2h, 10:00–02:00 UTC), and **pre-match reruns 45 min before each COT
-  kickoff window** (`15 16,18,19,22,1,4,5 * * *` UTC, covering
-  12:00/14:00/15:00/18:00/21:00/00:00/01:00 COT kickoffs respectively).
+  (every 2h, 10:00–02:00 UTC), and **pre-match reruns 45 min before each of
+  the 17 COT kickoff windows** — UTC crons at `:15` for on-the-hour COT
+  kickoffs and `:45` for the `:30` COT kickoffs (15:30, 18:30, 19:30, 20:30
+  COT).
 - **`lineup_fetch`**: runs `fetch_results.py --lineup-only`, commits/pushes
   `lineups.json` (and `match_adjustments.json` if present) **only if something
   actually changed** — gated by `git diff --cached --quiet`. Triggered
-  **50 min before each COT kickoff window** (`10 16,18,19,22,1,4,5 * * *` UTC,
-  covering 12:00/14:00/15:00/18:00/21:00/00:00/01:00 COT kickoffs
-  respectively).
+  **50 min before each of the 17 COT kickoff windows** — UTC crons at `:10`
+  for on-the-hour COT kickoffs and `:40` for the `:30` COT kickoffs.
 
 **Pre-match timing chain** (per kickoff window): lineup fetch fires 50 min
 before kickoff (FIFA's starting-XI submission deadline is 60 min before;
 ESPN/BBC publish 2-5 min later) → full pipeline rerun fires 45 min before
 kickoff, picking up the just-fetched lineups and regenerating
 `predictions.json`/`index.html` with lineup-adjusted simulations → Telegram
-reminder (`notify.yml`, unchanged) fires 20 min before kickoff, by which time
+reminder (`notify.yml`) fires 20 min before kickoff, by which time
 the dashboard already reflects the lineup-adjusted predictions.
 - Both jobs: `actions/checkout@v4` with `secrets.GITHUB_TOKEN`, git remote
   rewritten to `x-access-token:${GITHUB_TOKEN}@github.com/...`, Python 3.11,
@@ -167,7 +177,7 @@ the dashboard already reflects the lineup-adjusted predictions.
 - `permissions: contents: write, pages: write, id-token: write`
 - `env: PYTHONUNBUFFERED=1, FORCE_COLOR=1, FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`
   (Node.js 24 for JS actions)
-- **External cron-job.org backup**: 8 cron jobs hitting the workflow-dispatch
+- **External cron-job.org backup**: cron jobs hitting the workflow-dispatch
   endpoint on a schedule in **America/Bogota (COT)** time, as a redundancy
   layer in case GitHub's own scheduler is delayed. Auth via a fine-grained PAT
   with `Actions: write` scope, **expires 2026-07-25**.
@@ -178,10 +188,10 @@ the dashboard already reflects the lineup-adjusted predictions.
   window to absorb GitHub Actions scheduling delays for a ~20-min-before-
   kickoff reminder). No pip install step — uses only stdlib `urllib` plus
   the local `generate_index` module.
-- Triggers: `workflow_dispatch` plus 7 daily UTC crons, 20 min before each
-  COT kickoff window: `40 18` (13:00 COT), `40 19` (14:00 COT), `40 21`
-  (16:40 COT), `40 0` (19:40 COT), `40 1` (20:40 COT), `40 2` (21:40 COT),
-  `40 3` (22:40 COT).
+- Triggers: `workflow_dispatch` plus 17 daily UTC crons, 20 min before each
+  of the 17 COT kickoff windows — UTC crons at `:40` for on-the-hour COT
+  kickoffs and `:10` for the `:30` COT kickoffs (15:30→20:10, 18:30→23:10,
+  19:30→00:10, 20:30→01:10 UTC).
 - `permissions: contents: read` (read-only — sends a message, never
   commits). `actions/checkout@v4` with `secrets.GITHUB_TOKEN`, Python 3.11,
   `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`.
@@ -189,10 +199,15 @@ the dashboard already reflects the lineup-adjusted predictions.
   repo's GitHub Actions secrets (values not stored anywhere in this repo).
 - Test locally with: `python3 notify_telegram.py --window 9999 --dry-run`
   (prints the formatted message without calling the Telegram API).
-- **External cron-job.org backup**: add one more cronjob hitting
+- **External cron-job.org backup**: add cronjobs hitting
   `https://api.github.com/repos/DiCor-Sas/wc2026/actions/workflows/notify.yml/dispatches`
-  (same PAT/headers/body `{"ref":"main"}` as the existing 8 jobs), scheduled
-  in America/Bogota at 13:40, 14:40, 16:40, 19:40, 20:40, 21:40, 22:40.
+  (same PAT/headers/body `{"ref":"main"}` as the auto_update.yml backups),
+  scheduled in America/Bogota 20 min before each of the 17 kickoff windows.
+
+**Source of truth**: `WC_Schedule.md` (Spanish-language official schedule,
+provided by owner 2026-06-11). All kickoff times use the **COL/ECU/PER**
+column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
+104 `fixtures.json` times and derive the 17 cron windows above.
 
 ## 6. DATA SOURCES AND THEIR STATUS
 
@@ -285,9 +300,6 @@ the dashboard already reflects the lineup-adjusted predictions.
   Needs **8+ real match results** before it can be calibrated. Related
   training code lives in `model/` (`train.py`, `pipelines.py`,
   `expanded_model.pkl`).
-- Knockout kickoff times in `fixtures.json` (M73–M104, all `"time": "14:00"`,
-  `"timezone": "COT"`) are **placeholders** pending FIFA's official knockout
-  schedule confirmation — update once announced.
 
 ## 10. WORKING AGREEMENT
 
