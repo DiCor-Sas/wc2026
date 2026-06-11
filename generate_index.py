@@ -426,7 +426,7 @@ def _upcoming_matches(data):
             int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
             hour, minute, 0,
         )
-        if ko_col < now_col:
+        if ko_col < now_col - timedelta(minutes=110):
             continue
         if cutoff is not None and ko_col > cutoff:
             continue
