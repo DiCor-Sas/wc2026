@@ -89,6 +89,17 @@ knockout bracket schedules R32→Final).
 - `fix_and_reblend.py`, `fetch_remaining_players.py`, `player_pipeline.py`,
   `run_tasks_4_5.py`, `backfill_check.py`, `test_lineup.py`, `test_scraper.py` —
   one-off / maintenance scripts, not run by CI
+- `notify_telegram.py` — Telegram match-reminder bot (run by
+  `.github/workflows/notify.yml`, see §5). Imports `generate_index` for
+  `_upcoming_matches`/`_flag`/`COUNTRY_CODE`/`_load_lineups`/`_ko_lookup`/`h`
+  to stay consistent with the dashboard's predictions/confidence/venue
+  output (import is side-effect-free — `build_html()` and all file writes
+  in `generate_index.py` are gated behind `if __name__ == "__main__"`).
+  Flags: `--window N` (minutes ahead of now to look for a kickoff;
+  exits 0 silently if none found), `--dry-run` (prints the formatted
+  message instead of calling the Telegram API). Reads `TELEGRAM_BOT_TOKEN`
+  and `TELEGRAM_CHAT_ID` from the environment; missing/failed
+  send never causes a non-zero exit.
 
 **Data files (JSON)**
 - `wc2026_results.json` — completed WC matches (currently `[]`, pre-tournament)
@@ -152,6 +163,28 @@ knockout bracket schedules R32→Final).
   endpoint on a schedule in **America/Bogota (COT)** time, as a redundancy
   layer in case GitHub's own scheduler is delayed. Auth via a fine-grained PAT
   with `Actions: write` scope, **expires 2026-07-25**.
+
+`.github/workflows/notify.yml`, one job:
+
+- **`send_reminder`**: runs `python3 notify_telegram.py --window 25` (25 min
+  window to absorb GitHub Actions scheduling delays for a ~20-min-before-
+  kickoff reminder). No pip install step — uses only stdlib `urllib` plus
+  the local `generate_index` module.
+- Triggers: `workflow_dispatch` plus 7 daily UTC crons, 20 min before each
+  COT kickoff window: `40 18` (13:00 COT), `40 19` (14:00 COT), `40 21`
+  (16:40 COT), `40 0` (19:40 COT), `40 1` (20:40 COT), `40 2` (21:40 COT),
+  `40 3` (22:40 COT).
+- `permissions: contents: read` (read-only — sends a message, never
+  commits). `actions/checkout@v4` with `secrets.GITHUB_TOKEN`, Python 3.11,
+  `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`.
+- Secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are already set in the
+  repo's GitHub Actions secrets (values not stored anywhere in this repo).
+- Test locally with: `python3 notify_telegram.py --window 9999 --dry-run`
+  (prints the formatted message without calling the Telegram API).
+- **External cron-job.org backup**: add one more cronjob hitting
+  `https://api.github.com/repos/DiCor-Sas/wc2026/actions/workflows/notify.yml/dispatches`
+  (same PAT/headers/body `{"ref":"main"}` as the existing 8 jobs), scheduled
+  in America/Bogota at 13:40, 14:40, 16:40, 19:40, 20:40, 21:40, 22:40.
 
 ## 6. DATA SOURCES AND THEIR STATUS
 
