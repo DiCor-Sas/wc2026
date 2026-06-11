@@ -1,0 +1,38 @@
+name: Telegram Match Reminder
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+on:
+  schedule:
+    - cron: "40 18 * * *"  # 13:00 COT kickoffs
+    - cron: "40 19 * * *"  # 14:00 COT kickoffs
+    - cron: "40 21 * * *"  # 16:40 COT kickoffs
+    - cron: "40 0 * * *"   # 19:40 COT kickoffs
+    - cron: "40 1 * * *"   # 20:40 COT kickoffs
+    - cron: "40 2 * * *"   # 21:40 COT kickoffs
+    - cron: "40 3 * * *"   # 22:40 COT kickoffs
+  workflow_dispatch:
+
+jobs:
+  send_reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Send reminder if a match is upcoming
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 notify_telegram.py --window 25
