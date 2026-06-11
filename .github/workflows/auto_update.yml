@@ -1,6 +1,7 @@
-# Resynced 2026-06-10 — tournament eve
+# Resynced 2026-06-11 — pre-match lineup/pipeline timing fix
 # External cron-job.org backup active
-# Last resynced: 2026-06-09 — tournament starts June 11, pipeline must run every 2 hours through July 19
+# Pipeline reruns 45min before kickoff, lineup fetch 50min before kickoff,
+# Telegram reminder 20min before kickoff (separate workflow, unchanged)
 name: Auto Update WC 2026 Dashboard
 
 permissions:
@@ -17,18 +18,22 @@ on:
   schedule:
     # Main pipeline — every 2 hours from 10:00 to 02:00 UTC (12 runs per day)
     - cron: "0 10,12,14,16,18,20,22,0,2 * * *"
-    # Lineup fetch triggers — 75 min before each scheduled kickoff (UTC)
-    # June 11 specific kickoffs
-    - cron: "45 17 11 6 *"   # Match 1: 14:00 COT = 19:00 UTC → trigger 17:45 UTC
-    - cron: "45 0 12 6 *"    # Match 2: 21:00 COT = 02:00 UTC Jun 12 → trigger 00:45 UTC
-    # General pre-match windows June 12 through July 19
-    - cron: "45 10 * * *"    # covers 12:00 COT kickoffs (17:00 UTC)
-    - cron: "45 13 * * *"    # covers 15:00 COT kickoffs (20:00 UTC)
-    - cron: "45 16 * * *"    # covers 18:00 COT kickoffs (23:00 UTC)
-    - cron: "45 17 * * *"    # covers 19:00 COT kickoffs (00:00 UTC)
-    - cron: "45 19 * * *"    # covers 21:00 COT kickoffs (02:00 UTC)
-    - cron: "45 22 * * *"    # covers 00:00 COT kickoffs (05:00 UTC)
-    - cron: "45 23 * * *"    # covers 01:00 COT kickoffs (06:00 UTC)
+    # Pre-match pipeline reruns — 45 min before each COT kickoff window (UTC)
+    - cron: "15 16 * * *"   # 11:15 COT (12:00 COT kickoff)
+    - cron: "15 18 * * *"   # 13:15 COT (14:00 COT kickoff)
+    - cron: "15 19 * * *"   # 14:15 COT (15:00 COT kickoff)
+    - cron: "15 22 * * *"   # 17:15 COT (18:00 COT kickoff)
+    - cron: "15 1 * * *"    # 20:15 COT (21:00 COT kickoff)
+    - cron: "15 4 * * *"    # 23:15 COT (00:00 COT kickoff)
+    - cron: "15 5 * * *"    # 00:15 COT (01:00 COT kickoff)
+    # Lineup fetch triggers — 50 min before each COT kickoff window (UTC)
+    - cron: "10 16 * * *"   # 11:10 COT (12:00 COT kickoff)
+    - cron: "10 18 * * *"   # 13:10 COT (14:00 COT kickoff)
+    - cron: "10 19 * * *"   # 14:10 COT (15:00 COT kickoff)
+    - cron: "10 22 * * *"   # 17:10 COT (18:00 COT kickoff)
+    - cron: "10 1 * * *"    # 20:10 COT (21:00 COT kickoff)
+    - cron: "10 4 * * *"    # 23:10 COT (00:00 COT kickoff)
+    - cron: "10 5 * * *"    # 00:10 COT (01:00 COT kickoff)
   workflow_dispatch:
 
 jobs:
@@ -36,7 +41,14 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' ||
-      github.event.schedule == '0 10,12,14,16,18,20,22,0,2 * * *'
+      github.event.schedule == '0 10,12,14,16,18,20,22,0,2 * * *' ||
+      github.event.schedule == '15 16 * * *' ||
+      github.event.schedule == '15 18 * * *' ||
+      github.event.schedule == '15 19 * * *' ||
+      github.event.schedule == '15 22 * * *' ||
+      github.event.schedule == '15 1 * * *' ||
+      github.event.schedule == '15 4 * * *' ||
+      github.event.schedule == '15 5 * * *'
 
     steps:
       - name: Checkout repository
@@ -99,7 +111,13 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'schedule' &&
-      github.event.schedule != '0 10,12,14,16,18,20,22,0,2 * * *'
+      (github.event.schedule == '10 16 * * *' ||
+       github.event.schedule == '10 18 * * *' ||
+       github.event.schedule == '10 19 * * *' ||
+       github.event.schedule == '10 22 * * *' ||
+       github.event.schedule == '10 1 * * *' ||
+       github.event.schedule == '10 4 * * *' ||
+       github.event.schedule == '10 5 * * *')
 
     steps:
       - name: Checkout repository
