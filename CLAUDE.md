@@ -211,15 +211,22 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 6. DATA SOURCES AND THEIR STATUS
 
-- **WC results**: `openfootball/worldcup.json` (primary) → `worldcup26.ir/get/games`
-  (fallback) → Playwright ESPN WC scoreboard scraper (last resort, only
-  attempted after June 11).
+- **WC results** (`fetch_results()`, source tags in `wc2026_results.json`
+  metadata / pipeline logs): **Source 1** Sky Sports WC hub
+  (`skysports.com/fifa-world-cup`, plain HTML, `_parse_skysports_wc()` —
+  parses `a.sdc-site-fixres__match` `aria-label` like `"Mexico 2 - South
+  Africa 0"` via regex `r"^(.+) (\d+) - (.+) (\d+)$"`; no per-match date on
+  the page, so `date` falls back to today's date — **confirmed working**,
+  source tag `skysports-wc`) → **Source 2** Playwright ESPN WC scoreboard
+  (`_scrape_espn_matches`, `espn.com/soccer/scoreboard/_/date/{YYYYMMDD}/
+  league/fifa.worldcup`, filtered to matches where both teams are in
+  `WC_TEAMS`, source tag `espn-playwright-wc`) → **Source 3**
+  `worldcup26.ir/get/games` → **Source 4** `openfootball/worldcup.json`
+  (last resort).
 - **Daily friendly results** (`fetch_daily_results`): Sky Sports
   internationals page (`skysports.com/internationals-scores-fixtures`,
   embedded `data-state` JSON, plain HTML — **confirmed working**, primary) →
   Playwright ESPN date-specific scraper → FOX Sports HTML fallback.
-- **Sky Sports WC-specific URL**: returned 404 pre-tournament — **to be
-  re-tested June 11** and added as a WC-results fallback if live (see §9).
 - **Lineup fetch chain** (`fetch_lineup()` in `fetch_results.py`, threshold
   `len(xi) >= 5` per side): Source 1 API-Football → **Source 2 Rotowire**
   (`rotowire.com/soccer/lineups.php?league=WOC`, plain `requests` +
@@ -305,8 +312,6 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 9. PENDING ITEMS AND ROADMAP
 
-- **June 11**: re-test the Sky Sports World Cup-specific URL (was 404
-  pre-tournament); if live, add as a WC-results fallback source.
 - **June 13+ (Session 4)**: three-model ensemble — Dixon-Coles + Negative
   Binomial + Bivariate Poisson, combined with adaptive Brier-score weights.
   Needs **8+ real match results** before it can be calibrated. Related

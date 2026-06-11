@@ -264,59 +264,126 @@ def parse_worldcup26ir(data):
     return matches
 
 
-def fetch_results():
-    primary_url = "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json"
-    fallback_url = "https://worldcup26.ir/get/games"
+def _parse_skysports_wc():
+    """Fetch completed WC 2026 results from the Sky Sports FIFA World Cup hub page.
 
-    source = "openfootball"
-    matches = []
-
+    Returns list of dicts: {date, home, away, home_score, away_score}.
+    Only fixtures with a final score in their aria-label are returned.
+    The page does not expose a per-match date, so "date" falls back to today.
+    """
     try:
-        raw = fetch_url(primary_url)
-        data = json.loads(raw)
-        matches = parse_openfootball(data)
-        print(f"[fetch] openfootball: {len(matches)} completed matches")
+        import requests
+        from bs4 import BeautifulSoup
+        import re
+    except ImportError:
+        return []
+
+    url = "https://www.skysports.com/fifa-world-cup"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    try:
+        r = requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
     except Exception as e:
-        print(f"[fetch] openfootball failed: {e}")
-        matches = []
+        print(f"[fetch] skysports-wc: request failed: {e}")
+        return []
 
+    soup = BeautifulSoup(r.text, "html.parser")
+    today_iso = date.today().isoformat()
+    matches = []
+    for el in soup.select("a.sdc-site-fixres__match"):
+        label = el.get("aria-label", "")
+        m = re.match(r"^(.+) (\d+) - (.+) (\d+)$", label)
+        if not m:
+            continue
+        matches.append({
+            "date": today_iso,
+            "home": _fn(m.group(1).strip()),
+            "away": _fn(m.group(3).strip()),
+            "home_score": int(m.group(2)),
+            "away_score": int(m.group(4)),
+        })
+    return matches
+
+
+def fetch_results():
+    matches = []
+    source = None
+
+    # Source 1: Sky Sports WC hub (plain HTML, fastest after final whistle)
+    try:
+        sky_matches = _parse_skysports_wc()
+        wc_matches = [m for m in sky_matches if _is_wc(m["home"]) and _is_wc(m["away"])]
+        if wc_matches:
+            source = "skysports-wc"
+            matches = [
+                {"date": m["date"], "group": "", "round": "",
+                 "team1": m["home"], "team2": m["away"],
+                 "home_score": m["home_score"], "away_score": m["away_score"]}
+                for m in wc_matches
+            ]
+            print(f"[fetch] skysports-wc: {len(matches)} completed match(es)")
+        else:
+            print("[fetch] skysports-wc: no completed WC matches found")
+    except Exception as e:
+        print(f"[fetch] skysports-wc failed: {e}")
+
+    # Source 2: Playwright ESPN WC scoreboard
     if not matches:
-        source = "worldcup26.ir"
-        try:
-            raw = fetch_url(fallback_url)
-            data = json.loads(raw)
-            matches = parse_worldcup26ir(data)
-            print(f"[fetch] worldcup26.ir: {len(matches)} completed matches")
-        except Exception as e:
-            print(f"[fetch] worldcup26.ir failed: {e}")
-            matches = []
-
-    # ── Playwright ESPN WC fallback (last resort, only after June 11) ─────────
-    today = date.today()
-    tournament_started = today >= date(2026, 6, 11)
-    if not matches and tournament_started:
+        today = date.today()
         wc_url = (
             f"https://www.espn.com/soccer/scoreboard"
             f"/_/date/{today.strftime('%Y%m%d')}"
             f"/league/fifa.worldcup"
         )
-        print("[fetch] Both primary sources empty after June 11 — trying Playwright ESPN WC fallback")
         try:
             pw_matches = _scrape_espn_matches(wc_url)
-            if pw_matches:
+            wc_pw_matches = [
+                m for m in pw_matches
+                if _is_wc(m["home_team"]) and _is_wc(m["away_team"])
+            ]
+            if wc_pw_matches:
                 source = "espn-playwright-wc"
-                # Normalise to wc2026_results.json format
                 matches = [
                     {"date": m["date"], "group": "", "round": "",
                      "team1": m["home_team"], "team2": m["away_team"],
                      "home_score": m["home_score"], "away_score": m["away_score"]}
-                    for m in pw_matches
+                    for m in wc_pw_matches
                 ]
-                print(f"[fetch] Playwright ESPN WC fallback: {len(matches)} completed match(es)")
+                print(f"[fetch] espn-playwright-wc: {len(matches)} completed match(es)")
             else:
-                print("[fetch] Playwright ESPN WC fallback: no completed WC matches found")
+                print("[fetch] espn-playwright-wc: no completed WC matches found")
         except Exception as e:
-            print(f"[fetch] Playwright ESPN WC fallback failed: {e}")
+            print(f"[fetch] espn-playwright-wc failed: {e}")
+
+    # Source 3: worldcup26.ir
+    if not matches:
+        try:
+            raw = fetch_url("https://worldcup26.ir/get/games")
+            data = json.loads(raw)
+            wc26_matches = parse_worldcup26ir(data)
+            if wc26_matches:
+                source = "worldcup26.ir"
+                matches = wc26_matches
+                print(f"[fetch] worldcup26.ir: {len(matches)} completed matches")
+            else:
+                print("[fetch] worldcup26.ir: no completed matches found")
+        except Exception as e:
+            print(f"[fetch] worldcup26.ir failed: {e}")
+
+    # Source 4: openfootball worldcup.json (last resort)
+    if not matches:
+        try:
+            raw = fetch_url("https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json")
+            data = json.loads(raw)
+            of_matches = parse_openfootball(data)
+            if of_matches:
+                source = "openfootball"
+                matches = of_matches
+                print(f"[fetch] openfootball: {len(matches)} completed matches")
+            else:
+                print("[fetch] openfootball: no completed matches found")
+        except Exception as e:
+            print(f"[fetch] openfootball failed: {e}")
 
     # Sort by date
     matches.sort(key=lambda m: m.get("date", ""))
