@@ -11,7 +11,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- version: 1781209335 -->
+  <!-- version: 1781212492 -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1437,7 +1437,7 @@
 
 <div class="site-footer">
   <div class="footer-text">
-    <span id="footer-refreshed">Data refreshed: 2026-06-11 15:22 COT</span>
+    <span id="footer-refreshed">Data refreshed: 2026-06-11 16:14 COT</span>
     <span class="footer-sep"> &middot; </span>
     <span id="footer-now"></span>
     <span class="footer-sep"> &middot; </span>
@@ -1534,7 +1534,7 @@ function updateCountdowns() {
     const diff = kickoff - now;
     const el = card.querySelector('.countdown-timer');
     if (!el) return;
-    const LIVE_WINDOW_MS = 110 * 60 * 1000;
+    const LIVE_WINDOW_MS = 150 * 60 * 1000;
     if (diff <= 0 && diff > -LIVE_WINDOW_MS) {
       // Match in play: pulse the card and swap score for the LIVE indicator (CSS)
       card.classList.add('live-now');
@@ -1543,9 +1543,11 @@ function updateCountdowns() {
       return;
     }
     if (diff <= 0) {
+      // Recently ended: drop the pulse, show muted COMPLETED until the
+      // pipeline ingests the result and the card moves to MATCH RESULTS
       card.classList.remove('live-now');
       el.textContent = 'COMPLETED';
-      el.style.color = '#22C55E';
+      el.style.color = '#9CA3AF';
       return;
     }
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1595,7 +1597,7 @@ function updateBanner() {
     const next = getNextMatch();
     if (!next) { bannerEl.style.display = 'none'; return; }
     const diffToNext = new Date(next.utc) - now;
-    if (diffToNext <= 0 && diffToNext > -110 * 60 * 1000) {
+    if (diffToNext <= 0 && diffToNext > -150 * 60 * 1000) {
       bannerEl.style.background = '#22C55E';
       banner.textContent = `⚽ ${next.label} · LIVE NOW`;
     } else {

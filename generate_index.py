@@ -426,7 +426,7 @@ def _upcoming_matches(data):
             int(date_str[:4]), int(date_str[5:7]), int(date_str[8:10]),
             hour, minute, 0,
         )
-        if ko_col < now_col - timedelta(minutes=110):
+        if ko_col < now_col - timedelta(minutes=180):
             continue
         if cutoff is not None and ko_col > cutoff:
             continue
@@ -2505,7 +2505,7 @@ function updateCountdowns() {{
     const diff = kickoff - now;
     const el = card.querySelector('.countdown-timer');
     if (!el) return;
-    const LIVE_WINDOW_MS = 110 * 60 * 1000;
+    const LIVE_WINDOW_MS = 150 * 60 * 1000;
     if (diff <= 0 && diff > -LIVE_WINDOW_MS) {{
       // Match in play: pulse the card and swap score for the LIVE indicator (CSS)
       card.classList.add('live-now');
@@ -2514,9 +2514,11 @@ function updateCountdowns() {{
       return;
     }}
     if (diff <= 0) {{
+      // Recently ended: drop the pulse, show muted COMPLETED until the
+      // pipeline ingests the result and the card moves to MATCH RESULTS
       card.classList.remove('live-now');
       el.textContent = 'COMPLETED';
-      el.style.color = '#22C55E';
+      el.style.color = '#9CA3AF';
       return;
     }}
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -2566,7 +2568,7 @@ function updateBanner() {{
     const next = getNextMatch();
     if (!next) {{ bannerEl.style.display = 'none'; return; }}
     const diffToNext = new Date(next.utc) - now;
-    if (diffToNext <= 0 && diffToNext > -110 * 60 * 1000) {{
+    if (diffToNext <= 0 && diffToNext > -150 * 60 * 1000) {{
       bannerEl.style.background = '#22C55E';
       banner.textContent = `⚽ ${{next.label}} · LIVE NOW`;
     }} else {{
