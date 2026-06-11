@@ -140,7 +140,8 @@ jobs:
   lineup_fetch:
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'schedule' &&
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event_name == 'schedule' &&
       (github.event.schedule == '10 15 * * *' ||
        github.event.schedule == '10 16 * * *' ||
        github.event.schedule == '10 17 * * *' ||
@@ -157,7 +158,7 @@ jobs:
        github.event.schedule == '40 0 * * *' ||
        github.event.schedule == '10 1 * * *' ||
        github.event.schedule == '10 2 * * *' ||
-       github.event.schedule == '10 3 * * *')
+       github.event.schedule == '10 3 * * *'))
 
     steps:
       - name: Checkout repository
