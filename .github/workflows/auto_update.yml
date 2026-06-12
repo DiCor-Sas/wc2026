@@ -200,12 +200,21 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python3 fetch_results.py --lineup-only
 
+      - name: Regenerate dashboard if lineups changed
+        run: |
+          if git diff --quiet -- lineups.json; then
+            echo "No lineup changes, skipping regeneration"
+          else
+            python3 generate_index.py
+          fi
+
       - name: Commit lineup data if changed
         run: |
           git add lineups.json 2>/dev/null || true
           if [ -f match_adjustments.json ]; then
             git add match_adjustments.json
           fi
+          git add index.html version.txt 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No lineup changes to commit"
