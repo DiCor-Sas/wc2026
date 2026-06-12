@@ -408,6 +408,31 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   dependency pinning including `optuna==4.9.0`. Environment is stable and
   ready for Session 4. Related training code lives in `model/` (`train.py`,
   `pipelines.py`, `expanded_model.pkl`).
+- **Session 4 known inconsistency to address**: predicted score and win
+  probability can contradict each other on match cards. Example observed
+  2026-06-12: USA vs Paraguay showed predicted score USA 2-1 Paraguay
+  (favoring USA) while win probability showed Paraguay 70% (favoring
+  Paraguay). Two compounding causes: (1) for group-stage cards, the
+  predicted score is computed live in `generate_index.py` via
+  `_strength_lambdas()` + `_most_probable_score()` from the *current*
+  `team_strength.json`, while the win probability comes from
+  `predictions.json["match_probabilities"]` (Skellam), a snapshot frozen
+  at the last `run_predictions.py` (step 3) run — for USA/Paraguay these
+  two snapshots disagree almost completely (live lambdas favor USA 1.80
+  vs 1.25; stored lambdas favor Paraguay 2.42 vs 0.93), i.e.
+  `predictions.json` was stale relative to `team_strength.json`. (2) Even
+  with one consistent snapshot, argmax-of-independent-Poissons (predicted
+  score) and a Skellam win/draw/loss split are different statistics of the
+  same distribution and can disagree near 50/50 splits — this also applies
+  to knockout cards, where `run_predictions.py`'s
+  `_poisson_most_probable_score()` (Dixon-Coles + random sampling + 1-1
+  override) plays the analogous role. Session 4 should: (a) ensure
+  `team_strength.json` and `predictions.json` are always regenerated
+  together in the same pipeline run (eliminates cause 1), and (b) derive
+  the displayed predicted score from the same Skellam/simulation
+  distribution used for win probability, or (c) add a UI note that the two
+  metrics are independent (mitigates cause 2). (b) is preferred for
+  architectural consistency.
 
 ## 10. WORKING AGREEMENT
 
