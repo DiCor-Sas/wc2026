@@ -363,6 +363,16 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   if they differ. This guarantees users always see the latest pipeline
   output within one page load after any deployment, with no manual cache
   clearing required.
+- **Push retry loop hardening (2026-06-12)**: the `git pull --rebase` retry
+  loop in `auto_update.yml` had no `rebase --abort` on failure, leaving the
+  repo in an in-progress-rebase state on iteration 1 failure so iterations 2
+  and 3 always failed immediately with "a rebase is already in progress."
+  Fixed by adding `git rebase --abort` on the failure path of each
+  iteration. Also added `git stash --include-untracked` before each rebase
+  attempt and `git stash pop` after, to handle any unstaged files not in the
+  `git add` list (e.g. `match_adjustments.json`). Persistent conflicts
+  between concurrent runs still require manual intervention per the existing
+  CLAUDE.md Git workflow note.
 
 ## 8. DASHBOARD STRUCTURE
 

@@ -130,9 +130,22 @@ jobs:
           git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
 
           for i in 1 2 3; do
-            git pull --rebase --no-edit origin main && \
-            git push origin main && \
-            break
+            git add wc2026_results.json bracket_state.json \
+                    elo_ratings.json team_strength.json \
+                    predictions.json index.html version.txt \
+                    daily_results.json lineups.json \
+                    2>/dev/null || true
+            git stash --include-untracked 2>/dev/null || true
+            git pull --rebase --no-edit origin main
+            if [ $? -ne 0 ]; then
+              git rebase --abort 2>/dev/null || true
+              git stash pop 2>/dev/null || true
+              echo "Push attempt $i failed, retrying..."
+              sleep $((i * 10))
+              continue
+            fi
+            git stash pop 2>/dev/null || true
+            git push origin main && break
             echo "Push attempt $i failed, retrying..."
             sleep $((i * 10))
           done
