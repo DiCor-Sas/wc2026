@@ -188,6 +188,56 @@ def _scrape_espn_matches(url):
         return []
 
 
+def _fetch_espn_wc_api(check_date):
+    """Fetch completed WC 2026 results from ESPN's internal JSON scoreboard API.
+
+    Returns list of dicts: {date, home, away, home_score, away_score}.
+    Only events with status STATUS_FULL_TIME are returned.
+    """
+    try:
+        import requests
+    except ImportError:
+        return []
+
+    url = (
+        "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard"
+        f"?dates={check_date.strftime('%Y%m%d')}"
+    )
+    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+
+    try:
+        r = requests.get(url, headers=headers, timeout=15)
+        data = r.json()
+    except Exception as e:
+        print(f"[fetch] espn-api request failed for {check_date.isoformat()}: {e}")
+        return []
+
+    matches = []
+    for evt in data.get("events", []):
+        comp = evt.get("competitions", [{}])[0]
+        if comp.get("status", {}).get("type", {}).get("name") != "STATUS_FULL_TIME":
+            continue
+        competitors = comp.get("competitors", [])
+        home = next((c for c in competitors if c.get("homeAway") == "home"), None)
+        away = next((c for c in competitors if c.get("homeAway") == "away"), None)
+        if not home or not away:
+            continue
+        try:
+            h_s = int(home.get("score"))
+            a_s = int(away.get("score"))
+        except (TypeError, ValueError):
+            continue
+        evt_date = (evt.get("date", "") or "")[:10]
+        matches.append({
+            "date": evt_date or check_date.isoformat(),
+            "home": _fn(home["team"]["displayName"]),
+            "away": _fn(away["team"]["displayName"]),
+            "home_score": h_s,
+            "away_score": a_s,
+        })
+    return matches
+
+
 
 
 def parse_worldcup26ir(data):
@@ -288,82 +338,91 @@ def _parse_skysports_wc():
     return matches
 
 
-def fetch_results():
-    matches = []
-    source = None
+def _merge_wc_results(sources_results):
+    """Merge completed-match lists from multiple sources, deduplicating on the
+    unordered (team1, team2) pair. Later sources fill in missing group/round
+    metadata and replace a "today" date fallback with a real event date."""
+    today_iso = date.today().isoformat()
+    merged = {}
+    for batch in sources_results:
+        for m in batch:
+            key = tuple(sorted([m.get("team1", ""), m.get("team2", "")]))
+            if key not in merged:
+                merged[key] = dict(m)
+            else:
+                existing = merged[key]
+                if not existing.get("group") and m.get("group"):
+                    existing["group"] = m["group"]
+                if not existing.get("round") and m.get("round"):
+                    existing["round"] = m["round"]
+                if existing.get("date") == today_iso and m.get("date") != today_iso:
+                    existing["date"] = m["date"]
+    return list(merged.values())
 
+
+def fetch_results():
     # Source 1: Sky Sports WC hub (plain HTML, fastest after final whistle)
     try:
-        sky_matches = _parse_skysports_wc()
-        wc_matches = [m for m in sky_matches if _is_wc(m["home"]) and _is_wc(m["away"])]
-        if wc_matches:
-            source = "skysports-wc"
-            matches = [
-                {"date": m["date"], "group": "", "round": "",
-                 "team1": m["home"], "team2": m["away"],
-                 "home_score": m["home_score"], "away_score": m["away_score"]}
-                for m in wc_matches
-            ]
-            print(f"[fetch] skysports-wc: {len(matches)} completed match(es)")
-        else:
-            print("[fetch] skysports-wc: no completed WC matches found")
+        sky = _parse_skysports_wc()
+        sky_wc = [m for m in sky if _is_wc(m["home"]) and _is_wc(m["away"])]
+        sky_matches = [
+            {"date": m["date"], "group": "", "round": "",
+             "team1": m["home"], "team2": m["away"],
+             "home_score": m["home_score"], "away_score": m["away_score"]}
+            for m in sky_wc
+        ]
+        print(f"[fetch] skysports-wc: {len(sky_matches)} match(es)")
     except Exception as e:
+        sky_matches = []
         print(f"[fetch] skysports-wc failed: {e}")
 
-    # Source 2: Playwright ESPN WC scoreboard (today, then yesterday)
-    if not matches:
-        today_dt = date.today()
-        yesterday_dt = today_dt - timedelta(days=1)
-        for check_date in [today_dt, yesterday_dt]:
-            wc_url = (
-                f"https://www.espn.com/soccer/scoreboard"
-                f"/_/date/{check_date.strftime('%Y%m%d')}"
-                f"/league/fifa.worldcup"
-            )
-            try:
-                pw_matches = _scrape_espn_matches(wc_url)
-                wc_pw_matches = [
-                    m for m in pw_matches
-                    if _is_wc(m["home_team"]) and _is_wc(m["away_team"])
-                ]
-                if wc_pw_matches:
-                    source = "espn-playwright-wc"
-                    matches = [
-                        {"date": m["date"], "group": "", "round": "",
-                         "team1": m["home_team"], "team2": m["away_team"],
-                         "home_score": m["home_score"], "away_score": m["away_score"]}
-                        for m in wc_pw_matches
-                    ]
-                    print(f"[fetch] espn-playwright-wc: found matches for {check_date.isoformat()}")
-                    break
-                else:
-                    print(f"[fetch] espn-playwright-wc: no completed WC matches for {check_date.isoformat()}")
-            except Exception as e:
-                print(f"[fetch] espn-playwright-wc failed for {check_date.isoformat()}: {e}")
+    # Source 2: ESPN JSON API (today, then yesterday)
+    espn_matches = []
+    today_dt = date.today()
+    yesterday_dt = today_dt - timedelta(days=1)
+    for check_date in [today_dt, yesterday_dt]:
+        try:
+            batch = _fetch_espn_wc_api(check_date)
+            wc_batch = [m for m in batch if _is_wc(m["home"]) and _is_wc(m["away"])]
+            if wc_batch:
+                espn_matches.extend([
+                    {"date": m["date"], "group": "", "round": "",
+                     "team1": m["home"], "team2": m["away"],
+                     "home_score": m["home_score"], "away_score": m["away_score"]}
+                    for m in wc_batch
+                ])
+                print(f"[fetch] espn-api: {len(wc_batch)} match(es) for {check_date.isoformat()}")
+        except Exception as e:
+            print(f"[fetch] espn-api failed for {check_date.isoformat()}: {e}")
 
     # Source 3: worldcup26.ir
-    if not matches:
-        try:
-            raw = fetch_url("https://worldcup26.ir/get/games")
-            data = json.loads(raw)
-            wc26_matches = parse_worldcup26ir(data)
-            if wc26_matches:
-                source = "worldcup26.ir"
-                matches = wc26_matches
-                print(f"[fetch] worldcup26.ir: {len(matches)} completed matches")
-            else:
-                print("[fetch] worldcup26.ir: no completed matches found")
-        except Exception as e:
-            print(f"[fetch] worldcup26.ir failed: {e}")
+    try:
+        raw = fetch_url("https://worldcup26.ir/get/games")
+        data = json.loads(raw)
+        wc26_matches = parse_worldcup26ir(data)
+        print(f"[fetch] worldcup26.ir: {len(wc26_matches)} match(es)")
+    except Exception as e:
+        wc26_matches = []
+        print(f"[fetch] worldcup26.ir failed: {e}")
 
-    # Sort by date
+    # Merge all sources
+    matches = _merge_wc_results([sky_matches, espn_matches, wc26_matches])
     matches.sort(key=lambda m: m.get("date", ""))
+
+    sources_used = []
+    if sky_matches:
+        sources_used.append("skysports-wc")
+    if espn_matches:
+        sources_used.append("espn-api")
+    if wc26_matches:
+        sources_used.append("worldcup26.ir")
+    source = "+".join(sources_used) if matches else None
 
     out_path = ROOT / "wc2026_results.json"
     with open(out_path, "w") as f:
         json.dump(matches, f, indent=2)
 
-    print(f"[fetch] Source used: {source}")
+    print(f"[fetch] Sources used: {source}")
     print(f"[fetch] Total completed matches: {len(matches)}")
     print(f"[fetch] Saved to wc2026_results.json")
     return matches, source

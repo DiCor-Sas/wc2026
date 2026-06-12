@@ -212,24 +212,45 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 6. DATA SOURCES AND THEIR STATUS
 
-- **WC results** (`fetch_results()`, source tags in `wc2026_results.json`
-  metadata / pipeline logs): **Source 1** Sky Sports WC hub
-  (`skysports.com/fifa-world-cup`, Playwright with `wait_until="networkidle"`
-  — scores are JS-rendered, plain `requests` returns an empty shell;
-  `_parse_skysports_wc()` parses `a.sdc-site-fixres__match` `aria-label` like
-  `"Mexico 2 - South Africa 0"` via regex `r"^(.+) (\d+) - (.+) (\d+)$"`; no
-  per-match date on the page, so `date` falls back to today's date, source
-  tag `skysports-wc`) → **Source 2** Playwright ESPN WC scoreboard
-  (`_scrape_espn_matches`, `espn.com/soccer/scoreboard/_/date/{YYYYMMDD}/
-  league/fifa.worldcup`, filtered to matches where both teams are in
-  `WC_TEAMS`; tries **today, then yesterday** — matches completing late at
-  night would otherwise be missed by the next morning's runs, source tag
-  `espn-playwright-wc`) → **Source 3** `worldcup26.ir/get/games` (filters
+- **WC results** (`fetch_results()`, `source` tag in pipeline logs is a
+  `+`-joined list of every source that contributed, e.g.
+  `"skysports-wc+espn-api+worldcup26.ir"`): **all three sources below are
+  always queried** (no chain short-circuit), then merged via
+  `_merge_wc_results()` — matches are deduplicated on the unordered
+  `(team1, team2)` pair; for a given match, the first source to report it
+  wins the base record, and later sources backfill missing `group`/`round`
+  metadata and replace a "today" date fallback with a real event date.
+  **Source 1** Sky Sports WC hub (`skysports.com/fifa-world-cup`, Playwright
+  with `wait_until="domcontentloaded"` + an ad/analytics request-blocking
+  route handler — `googletagmanager`, `facebook`, `analytics`, `doubleclick`,
+  `googlesyndication`, `amazon-adsystem`, `rubiconproject`,
+  `scorecardresearch`, `outbrain`, `taboola` — plus
+  `page.wait_for_selector("a.sdc-site-fixres__match", timeout=10000)`
+  instead of `networkidle`, which never resolves on this page due to
+  continuous background ad/analytics requests; `_parse_skysports_wc()` then
+  parses `a.sdc-site-fixres__match` `aria-label` like
+  `"Mexico 2 - South Africa 0"` via regex `r"^(.+) (\d+) - (.+) (\d+)$"`. The
+  page only shows a rotating subset of fixtures (not full history) and
+  exposes no per-match date, so `date` falls back to today's date — source
+  tag `skysports-wc`). **Source 2** ESPN JSON API (`_fetch_espn_wc_api()`,
+  plain `requests.get()` against
+  `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard
+  ?dates=YYYYMMDD` — note league slug is **`fifa.world`**, not
+  `fifa.worldcup`; the latter's HTML scoreboard page returns ESPN's generic
+  homepage/error page and was the old, now-removed Playwright source. Tries
+  **today, then yesterday**; filters `competitions[0].status.type.name ==
+  "STATUS_FULL_TIME"`, reads team names from `competitors[].team.displayName`
+  normalized via `_fn()`, scores from `competitors[].score` — source tag
+  `espn-api`). **Source 3** `worldcup26.ir/get/games` (filters
   `finished == "TRUE"`, reads team names directly from
   `home_team_name_en`/`away_team_name_en` and normalizes via `_fn()` — e.g.
-  `"Czech Republic"` → `"Czechia"` — **confirmed working**, source tag
-  `worldcup26.ir`). If all three return empty, `wc2026_results.json` is
-  written as `[]` and the pipeline continues (graceful degradation).
+  `"Czech Republic"` → `"Czechia"`; this source provides `group`/`round` and
+  the real match date — source tag `worldcup26.ir`). If all three return
+  empty, `wc2026_results.json` is written as `[]` and the pipeline continues
+  (graceful degradation). `_scrape_espn_matches()` /
+  `_parse_espn_evts_html()` (Playwright `espn.com/.../league/fifa.worldcup`
+  scoreboard HTML, `evts[]` inline JSON) are **no longer used for WC
+  results** but remain in place for the daily-friendlies chain below.
 - **Daily friendly results** (`fetch_daily_results`): Sky Sports
   internationals page (`skysports.com/internationals-scores-fixtures`,
   embedded `data-state` JSON, plain HTML — **confirmed working**, primary) →
