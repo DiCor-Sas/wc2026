@@ -1608,6 +1608,34 @@ def _parse_lineup_from_html(html, home_team, away_team):
     return home_xi, away_xi
 
 
+def _name_in_xi(full_name, xi_list):
+    full_lower = full_name.lower().strip()
+    xi_lower = [x.lower().strip() for x in xi_list]
+
+    # Strategy 1: exact match
+    if full_lower in xi_lower:
+        return True
+
+    # Strategy 2: last name match
+    last_name = full_lower.split()[-1]
+    if any(last_name in xi_n for xi_n in xi_lower):
+        return True
+
+    # Strategy 3: abbreviated first name (e.g. "K. Mbappe" → "mbappe")
+    for xi_n in xi_lower:
+        parts = xi_n.replace(".", "").split()
+        if parts:
+            xi_last = parts[-1]
+            if xi_last == last_name:
+                return True
+
+    # Strategy 4: bidirectional substring (existing fallback)
+    if any(full_lower in xi_n or xi_n in full_lower for xi_n in xi_lower):
+        return True
+
+    return False
+
+
 def _detect_key_absences(lineup_data, home_team, away_team):
     """Detect top-3 player absences and compute lambda penalties. Updates lineup_data in-place."""
     if not (lineup_data.get("home_xi") or lineup_data.get("away_xi")):
@@ -1644,13 +1672,11 @@ def _detect_key_absences(lineup_data, home_team, away_team):
             print(f"[lineup] {team}: only {len(ranked)} player(s) with tracked minutes "
                   f"(squad_score_norm={sq_str}). "
                   f"{3 - len(ranked)} slot(s) cannot be checked — using proxy contribution=0.25.")
-        xi_lower = [n.lower() for n in xi]
         for player in ranked[:3]:
             pname = player.get("name", "")
             if not pname:
                 continue
-            pname_lower = pname.lower()
-            in_xi = any(pname_lower in xi_n or xi_n in pname_lower for xi_n in xi_lower)
+            in_xi = _name_in_xi(pname, xi)
             if in_xi:
                 continue
             g90 = player.get("goals", 0) / (player["minutes"] / 90)

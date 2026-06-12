@@ -236,9 +236,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   mapping is `ROTOWIRE_COUNTRY_CODE`) → Source 3 ESPN Playwright
   (scoreboard → match page) → Source 4 BBC Sport Playwright (fixtures page →
   match page) → Source 5 graceful degradation (`STARTING XI PENDING`).
-  `_lineup_badge_html()` in `generate_index.py` shows `LINEUP ESTIMATED` for
-  sources `espn-playwright`, `bbc-playwright`, `rotowire`, `web-search`, and
-  `LINEUP CONFIRMED` only for `api-football`.
+  `_lineup_badge_html()` in `generate_index.py` shows `LINEUP CONFIRMED`
+  (green) for sources `rotowire` and `api-football` (since API-Football
+  never returns data for this tournament, Rotowire is effectively the
+  confirmed source), and `LINEUP ESTIMATED` for `espn-playwright`,
+  `bbc-playwright`, `web-search`.
+- **Absence detection name matching** (`_name_in_xi()` in
+  `fetch_results.py`, used by `_detect_key_absences()`): Rotowire XIs use
+  abbreviated names (e.g. `"K. Mbappe"`) while `player_stats.json` has full
+  names (e.g. `"Kylian Mbappé"`). `_name_in_xi()` tries, in order: exact
+  match, last-name match, abbreviated-first-name match (xi entry's last
+  token == player's last name), then bidirectional substring as a
+  fallback — avoids false-positive "player absent" flags against Rotowire
+  lineups.
 - **worldfootball.net**: BLOCKED by Cloudflare 403 — do not retry.
 - **Sofascore**: BLOCKED 403 — do not retry.
 - **API-Football** (`v3.football.api-sports.io`, header `x-apisports-key`):
@@ -297,7 +307,8 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 - Match cards: confidence badges (LOW/MED/HIGH) with tap-to-show tooltips
   (`.tooltip-visible`, `data-tooltip` attr); lineup badge shows
   `STARTING XI PENDING` until `lineups.json` has a confirmed XI
-  (`xi_confirmed = src == "api-football" and len(xi) >= 5` for both teams).
+  (`xi_confirmed = src in ("rotowire", "api-football") and (len(home_xi) >= 5
+  or len(away_xi) >= 5)`).
 - Knockout cards (`_bracket_section_html`, `ko_card`): show `CONFIRMED` team
   names or `PROJECTED <slot> <prob>%` (muted style, `~` icon) per
   `bracket_state.json`. For matches that may go to extra time/penalties:
