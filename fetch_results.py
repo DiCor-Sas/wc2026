@@ -780,12 +780,12 @@ def fetch_daily_results():
         if team not in elo_data:
             continue
         new_elo = elo_data[team]["elo"]
-        if new_elo == s.get("elo"):
-            continue
+        rd = elo_data[team].get("rd", 200.0)
         s["elo"] = new_elo
         base = (new_elo * 0.50) + (s["fifa_score"] * 0.30) + (s["form_score"] * 0.20)
         squad_elo_like = SQUAD_SCALE_MIN + s["squad_score_norm"] * (SQUAD_SCALE_MAX - SQUAD_SCALE_MIN)
-        s["final_strength"] = round(base * 0.70 + squad_elo_like * 0.30, 2)
+        fresh_strength = base * 0.70 + squad_elo_like * 0.30
+        s["final_strength"] = round(fresh_strength * (1 - 0.0001 * rd), 2)
     with open(ts_path, "w") as f:
         json.dump(ts, f, indent=2)
 

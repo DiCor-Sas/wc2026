@@ -43,11 +43,19 @@ Code with **show-before-implement approval gates** (see §10).
   `{date, group, round, team1, team2, home_score, away_score}`); then
   `update_elo_from_results()` updates `elo_ratings.json`; then
   `update_bracket_state()` updates `bracket_state.json`.
-- **Step 2** — recompute `team_strength.json` from updated ELO:
+- **Step 2** — recompute `team_strength.json` from updated ELO. **Every team,
+  every run**, `final_strength` is recomputed fresh from current
+  `elo`/`fifa_score`/`form_score`/`squad_score_norm` — never derived from the
+  previous run's `final_strength`:
   `base = ELO*0.50 + FIFA*0.30 + form*0.20`; squad layer
-  `squad_elo_like = 800 + squad_score_norm * (2200-800)`; final blend
-  `final_strength = (base*0.70 + squad_elo_like*0.30)`, then RD penalty
-  `final_strength *= (1 - 0.0001 * rd)` applied to **every** team every run.
+  `squad_elo_like = 800 + squad_score_norm * (2200-800)`; fresh blend
+  `fresh_strength = (base*0.70 + squad_elo_like*0.30)`; then the RD penalty
+  is applied **once** to that fresh value:
+  `final_strength = round(fresh_strength * (1 - 0.0001 * rd), 2)`.
+  (Past bug: the RD penalty used to be applied to the *previous*
+  `final_strength` instead of a fresh recompute, compounding every pipeline
+  run and collapsing values for teams with infrequent ELO updates — fixed
+  2026-06-12.)
 - **Step 3** — `run_predictions.py`: 10,000-iteration Monte Carlo simulation
   (`NUM_SIMULATIONS = 10_000`) → `predictions.json`.
 - **Step 4** — `generate_index.py`: regenerates `index.html` from
