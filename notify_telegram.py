@@ -27,7 +27,7 @@ DASHBOARD_URL = "dicor-sas.github.io/wc2026"
 
 
 def _lineup_status(xi, source):
-    if source == "api-football" and len(xi) >= 5:
+    if source in ("api-football", "rotowire") and len(xi) >= 5:
         return "CONFIRMED"
     if source in ("espn-playwright", "bbc-playwright", "web-search") and xi:
         return "ESTIMATED"
@@ -56,22 +56,25 @@ def _team_code(team):
     return code[:3]
 
 
-def _find_match(window_minutes):
-    """Return the next upcoming match dict (from gi._upcoming_matches) whose
-    kickoff falls within [now, now+window_minutes], or (None, None)."""
+def _find_matches(window_minutes):
+    """Return (matches, data) where matches is a list of all upcoming-match
+    dicts (from gi._upcoming_matches) whose kickoff falls within
+    [now, now+window_minutes]. matches is [] if none found or data
+    can't be loaded; data is None in the load-failure case."""
     try:
         with open(PREDICTIONS_FILE) as f:
             data = json.load(f)
     except Exception:
-        return None, None
+        return [], None
 
     now_utc = datetime.now(timezone.utc)
+    matches = []
     for m in gi._upcoming_matches(data):
         ko_dt = datetime.strptime(m["kickoff_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         delta_min = (ko_dt - now_utc).total_seconds() / 60
         if 0 <= delta_min <= window_minutes:
-            return m, data
-    return None, None
+            matches.append(m)
+    return matches, data
 
 
 def _build_message(m, data):
@@ -168,26 +171,26 @@ def main():
     args = parser.parse_args()
 
     try:
-        match, data = _find_match(args.window)
+        matches, data = _find_matches(args.window)
     except Exception as e:
         print(f"ERROR finding match: {e}")
         return
 
-    if not match:
-        print("No match found in window.")
+    if not matches:
+        print("No matches found in window.")
         return
 
-    try:
-        message = _build_message(match, data)
-    except Exception as e:
-        print(f"ERROR building message: {e}")
-        return
+    for match in matches:
+        try:
+            message = _build_message(match, data)
+        except Exception as e:
+            print(f"ERROR building message: {e}")
+            continue
 
-    if args.dry_run:
-        print(message)
-        return
-
-    send_telegram(message)
+        if args.dry_run:
+            print(message)
+        else:
+            send_telegram(message)
 
 
 if __name__ == "__main__":

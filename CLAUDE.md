@@ -298,14 +298,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `ROOT = Path(__file__).parent.resolve()`.
 - `scikit-learn==1.8.0` pinned in `requirements.txt` for pickle compatibility
   with `model/expanded_model.pkl` — do not upgrade.
-- `requirements.txt` exact contents: `requests`, `beautifulsoup4`,
-  `playwright`, `numpy==2.0.2`, `scipy==1.13.1`, `scikit-learn==1.8.0`,
-  `pandas`, `lxml`, `duckdb`, `optuna`.
+- `requirements.txt` exact contents (all pinned as of 2026-06-12):
+  `requests==2.32.5`, `beautifulsoup4==4.14.3`, `playwright==1.60.0`,
+  `numpy==2.0.2`, `scipy==1.13.1`, `scikit-learn==1.8.0`, `pandas==2.3.3`,
+  `lxml==6.1.1`, `duckdb==1.4.4`, `optuna==4.9.0`. All pinned 2026-06-12 for
+  pipeline stability through end of tournament. `optuna` installed and
+  pinned ahead of Session 4 ensemble work.
 - **Runner-up and third place** must read from `predictions["runners_up"][0]`
   and `predictions["third_place"][0]` — **never** `all_teams[1]`/`all_teams[2]`.
-  `all_teams` is ranked by champion probability, a different ordering
-  (asserted in `generate_index.py`: runner-up probability must exceed
-  third-place probability).
+  `all_teams` is ranked by champion probability, a different ordering.
+  `generate_index.py` expects runner-up probability to exceed third-place
+  probability; if violated it warns and auto-swaps the two entries rather
+  than crashing (H5, 2026-06-12).
 - **Single commit point**: `update_results.py` step 5 only `git add`s files —
   it never commits or pushes. Only the GitHub Actions workflow commits/pushes.
 - All UI animations must have `prefers-reduced-motion` guards (both CSS
@@ -322,6 +326,28 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 - ELO per-match deltas are **not persisted** — only current ratings — so
   dashboard "ELO impact" lines (`_elo_impact_str`) are recomputed estimates
   from current values, not historical deltas.
+- **ELO double-counting dedup guard (2026-06-12)**: `update_elo_from_results()`
+  in `fetch_results.py` had no `applied_keys`-style guard and reprocessed
+  every match in `wc2026_results.json` on every pipeline run (10-17x/day),
+  compounding ELO and Glicko-1 RD for affected teams with each run. Fixed by
+  adding `wc_applied_keys` (persisted in `elo_ratings.json` under the key
+  `wc_applied_keys`), mirroring the `applied_keys` pattern in
+  `fetch_daily_results()`. A one-time reset script (`reset_elo_corruption.py`,
+  completed 2026-06-12, do not re-run) restored correct post-match ELO/RD for
+  the 4 affected teams (Mexico, South Korea, Czechia, South Africa) from
+  pre-match baselines before the dedup guard was active.
+- **`generate_index.py` hardening (2026-06-12)**: replaced the hard `assert`
+  on runner-up/third-place probability ordering with a warn-and-swap guard
+  (H5). All top-level `predictions.json` key accesses in `build_html()` and
+  `_compute_golden_boot()` were replaced with `.get()` calls and safe
+  defaults (H6) to prevent `KeyError` crashes during `predictions.json`
+  schema changes in Session 4.
+- **`notify_telegram.py` lineup and multi-match fixes (2026-06-12)**: added
+  `"rotowire"` to the confirmed-source check in `_lineup_status()` so
+  Telegram reminders correctly show `LINEUP CONFIRMED` (H1). Renamed
+  `_find_match()` to `_find_matches()` and restructured it to return all
+  matches in the kickoff window; `main()` now sends one reminder per match so
+  simultaneous-kickoff pairs both get notified (H2).
 
 ## 8. DASHBOARD STRUCTURE
 
@@ -359,11 +385,14 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 9. PENDING ITEMS AND ROADMAP
 
-- **June 13+ (Session 4)**: three-model ensemble — Dixon-Coles + Negative
+- **June 18 (Session 4)**: three-model ensemble — Dixon-Coles + Negative
   Binomial + Bivariate Poisson, combined with adaptive Brier-score weights.
-  Needs **8+ real match results** before it can be calibrated. Related
-  training code lives in `model/` (`train.py`, `pipelines.py`,
-  `expanded_model.pkl`).
+  Requires **8+ real match results** with clean ELO inputs (C1 fixed
+  2026-06-12). Pre-session stabilization completed 2026-06-12: C1 ELO dedup
+  fix, H1/H2 Telegram fixes, H5/H6 `generate_index.py` hardening, H8 full
+  dependency pinning including `optuna==4.9.0`. Environment is stable and
+  ready for Session 4. Related training code lives in `model/` (`train.py`,
+  `pipelines.py`, `expanded_model.pkl`).
 
 ## 10. WORKING AGREEMENT
 

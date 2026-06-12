@@ -747,7 +747,7 @@ def _compute_golden_boot(data):
     except Exception:
         return {"player": "—", "team": "—", "expected_goals": 0}
 
-    winner_team = data["predicted_winner"]
+    winner_team = data.get("predicted_winner", "")
     # Expected matches: winner plays 7 (3 group + R32 + R16 + QF + SF + Final = 7 KO = 7 total KO, +3 group = 7)
     # Actually: 3 group + R32 + R16 + QF + SF + Final = 3 + 5 = 8 matches but we use 7 as conservative
     expected_matches = 7
@@ -1084,12 +1084,12 @@ def _results_section_html():
 
 
 def build_html(data):
-    sims = data["simulations"]
-    winner = data["predicted_winner"]
-    winner_pct = data["predicted_winner_probability_pct"]
-    runners_up = data["runners_up"]
-    third_place = data["third_place"]
-    all_teams = data["all_teams"]
+    sims        = data.get("simulations", 0)
+    winner      = data.get("predicted_winner", "TBD")
+    winner_pct  = data.get("predicted_winner_probability_pct", 0.0)
+    runners_up  = data.get("runners_up", [{"team": "—", "probability": 0}])
+    third_place = data.get("third_place", [{"team": "—", "probability": 0}])
+    all_teams   = data.get("all_teams", [])
     now_utc = datetime.now(timezone.utc)
 
     # Runner-up and third place come from their dedicated lists, not all_teams rank.
@@ -1102,10 +1102,16 @@ def build_html(data):
 
     runner_prob = runner["probability"]
     third_prob  = third["probability"]
-    assert runner_prob > third_prob, (
-        f"Runner-Up must have higher win probability than Third Place "
-        f"({runner['team']} {runner_prob}% vs {third['team']} {third_prob}%)"
-    )
+    if runner_prob <= third_prob:
+        print(
+            f"[WARN] Runner-Up probability ({runner['team']} "
+            f"{runner_prob}%) is not greater than Third Place "
+            f"({third['team']} {third_prob}%) — swapping entries "
+            f"to preserve display invariant."
+        )
+        runners_up[0], third_place[0] = third_place[0], runners_up[0]
+        runner, third = third, runner
+        runner_prob, third_prob = third_prob, runner_prob
     golden_boot = _compute_golden_boot(data)
 
     try:
@@ -2691,5 +2697,5 @@ if __name__ == "__main__":
     print(f"✓ Written version.txt ({version})")
 
     # Count teams with asterisk
-    pending = [t["team"] for t in data["all_teams"] if "*" in t["team"]]
+    pending = [t["team"] for t in data.get("all_teams", []) if "*" in t["team"]]
     print(f"✓ Pending teams marked with *: {pending}")

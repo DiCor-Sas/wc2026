@@ -818,6 +818,8 @@ def update_elo_from_results():
         print("[elo] No completed matches — ELO unchanged.")
         return
 
+    wc_applied_keys = set(elo_data.pop("wc_applied_keys", []))
+
     # Initialize rd/volatility for any team missing these fields
     for team, d in elo_data.items():
         d.setdefault("rd", 200.0)
@@ -827,11 +829,18 @@ def update_elo_from_results():
     elo = {team: d["elo"] for team, d in elo_data.items()}
     rd_updates = {}
 
+    new_matches_applied = 0
+
     for m in matches:
         t1 = m["team1"]
         t2 = m["team2"]
         hs = m["home_score"]
         as_ = m["away_score"]
+
+        match_key = f"{m['date']}|{m['team1']}|{m['team2']}"
+        if match_key in wc_applied_keys:
+            continue
+
         K = 40 * _decay_weight(m.get("date", date.today().isoformat()))
 
         if t1 not in elo or t2 not in elo:
@@ -884,6 +893,9 @@ def update_elo_from_results():
               f"{t1}: {e1}→{elo[t1]} ({delta1:+.1f})  "
               f"{t2}: {e2}→{elo[t2]} ({delta2:+.1f})")
 
+        wc_applied_keys.add(match_key)
+        new_matches_applied += 1
+
     # Write back elo, rd, and volatility together
     for team in elo_data:
         if team in elo:
@@ -893,10 +905,15 @@ def update_elo_from_results():
         if "volatility" not in elo_data[team]:
             elo_data[team]["volatility"] = 0.06
 
+    elo_data["wc_applied_keys"] = sorted(wc_applied_keys)
+
     with open(elo_path, "w") as f:
         json.dump(elo_data, f, indent=2)
 
-    print(f"[elo] elo_ratings.json updated.")
+    if new_matches_applied:
+        print(f"[ELO] Updated. Applied keys now: {len(wc_applied_keys)}")
+    else:
+        print("[ELO] No new WC matches to process.")
 
 
 # ── TASK 3: Bracket state ──────────────────────────────────────────────────────
