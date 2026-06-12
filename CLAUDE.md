@@ -377,6 +377,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `git add` lists in the `update` job on 2026-06-12 — previously it was left
   unstaged and only shuffled by the stash/pop, so accuracy-tracking data was
   never persisted to the repo; it now commits cleanly each run.
+- **Concurrent-run push conflict guard (2026-06-12)**: two schedulers
+  (GitHub Actions cron plus the external cron-job.org backup) could trigger
+  the `update` job simultaneously, causing two full pipeline runs to
+  regenerate the same files with different content and produce unresolvable
+  rebase conflicts on push (observed: `daily_results.json`, `index.html`,
+  `predictions.json`). Fixed with a job-level concurrency group
+  (`group: pipeline-update`, `cancel-in-progress: false`) on the `update`
+  job only — overlapping update runs now queue and run sequentially instead
+  of colliding. The `lineup_fetch` job is deliberately left unguarded so its
+  50-min-before-kickoff timing is never delayed by a queued `update` run.
+  `cancel-in-progress` is false so a running pipeline is never killed
+  mid-run.
 
 ## 8. DASHBOARD STRUCTURE
 

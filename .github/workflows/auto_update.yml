@@ -59,6 +59,9 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    concurrency:
+      group: pipeline-update
+      cancel-in-progress: false
     if: |
       github.event_name == 'workflow_dispatch' ||
       github.event.schedule == '0 10,12,14,16,18,20,22,0,2 * * *' ||
