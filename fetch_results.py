@@ -246,8 +246,23 @@ def _parse_skysports_wc():
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
+            page.route("**/*", lambda route:
+                route.abort() if any(x in
+                route.request.url for x in [
+                    "googletagmanager", "facebook",
+                    "analytics", "doubleclick",
+                    "googlesyndication",
+                    "amazon-adsystem",
+                    "rubiconproject",
+                    "scorecardresearch",
+                    "outbrain", "taboola"
+                ]) else route.continue_())
             page.goto("https://www.skysports.com/fifa-world-cup",
-                      wait_until="networkidle", timeout=30000)
+                      wait_until="domcontentloaded", timeout=30000)
+            try:
+                page.wait_for_selector("a.sdc-site-fixres__match", timeout=10000)
+            except Exception:
+                pass
             html = page.content()
             browser.close()
     except Exception as e:
