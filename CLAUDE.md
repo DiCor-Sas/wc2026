@@ -336,6 +336,11 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   completed 2026-06-12, do not re-run) restored correct post-match ELO/RD for
   the 4 affected teams (Mexico, South Korea, Czechia, South Africa) from
   pre-match baselines before the dedup guard was active.
+  Note: fixes were local-only during the 2026-06-12 session. A CI run
+  executed against the unpatched code and uncorrected elo_ratings.json
+  before the push landed — that run's ELO outputs are superseded by the
+  corrected data pushed immediately after. First clean pipeline run
+  confirmed post-push.
 - **`generate_index.py` hardening (2026-06-12)**: replaced the hard `assert`
   on runner-up/third-place probability ordering with a warn-and-swap guard
   (H5). All top-level `predictions.json` key accesses in `build_html()` and
