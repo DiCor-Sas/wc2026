@@ -102,7 +102,8 @@ knockout bracket schedules R32→Final).
   send never causes a non-zero exit.
 
 **Data files (JSON)**
-- `wc2026_results.json` — completed WC matches (currently `[]`, pre-tournament)
+- `wc2026_results.json` — completed WC matches (group stage underway as of
+  2026-06-12; 2 matches completed so far)
 - `daily_results.json` — completed friendly results for ELO nudges
 - `elo_ratings.json` — per-team `{elo, rd, volatility}`
 - `team_strength.json` — per-team `{elo, fifa_score, form_score,
@@ -213,16 +214,22 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 - **WC results** (`fetch_results()`, source tags in `wc2026_results.json`
   metadata / pipeline logs): **Source 1** Sky Sports WC hub
-  (`skysports.com/fifa-world-cup`, plain HTML, `_parse_skysports_wc()` —
-  parses `a.sdc-site-fixres__match` `aria-label` like `"Mexico 2 - South
-  Africa 0"` via regex `r"^(.+) (\d+) - (.+) (\d+)$"`; no per-match date on
-  the page, so `date` falls back to today's date — **confirmed working**,
-  source tag `skysports-wc`) → **Source 2** Playwright ESPN WC scoreboard
+  (`skysports.com/fifa-world-cup`, Playwright with `wait_until="networkidle"`
+  — scores are JS-rendered, plain `requests` returns an empty shell;
+  `_parse_skysports_wc()` parses `a.sdc-site-fixres__match` `aria-label` like
+  `"Mexico 2 - South Africa 0"` via regex `r"^(.+) (\d+) - (.+) (\d+)$"`; no
+  per-match date on the page, so `date` falls back to today's date, source
+  tag `skysports-wc`) → **Source 2** Playwright ESPN WC scoreboard
   (`_scrape_espn_matches`, `espn.com/soccer/scoreboard/_/date/{YYYYMMDD}/
   league/fifa.worldcup`, filtered to matches where both teams are in
-  `WC_TEAMS`, source tag `espn-playwright-wc`) → **Source 3**
-  `worldcup26.ir/get/games` → **Source 4** `openfootball/worldcup.json`
-  (last resort).
+  `WC_TEAMS`; tries **today, then yesterday** — matches completing late at
+  night would otherwise be missed by the next morning's runs, source tag
+  `espn-playwright-wc`) → **Source 3** `worldcup26.ir/get/games` (filters
+  `finished == "TRUE"`, reads team names directly from
+  `home_team_name_en`/`away_team_name_en` and normalizes via `_fn()` — e.g.
+  `"Czech Republic"` → `"Czechia"` — **confirmed working**, source tag
+  `worldcup26.ir`). If all three return empty, `wc2026_results.json` is
+  written as `[]` and the pipeline continues (graceful degradation).
 - **Daily friendly results** (`fetch_daily_results`): Sky Sports
   internationals page (`skysports.com/internationals-scores-fixtures`,
   embedded `data-state` JSON, plain HTML — **confirmed working**, primary) →

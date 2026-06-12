@@ -1,6 +1,33 @@
 {
-  "matches_scored": 0,
-  "mean_brier": null,
-  "mean_rps": null,
-  "history": []
+  "matches_scored": 2,
+  "mean_brier": 0.951127,
+  "mean_rps": 0.452977,
+  "history": [
+    {
+      "key": "Mexico|South Africa|2026-06-11",
+      "home": "Mexico",
+      "away": "South Africa",
+      "date": "2026-06-11",
+      "home_score": 2,
+      "away_score": 0,
+      "p_win": 0.346341,
+      "p_draw": 0.24211,
+      "p_loss": 0.411549,
+      "brier": 0.65526,
+      "rps": 0.298321
+    },
+    {
+      "key": "South Korea|Czechia|2026-06-11",
+      "home": "South Korea",
+      "away": "Czechia",
+      "date": "2026-06-11",
+      "home_score": 2,
+      "away_score": 1,
+      "p_win": 0.136534,
+      "p_draw": 0.178125,
+      "p_loss": 0.685341,
+      "brier": 1.246994,
+      "rps": 0.607633
+    }
+  ]
 }

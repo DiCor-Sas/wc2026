@@ -1,6 +1,6 @@
 """
 fetch_results.py
-Task 1: Fetch WC 2026 results from openfootball (fallback: worldcup26.ir)
+Task 1: Fetch WC 2026 results from Sky Sports, ESPN, and worldcup26.ir
 Task 2: Update ELO ratings from completed matches
 Task 3: Update bracket state (CONFIRMED / PROJECTED) for all 48 slots
 """
@@ -190,72 +190,36 @@ def _scrape_espn_matches(url):
 
 
 
-def parse_openfootball(data):
-    """Parse openfootball worldcup.json format into normalized match list."""
-    matches = []
-    for rnd in data.get("rounds", []):
-        round_name = rnd.get("name", "")
-        # Determine group from round name e.g. "Matchday 1 (Group A)"
-        group = ""
-        if "Group" in round_name:
-            parts = round_name.split("Group")
-            if len(parts) > 1:
-                group = parts[-1].strip().rstrip(")")
-
-        for m in rnd.get("matches", []):
-            score = m.get("score")
-            if not score:
-                continue
-            ft = score.get("ft")
-            if not ft or len(ft) < 2:
-                continue
-            home_score = ft[0]
-            away_score = ft[1]
-            if home_score is None or away_score is None:
-                continue
-            t1 = m.get("team1", {}).get("name", "")
-            t2 = m.get("team2", {}).get("name", "")
-            if not t1 or not t2:
-                continue
-            match_date = m.get("date", "")
-            matches.append({
-                "date": match_date,
-                "group": group,
-                "round": round_name,
-                "team1": t1,
-                "team2": t2,
-                "home_score": home_score,
-                "away_score": away_score,
-            })
-    return matches
-
-
 def parse_worldcup26ir(data):
-    """Parse worldcup26.ir /get/games response into normalized match list."""
+    """Parse worldcup26.ir /get/games response into normalized match list.
+
+    Only matches with finished == "TRUE" and valid scores are returned.
+    Team names come from home_team_name_en / away_team_name_en, normalized
+    via _fn() (e.g. "Czech Republic" -> "Czechia").
+    """
     matches = []
     games = data if isinstance(data, list) else data.get("games", data.get("data", []))
     for m in games:
-        # Field names may vary — handle common variants
-        home_score = m.get("home_score") or m.get("homeScore") or m.get("score1")
-        away_score = m.get("away_score") or m.get("awayScore") or m.get("score2")
-        if home_score is None or away_score is None:
+        if str(m.get("finished", "")).upper() != "TRUE":
             continue
         try:
-            home_score = int(home_score)
-            away_score = int(away_score)
+            home_score = int(m.get("home_score"))
+            away_score = int(m.get("away_score"))
         except (TypeError, ValueError):
             continue
-        t1 = (m.get("home_team") or m.get("homeTeam") or m.get("team1") or "").strip()
-        t2 = (m.get("away_team") or m.get("awayTeam") or m.get("team2") or "").strip()
-        if not t1 or not t2:
+        t1 = _fn((m.get("home_team_name_en") or "").strip())
+        t2 = _fn((m.get("away_team_name_en") or "").strip())
+        if not _is_wc(t1) or not _is_wc(t2):
             continue
-        match_date = str(m.get("date") or m.get("match_date") or "")
-        round_name = str(m.get("round") or m.get("stage") or "")
-        group = str(m.get("group") or "")
+        local_date = m.get("local_date", "")
+        try:
+            match_date = datetime.strptime(local_date, "%m/%d/%Y %H:%M").date().isoformat()
+        except ValueError:
+            match_date = date.today().isoformat()
         matches.append({
             "date": match_date,
-            "group": group,
-            "round": round_name,
+            "group": str(m.get("group") or ""),
+            "round": str(m.get("type") or "").title(),
             "team1": t1,
             "team2": t2,
             "home_score": home_score,
@@ -272,22 +236,25 @@ def _parse_skysports_wc():
     The page does not expose a per-match date, so "date" falls back to today.
     """
     try:
-        import requests
         from bs4 import BeautifulSoup
         import re
     except ImportError:
         return []
 
-    url = "https://www.skysports.com/fifa-world-cup"
-    headers = {"User-Agent": "Mozilla/5.0"}
     try:
-        r = requests.get(url, headers=headers, timeout=15)
-        r.raise_for_status()
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto("https://www.skysports.com/fifa-world-cup",
+                      wait_until="networkidle", timeout=30000)
+            html = page.content()
+            browser.close()
     except Exception as e:
-        print(f"[fetch] skysports-wc: request failed: {e}")
+        print(f"[fetch] skysports-wc playwright failed: {e}")
         return []
 
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = BeautifulSoup(html, "html.parser")
     today_iso = date.today().isoformat()
     matches = []
     for el in soup.select("a.sdc-site-fixres__match"):
@@ -302,6 +269,7 @@ def _parse_skysports_wc():
             "home_score": int(m.group(2)),
             "away_score": int(m.group(4)),
         })
+    print(f"[fetch] skysports-wc playwright: {len(matches)} completed match(es)")
     return matches
 
 
@@ -327,33 +295,36 @@ def fetch_results():
     except Exception as e:
         print(f"[fetch] skysports-wc failed: {e}")
 
-    # Source 2: Playwright ESPN WC scoreboard
+    # Source 2: Playwright ESPN WC scoreboard (today, then yesterday)
     if not matches:
-        today = date.today()
-        wc_url = (
-            f"https://www.espn.com/soccer/scoreboard"
-            f"/_/date/{today.strftime('%Y%m%d')}"
-            f"/league/fifa.worldcup"
-        )
-        try:
-            pw_matches = _scrape_espn_matches(wc_url)
-            wc_pw_matches = [
-                m for m in pw_matches
-                if _is_wc(m["home_team"]) and _is_wc(m["away_team"])
-            ]
-            if wc_pw_matches:
-                source = "espn-playwright-wc"
-                matches = [
-                    {"date": m["date"], "group": "", "round": "",
-                     "team1": m["home_team"], "team2": m["away_team"],
-                     "home_score": m["home_score"], "away_score": m["away_score"]}
-                    for m in wc_pw_matches
+        today_dt = date.today()
+        yesterday_dt = today_dt - timedelta(days=1)
+        for check_date in [today_dt, yesterday_dt]:
+            wc_url = (
+                f"https://www.espn.com/soccer/scoreboard"
+                f"/_/date/{check_date.strftime('%Y%m%d')}"
+                f"/league/fifa.worldcup"
+            )
+            try:
+                pw_matches = _scrape_espn_matches(wc_url)
+                wc_pw_matches = [
+                    m for m in pw_matches
+                    if _is_wc(m["home_team"]) and _is_wc(m["away_team"])
                 ]
-                print(f"[fetch] espn-playwright-wc: {len(matches)} completed match(es)")
-            else:
-                print("[fetch] espn-playwright-wc: no completed WC matches found")
-        except Exception as e:
-            print(f"[fetch] espn-playwright-wc failed: {e}")
+                if wc_pw_matches:
+                    source = "espn-playwright-wc"
+                    matches = [
+                        {"date": m["date"], "group": "", "round": "",
+                         "team1": m["home_team"], "team2": m["away_team"],
+                         "home_score": m["home_score"], "away_score": m["away_score"]}
+                        for m in wc_pw_matches
+                    ]
+                    print(f"[fetch] espn-playwright-wc: found matches for {check_date.isoformat()}")
+                    break
+                else:
+                    print(f"[fetch] espn-playwright-wc: no completed WC matches for {check_date.isoformat()}")
+            except Exception as e:
+                print(f"[fetch] espn-playwright-wc failed for {check_date.isoformat()}: {e}")
 
     # Source 3: worldcup26.ir
     if not matches:
@@ -369,21 +340,6 @@ def fetch_results():
                 print("[fetch] worldcup26.ir: no completed matches found")
         except Exception as e:
             print(f"[fetch] worldcup26.ir failed: {e}")
-
-    # Source 4: openfootball worldcup.json (last resort)
-    if not matches:
-        try:
-            raw = fetch_url("https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json")
-            data = json.loads(raw)
-            of_matches = parse_openfootball(data)
-            if of_matches:
-                source = "openfootball"
-                matches = of_matches
-                print(f"[fetch] openfootball: {len(matches)} completed matches")
-            else:
-                print("[fetch] openfootball: no completed matches found")
-        except Exception as e:
-            print(f"[fetch] openfootball failed: {e}")
 
     # Sort by date
     matches.sort(key=lambda m: m.get("date", ""))
