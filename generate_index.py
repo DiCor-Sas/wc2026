@@ -2423,6 +2423,25 @@ def build_html(data):
 </div>
 
 <script>
+// Cache-bust: fetch version.txt with a timestamp query string
+// so CDN never caches the request. If the version has changed
+// since last visit, force a hard reload to get fresh index.html.
+(function() {{
+  var stored = localStorage.getItem('wc_version');
+  fetch('version.txt?t=' + Date.now())
+    .then(function(r) {{ return r.text(); }})
+    .then(function(v) {{
+      v = v.trim();
+      if (stored && stored !== v) {{
+        localStorage.setItem('wc_version', v);
+        location.reload(true);
+      }} else {{
+        localStorage.setItem('wc_version', v);
+      }}
+    }})
+    .catch(function() {{}});
+}})();
+
 function toggleConf() {{
   document.getElementById('conf-section').classList.toggle('open');
 }}

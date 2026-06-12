@@ -353,6 +353,16 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `_find_match()` to `_find_matches()` and restructured it to return all
   matches in the kickoff window; `main()` now sends one reminder per match so
   simultaneous-kickoff pairs both get notified (H2).
+- **GitHub Pages CDN cache-bust (2026-06-12)**: GitHub Pages ignores
+  `<meta http-equiv='Cache-Control'>` tags and serves stale `index.html`
+  from CDN after each deployment. Fixed by adding a version-check snippet as
+  the first statement in the main `<script>` block in `generate_index.py`.
+  On every page load it fetches `version.txt` with a `Date.now()` query
+  string (bypassing CDN cache on that tiny file), compares it to the value
+  stored in `localStorage` under `wc_version`, and calls `location.reload()`
+  if they differ. This guarantees users always see the latest pipeline
+  output within one page load after any deployment, with no manual cache
+  clearing required.
 
 ## 8. DASHBOARD STRUCTURE
 
