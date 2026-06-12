@@ -372,7 +372,11 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   attempt and `git stash pop` after, to handle any unstaged files not in the
   `git add` list (e.g. `match_adjustments.json`). Persistent conflicts
   between concurrent runs still require manual intervention per the existing
-  CLAUDE.md Git workflow note.
+  CLAUDE.md Git workflow note. Additionally, `model_accuracy.json` (written
+  by `score_prediction_accuracy()` during the simulation) was added to both
+  `git add` lists in the `update` job on 2026-06-12 — previously it was left
+  unstaged and only shuffled by the stash/pop, so accuracy-tracking data was
+  never persisted to the repo; it now commits cleanly each run.
 
 ## 8. DASHBOARD STRUCTURE
 

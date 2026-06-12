@@ -124,7 +124,8 @@ jobs:
         run: |
           git add wc2026_results.json bracket_state.json elo_ratings.json \
                   team_strength.json predictions.json index.html \
-                  version.txt daily_results.json lineups.json 2>/dev/null || true
+                  version.txt daily_results.json lineups.json \
+                  model_accuracy.json 2>/dev/null || true
 
           git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
@@ -134,6 +135,7 @@ jobs:
                     elo_ratings.json team_strength.json \
                     predictions.json index.html version.txt \
                     daily_results.json lineups.json \
+                    model_accuracy.json \
                     2>/dev/null || true
             git stash --include-untracked 2>/dev/null || true
             git pull --rebase --no-edit origin main
