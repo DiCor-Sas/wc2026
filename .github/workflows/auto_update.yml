@@ -125,35 +125,38 @@ jobs:
 
       - name: Commit and push if changed
         run: |
-          git add wc2026_results.json bracket_state.json elo_ratings.json \
-                  team_strength.json predictions.json index.html \
-                  version.txt daily_results.json lineups.json \
-                  model_accuracy.json 2>/dev/null || true
-
-          git diff --quiet && git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-
+          FILES="wc2026_results.json bracket_state.json elo_ratings.json team_strength.json predictions.json index.html version.txt daily_results.json lineups.json model_accuracy.json"
+          tmpdir=$(mktemp -d)
+          for f in $FILES; do
+            [ -f "$f" ] && cp "$f" "$tmpdir/$f"
+          done
+          git add $FILES 2>/dev/null || true
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            rm -rf "$tmpdir"
+            exit 0
+          fi
           for i in 1 2 3; do
-            git add wc2026_results.json bracket_state.json \
-                    elo_ratings.json team_strength.json \
-                    predictions.json index.html version.txt \
-                    daily_results.json lineups.json \
-                    model_accuracy.json \
-                    2>/dev/null || true
-            git stash --include-untracked 2>/dev/null || true
-            git pull --rebase --no-edit origin main
-            if [ $? -ne 0 ]; then
-              git rebase --abort 2>/dev/null || true
-              git stash pop 2>/dev/null || true
-              echo "Push attempt $i failed, retrying..."
-              sleep $((i * 10))
-              continue
+            git fetch origin main
+            git reset --hard origin/main
+            for f in $FILES; do
+              [ -f "$tmpdir/$f" ] && cp "$tmpdir/$f" "$f"
+            done
+            git add $FILES 2>/dev/null || true
+            if git diff --staged --quiet; then
+              echo "No changes relative to latest origin/main, nothing to push"
+              rm -rf "$tmpdir"
+              exit 0
             fi
-            git stash pop 2>/dev/null || true
-            git push origin main && break
+            git commit -m "auto update [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+            if git push origin main; then
+              echo "Push succeeded on attempt $i"
+              break
+            fi
             echo "Push attempt $i failed, retrying..."
             sleep $((i * 10))
           done
+          rm -rf "$tmpdir"
 
   lineup_fetch:
     runs-on: ubuntu-latest

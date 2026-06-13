@@ -363,20 +363,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   if they differ. This guarantees users always see the latest pipeline
   output within one page load after any deployment, with no manual cache
   clearing required.
-- **Push retry loop hardening (2026-06-12)**: the `git pull --rebase` retry
-  loop in `auto_update.yml` had no `rebase --abort` on failure, leaving the
-  repo in an in-progress-rebase state on iteration 1 failure so iterations 2
-  and 3 always failed immediately with "a rebase is already in progress."
-  Fixed by adding `git rebase --abort` on the failure path of each
-  iteration. Also added `git stash --include-untracked` before each rebase
-  attempt and `git stash pop` after, to handle any unstaged files not in the
-  `git add` list (e.g. `match_adjustments.json`). Persistent conflicts
-  between concurrent runs still require manual intervention per the existing
-  CLAUDE.md Git workflow note. Additionally, `model_accuracy.json` (written
-  by `score_prediction_accuracy()` during the simulation) was added to both
-  `git add` lists in the `update` job on 2026-06-12 — previously it was left
-  unstaged and only shuffled by the stash/pop, so accuracy-tracking data was
-  never persisted to the repo; it now commits cleanly each run.
+- **Push conflict fix (2026-06-12/13)**: concurrent update runs regenerate
+  `daily_results.json`, `index.html`, `predictions.json`, and `version.txt`
+  with always-different content (fresh timestamps, unseeded RNG). `git pull
+  --rebase` cannot auto-merge these files, causing unresolvable content
+  conflicts on every concurrent push. Fixed with a
+  fetch-reset-overwrite-commit-push pattern: before touching git state, the
+  10 generated files are saved to a temp directory; each retry iteration does
+  `git fetch` + `git reset --hard origin/main` (taking the latest remote as
+  base), copies the saved files back over the top, commits, and pushes. No
+  merge, no rebase, no conflict possible. A job-level concurrency guard
+  (`group: pipeline-update`, `cancel-in-progress: false`) on the `update` job
+  additionally serializes runs so only one update job executes at a time. The
+  `lineup_fetch` job is deliberately left unguarded.
 - **Concurrent-run push conflict guard (2026-06-12)**: two schedulers
   (GitHub Actions cron plus the external cron-job.org backup) could trigger
   the `update` job simultaneously, causing two full pipeline runs to
