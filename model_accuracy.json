@@ -1,7 +1,7 @@
 {
-  "matches_scored": 9,
-  "mean_brier": 0.843892,
-  "mean_rps": 0.239608,
+  "matches_scored": 10,
+  "mean_brier": 0.818389,
+  "mean_rps": 0.242137,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -119,6 +119,19 @@
       "p_loss": 0.379775,
       "brier": 0.859579,
       "rps": 0.143264
+    },
+    {
+      "key": "Australia|T\u00fcrkiye|2026-06-13",
+      "home": "Australia",
+      "away": "T\u00fcrkiye",
+      "date": "2026-06-13",
+      "home_score": 2,
+      "away_score": 0,
+      "p_win": 0.378355,
+      "p_draw": 0.243,
+      "p_loss": 0.378645,
+      "brier": 0.588864,
+      "rps": 0.264907
     }
   ]
 }
