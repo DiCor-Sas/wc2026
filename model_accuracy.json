@@ -1,7 +1,7 @@
 {
-  "matches_scored": 6,
-  "mean_brier": 0.782321,
-  "mean_rps": 0.269811,
+  "matches_scored": 7,
+  "mean_brier": 0.817318,
+  "mean_rps": 0.259743,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -80,6 +80,19 @@
       "p_loss": 0.207318,
       "brier": 0.996398,
       "rps": 0.189085
+    },
+    {
+      "key": "Haiti|Scotland|2026-06-13",
+      "home": "Haiti",
+      "away": "Scotland",
+      "date": "2026-06-13",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.19106,
+      "p_draw": 0.207138,
+      "p_loss": 0.601802,
+      "brier": 1.0273,
+      "rps": 0.199335
     }
   ]
 }
