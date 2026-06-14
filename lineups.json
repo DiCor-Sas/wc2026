@@ -341,5 +341,54 @@
     ],
     "key_absences": [],
     "fetched_at": "2026-06-14T16:10:44Z"
+  },
+  {
+    "match": "Netherlands vs Japan",
+    "date": "2026-06-14",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Bart Verbruggen",
+      "Micky van de Ven",
+      "Virgil van Dijk",
+      "Jan Paul van Hecke",
+      "Denzel Dumfries",
+      "Frenkie de Jong",
+      "Ryan Gravenberch",
+      "Cody Gakpo",
+      "Tijjani Reijnders",
+      "Crysencio Summerville",
+      "Donyell Malen"
+    ],
+    "away_xi": [
+      "Zion Suzuki",
+      "Hiroki Ito",
+      "Shogo Taniguchi",
+      "Tsuyoshi Watanabe",
+      "Keito Nakamura",
+      "Kaishu Sano",
+      "Daichi Kamada",
+      "Ritsu Doan",
+      "Takefusa Kubo",
+      "Daizen Maeda",
+      "Ayase Ueda"
+    ],
+    "key_absences": [
+      {
+        "player": "X. Simons",
+        "team": "Netherlands",
+        "penalty": 0.105,
+        "base_lambda": 2.26,
+        "adjusted_lambda": 2.02
+      },
+      {
+        "player": "T. Kawamura",
+        "team": "Japan",
+        "penalty": 0.3,
+        "base_lambda": 1.44,
+        "adjusted_lambda": 1.01
+      }
+    ],
+    "fetched_at": "2026-06-14T19:00:48Z"
   }
 ]
