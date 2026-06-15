@@ -400,6 +400,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   application (`adjusted_lambda / base_lambda` per absent player per team).
   Previously `match_adjustments.json` was a silent dead-end with no
   downstream reader.
+- **Over 2.5 and BTTS market chips added (2026-06-15)**: two new statistical
+  market chips added to each group-stage match card in `generate_index.py`.
+  `_over25_prob(lam1, lam2)` computes probability of 3 or more total goals
+  using independent Poisson PMFs. `_btts_prob(lam1, lam2)` computes
+  probability both teams score at least 1 goal:
+  `(1-e^-lam1)*(1-e^-lam2)`. Both use the same `lam1`/`lam2` from
+  `_strength_lambdas()` including any `match_adjustments.json` absence
+  penalties. BTTS chip includes a tap-to-show tooltip reusing the existing
+  `confidence-badge` CSS/JS pattern. `mc-chips` grid changed from 3-column
+  fixed to `repeat(auto-fit, minmax(90px,1fr))` to accommodate 5 chips on
+  mobile. Chips are scoped to the rolling upcoming/live window via
+  `_match_cards_html()` — completed matches in `_results_section_html()`
+  are unaffected.
 
 ## 8. DASHBOARD STRUCTURE
 

@@ -225,6 +225,25 @@ def _most_probable_score(lam1, lam2, max_goals=5):
     return best_s
 
 
+def _over25_prob(lam1, lam2):
+    """Probability that total goals > 2.5 (i.e. 3 or more)."""
+    prob_under = 0.0
+    for g1 in range(4):
+        for g2 in range(4):
+            if g1 + g2 <= 2:
+                p1 = math.exp(-lam1) * (lam1**g1) / math.factorial(g1)
+                p2 = math.exp(-lam2) * (lam2**g2) / math.factorial(g2)
+                prob_under += p1 * p2
+    return round((1 - prob_under) * 100, 1)
+
+
+def _btts_prob(lam1, lam2):
+    """Probability both teams score at least 1 goal."""
+    p_team1_scores = 1 - math.exp(-lam1)
+    p_team2_scores = 1 - math.exp(-lam2)
+    return round(p_team1_scores * p_team2_scores * 100, 1)
+
+
 _TEAM_STRENGTH_DATA: dict = {}
 
 
@@ -721,6 +740,11 @@ def _match_cards_html(matches):
                 w_code = w_code[:3] if len(w_code) > 3 else w_code
                 win_chip = f'WIN {h(w_code)} 8pts'
             goals_chip = f'{t1_abbr}{m["score1"]} {t2_abbr}{m["score2"]} 5pts'
+            lam1, lam2 = _strength_lambdas(t1, t2)
+            over25 = _over25_prob(lam1, lam2)
+            btts = _btts_prob(lam1, lam2)
+            over25_chip = f'O2.5 {over25}%'
+            btts_chip = f'BTTS {btts}%'
             cards += f'''<div class="match-card" style="animation-delay:{delay}ms"{colombia_style} data-kickoff="{m["kickoff_utc"]}">
   <div class="mc-card-header">
     <span class="mc-card-label">{h(m["match_lbl"])}</span>
@@ -751,6 +775,12 @@ def _match_cards_html(matches):
     <div class="mc-chip chip-gold">{score_chip}</div>
     <div class="mc-chip chip-red">{win_chip}</div>
     <div class="mc-chip chip-blue">{goals_chip}</div>
+    <div class="mc-chip chip-teal">{over25_chip}</div>
+    <div class="mc-chip chip-purple confidence-badge"
+         data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
+         tabindex="0">
+      {btts_chip} <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
+    </div>
   </div>
 </div>
 '''
@@ -1668,7 +1698,7 @@ def build_html(data):
     }}
     .mc-chips {{
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
       gap: 6px;
       border-top: 1px solid var(--fifa-border);
       padding: 10px 12px 12px;
@@ -1689,6 +1719,8 @@ def build_html(data):
     .chip-gold  {{ border: 1px solid rgba(201,168,76,0.5);  color: var(--fifa-gold); }}
     .chip-red   {{ border: 1px solid rgba(232,0,45,0.5);   color: #FF4060; }}
     .chip-blue  {{ border: 1px solid rgba(64,140,255,0.5); color: #60A0FF; }}
+    .chip-teal   {{ border: 1px solid rgba(20,184,166,0.5);  color: #14b8a6; }}
+    .chip-purple {{ border: 1px solid rgba(139,92,246,0.5); color: #a78bfa; }}
 
     /* ── SECTION 3: Model Confidence ── */
     .confidence-section {{
