@@ -1,7 +1,7 @@
 {
-  "matches_scored": 14,
-  "mean_brier": 0.91177,
-  "mean_rps": 0.240405,
+  "matches_scored": 15,
+  "mean_brier": 0.908893,
+  "mean_rps": 0.234132,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -184,6 +184,19 @@
       "p_loss": 0.370539,
       "brier": 0.859821,
       "rps": 0.143346
+    },
+    {
+      "key": "Sweden|Tunisia|2026-06-15",
+      "home": "Sweden",
+      "away": "Tunisia",
+      "date": "2026-06-15",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.427592,
+      "p_draw": 0.24106,
+      "p_loss": 0.331348,
+      "brier": 0.868616,
+      "rps": 0.146313
     }
   ]
 }
