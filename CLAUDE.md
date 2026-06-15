@@ -388,6 +388,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   50-min-before-kickoff timing is never delayed by a queued `update` run.
   `cancel-in-progress` is false so a running pipeline is never killed
   mid-run.
+- **lineup_fetch and update job isolation fix (2026-06-15)**: the `update`
+  job's fetch-reset-overwrite pattern was overwriting `lineups.json` with
+  its stale checkout-time snapshot, discarding fresh data committed by the
+  `lineup_fetch` job. Fixed by removing `lineups.json` from the `update` job
+  `FILES` variable — the `update` job never writes `lineups.json` so it
+  should never save/restore it. Also wired `match_adjustments.json` into
+  `_strength_lambdas()` in `generate_index.py`: absence penalties written by
+  `_detect_key_absences()` now correctly reduce the displayed predicted
+  score and win probability on match cards via multiplicative ratio
+  application (`adjusted_lambda / base_lambda` per absent player per team).
+  Previously `match_adjustments.json` was a silent dead-end with no
+  downstream reader.
 
 ## 8. DASHBOARD STRUCTURE
 

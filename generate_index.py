@@ -16,6 +16,7 @@ PLAYER_STATS_FILE  = _ROOT / "player_stats.json"
 TEAM_STRENGTH_FILE = _ROOT / "team_strength.json"
 FIXTURES_FILE      = _ROOT / "fixtures.json"
 LINEUPS_FILE       = _ROOT / "lineups.json"
+MATCH_ADJUSTMENTS_FILE = _ROOT / "match_adjustments.json"
 BRACKET_STATE_FILE = _ROOT / "bracket_state.json"
 RESULTS_FILE       = _ROOT / "wc2026_results.json"
 
@@ -237,6 +238,23 @@ def _load_team_strength():
             pass
 
 
+_MATCH_ADJUSTMENTS_DATA: dict = {}
+
+
+def _load_match_adjustments():
+    global _MATCH_ADJUSTMENTS_DATA
+    if not _MATCH_ADJUSTMENTS_DATA:
+        try:
+            with open(MATCH_ADJUSTMENTS_FILE) as f:
+                entries = json.load(f)
+            by_match: dict = {}
+            for entry in entries:
+                by_match.setdefault(entry["match"], []).append(entry)
+            _MATCH_ADJUSTMENTS_DATA = by_match
+        except Exception:
+            pass
+
+
 def _strength_lambdas(team1, team2):
     """Return (lam1, lam2): lambda = 1.5 * (s_attack/s_defend)^2, capped [0.3, 3.5]."""
     _load_team_strength()
@@ -244,6 +262,20 @@ def _strength_lambdas(team1, team2):
     s2 = _TEAM_STRENGTH_DATA.get(team2, {}).get("final_strength", 1600.0)
     lam1 = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
     lam2 = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+
+    _load_match_adjustments()
+    adjustments = (_MATCH_ADJUSTMENTS_DATA.get(f"{team1} vs {team2}")
+                   or _MATCH_ADJUSTMENTS_DATA.get(f"{team2} vs {team1}")
+                   or [])
+    for adj in adjustments:
+        ratio = adj["adjusted_lambda"] / adj["base_lambda"]
+        if adj["team"] == team1:
+            lam1 *= ratio
+        elif adj["team"] == team2:
+            lam2 *= ratio
+
+    lam1 = max(0.3, min(3.5, lam1))
+    lam2 = max(0.3, min(3.5, lam2))
     return lam1, lam2
 
 
