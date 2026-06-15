@@ -1551,7 +1551,6 @@ def build_html(data):
       background: var(--fifa-card);
       border: 1px solid var(--fifa-border);
       border-radius: 12px;
-      overflow: hidden;
       position: relative;
       animation: slideUp 400ms ease both;
       transition: transform 150ms ease, box-shadow 150ms ease;
@@ -1726,12 +1725,16 @@ def build_html(data):
     }}
     .mc-chips {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       border-top: 1px solid var(--fifa-border);
       padding: 10px 12px 12px;
       margin-top: 4px;
-      overflow: visible;
+    }}
+    @media (min-width: 600px) {{
+      .mc-chips {{
+        grid-template-columns: repeat(5, 1fr);
+      }}
     }}
     .mc-chip {{
       font-size: 10px;
