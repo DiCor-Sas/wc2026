@@ -1,7 +1,7 @@
 {
-  "matches_scored": 13,
-  "mean_brier": 0.915766,
-  "mean_rps": 0.247871,
+  "matches_scored": 14,
+  "mean_brier": 0.91177,
+  "mean_rps": 0.240405,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -171,6 +171,19 @@
       "p_loss": 0.369501,
       "brier": 0.859891,
       "rps": 0.14337
+    },
+    {
+      "key": "Ivory Coast|Ecuador|2026-06-15",
+      "home": "Ivory Coast",
+      "away": "Ecuador",
+      "date": "2026-06-15",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.386514,
+      "p_draw": 0.242947,
+      "p_loss": 0.370539,
+      "brier": 0.859821,
+      "rps": 0.143346
     }
   ]
 }
