@@ -431,8 +431,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   2026-06-12). Pre-session stabilization completed 2026-06-12: C1 ELO dedup
   fix, H1/H2 Telegram fixes, H5/H6 `generate_index.py` hardening, H8 full
   dependency pinning including `optuna==4.9.0`. Environment is stable and
-  ready for Session 4. Related training code lives in `model/` (`train.py`,
-  `pipelines.py`, `expanded_model.pkl`).
+  ready for Session 4. Pre-Session 4 checklist must include an end-to-end
+  data flow audit: for every file written by the pipeline
+  (`fetch_results.py`, `run_predictions.py`, `generate_index.py`,
+  `update_results.py`), confirm at least one downstream reader consumes it.
+  The `match_adjustments.json` dead-end (written by `_detect_key_absences()`
+  in `fetch_results.py`, never read by `generate_index.py` or
+  `run_predictions.py`) was discovered live on 2026-06-15 when Lamine
+  Yamal's absence was correctly detected and lambda-adjusted in memory but
+  the adjustment never reached the dashboard predicted score or win
+  probability. This class of silent dead-end data flows is not detectable
+  by static code audit without explicit write-to-reader tracing. Related
+  training code lives in `model/` (`train.py`, `pipelines.py`,
+  `expanded_model.pkl`).
 - **Session 4 known inconsistency to address**: predicted score and win
   probability can contradict each other on match cards. Example observed
   2026-06-12: USA vs Paraguay showed predicted score USA 2-1 Paraguay
