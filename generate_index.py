@@ -776,7 +776,7 @@ def _match_cards_html(matches):
     <div class="mc-chip chip-red">{win_chip}</div>
     <div class="mc-chip chip-blue">{goals_chip}</div>
     <div class="mc-chip chip-teal">{over25_chip}</div>
-    <div class="mc-chip chip-purple confidence-badge"
+    <div class="mc-chip chip-purple confidence-badge tooltip-up"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       {btts_chip} <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1623,6 +1623,33 @@ def build_html(data):
       opacity: 1;
     }}
     .confidence-badge.tooltip-visible::after {{
+      opacity: 1;
+    }}
+    .mc-chip.tooltip-up::after {{
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      top: auto;
+      width: 220px;
+      background: #1A2B40;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #1E3050;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 200;
+      white-space: normal;
+      text-align: left;
+    }}
+    .mc-chip.tooltip-up.tooltip-visible::after {{
       opacity: 1;
     }}
     .mc-venue-row {{
