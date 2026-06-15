@@ -1629,9 +1629,10 @@ def build_html(data):
       content: attr(data-tooltip);
       position: absolute;
       bottom: calc(100% + 8px);
-      right: 0;
+      left: 0;
+      right: auto;
       top: auto;
-      width: 220px;
+      width: 180px;
       background: #1A2B40;
       color: #F8FAFC;
       font-family: 'Inter', sans-serif;
@@ -1725,11 +1726,12 @@ def build_html(data):
     }}
     .mc-chips {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
       gap: 6px;
       border-top: 1px solid var(--fifa-border);
       padding: 10px 12px 12px;
       margin-top: 4px;
+      overflow: visible;
     }}
     .mc-chip {{
       font-size: 10px;

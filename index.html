@@ -11,7 +11,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- version: 1781543013 -->
+  <!-- version: 1781543493 -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -413,9 +413,10 @@
       content: attr(data-tooltip);
       position: absolute;
       bottom: calc(100% + 8px);
-      right: 0;
+      left: 0;
+      right: auto;
       top: auto;
-      width: 220px;
+      width: 180px;
       background: #1A2B40;
       color: #F8FAFC;
       font-family: 'Inter', sans-serif;
@@ -509,11 +510,12 @@
     }
     .mc-chips {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
       gap: 6px;
       border-top: 1px solid var(--fifa-border);
       padding: 10px 12px 12px;
       margin-top: 4px;
+      overflow: visible;
     }
     .mc-chip {
       font-size: 10px;
@@ -1706,7 +1708,7 @@
 
 <div class="site-footer">
   <div class="footer-text">
-    <span id="footer-refreshed">Data refreshed: 2026-06-15 12:03 COT</span>
+    <span id="footer-refreshed">Data refreshed: 2026-06-15 12:11 COT</span>
     <span class="footer-sep"> &middot; </span>
     <span id="footer-now"></span>
     <span class="footer-sep"> &middot; </span>
