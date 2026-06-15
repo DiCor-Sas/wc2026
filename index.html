@@ -11,7 +11,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- version: 1781543493 -->
+  <!-- version: 1781543565 -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -409,34 +409,6 @@
     .confidence-badge.tooltip-visible::after {
       opacity: 1;
     }
-    .mc-chip.tooltip-up::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
-      right: auto;
-      top: auto;
-      width: 180px;
-      background: #1A2B40;
-      color: #F8FAFC;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 1.5;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #1E3050;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 200ms ease;
-      z-index: 200;
-      white-space: normal;
-      text-align: left;
-    }
-    .mc-chip.tooltip-up.tooltip-visible::after {
-      opacity: 1;
-    }
     .mc-venue-row {
       font-size: 11px;
       font-weight: 500;
@@ -510,12 +482,11 @@
     }
     .mc-chips {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
       gap: 6px;
       border-top: 1px solid var(--fifa-border);
       padding: 10px 12px 12px;
       margin-top: 4px;
-      overflow: visible;
     }
     .mc-chip {
       font-size: 10px;
@@ -1215,22 +1186,22 @@
       <div class="pick-mini-label">Champion</div>
       <span class="pick-mini-flag">🇪🇸</span>
       <div class="pick-mini-team">Spain</div>
-      <div class="pick-mini-pct">9.38%</div>
-      <div style="font-size:11px;color:var(--fifa-text-secondary);margin-top:1px;">80% CI: 9.0%–9.8%</div>
+      <div class="pick-mini-pct">9.9%</div>
+      <div style="font-size:11px;color:var(--fifa-text-secondary);margin-top:1px;">80% CI: 9.5%–10.3%</div>
       <div class="pick-mini-pts">50 PTS</div>
     </div>
     <div class="pick-mini silver">
       <div class="pick-mini-label">Runner-Up</div>
       <span class="pick-mini-flag">🇦🇷</span>
       <div class="pick-mini-team">Argentina</div>
-      <div class="pick-mini-pct">6.88%</div>
+      <div class="pick-mini-pct">7.16%</div>
       <div class="pick-mini-pts">35 PTS</div>
     </div>
     <div class="pick-mini bronze">
       <div class="pick-mini-label">Third Place</div>
       <span class="pick-mini-flag">🇳🇱</span>
       <div class="pick-mini-team">Netherlands</div>
-      <div class="pick-mini-pct">5.76%</div>
+      <div class="pick-mini-pct">4.98%</div>
       <div class="pick-mini-pts">20 PTS</div>
     </div>
     <div class="pick-mini green">
@@ -1286,7 +1257,7 @@
     <div class="mc-chip chip-red">WIN ESP 8pts</div>
     <div class="mc-chip chip-blue">ESP2 CPV0 5pts</div>
     <div class="mc-chip chip-teal">O2.5 69.2%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 48.2% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1324,7 +1295,7 @@
     <div class="mc-chip chip-red">WIN BEL 8pts</div>
     <div class="mc-chip chip-blue">BEL2 EGY1 5pts</div>
     <div class="mc-chip chip-teal">O2.5 62.3%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 57.1% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1362,7 +1333,7 @@
     <div class="mc-chip chip-red">WIN URU 8pts</div>
     <div class="mc-chip chip-blue">KSA1 URU2 5pts</div>
     <div class="mc-chip chip-teal">O2.5 59.9%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 58.7% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1400,7 +1371,7 @@
     <div class="mc-chip chip-red">WIN IRN 8pts</div>
     <div class="mc-chip chip-blue">IRN2 NZL1 5pts</div>
     <div class="mc-chip chip-teal">O2.5 62.1%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 57.2% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1442,7 +1413,7 @@
     <div class="mc-chip chip-red">WIN FRA 8pts</div>
     <div class="mc-chip chip-blue">FRA2 SEN1 5pts</div>
     <div class="mc-chip chip-teal">O2.5 63.0%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 56.6% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1480,7 +1451,7 @@
     <div class="mc-chip chip-red">WIN NOR 8pts</div>
     <div class="mc-chip chip-blue">IRQ1 NOR2 5pts</div>
     <div class="mc-chip chip-teal">O2.5 59.8%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 58.9% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1518,7 +1489,7 @@
     <div class="mc-chip chip-red">WIN ARG 8pts</div>
     <div class="mc-chip chip-blue">ARG2 ALG0 5pts</div>
     <div class="mc-chip chip-teal">O2.5 66.1%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 54.4% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1556,7 +1527,7 @@
     <div class="mc-chip chip-red">WIN AUT 8pts</div>
     <div class="mc-chip chip-blue">AUT2 JOR1 5pts</div>
     <div class="mc-chip chip-teal">O2.5 62.1%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 57.2% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1598,7 +1569,7 @@
     <div class="mc-chip chip-red">WIN POR 8pts</div>
     <div class="mc-chip chip-blue">POR2 COD0 5pts</div>
     <div class="mc-chip chip-teal">O2.5 70.5%</div>
-    <div class="mc-chip chip-purple confidence-badge tooltip-up"
+    <div class="mc-chip chip-purple confidence-badge"
          data-tooltip="Both Teams To Score: probability that BOTH teams finish with at least 1 goal. High % = open game, both sides likely to score. Low % = expect a clean sheet or one-sided match."
          tabindex="0">
       BTTS 51.4% <span style="font-size:10px;opacity:0.6;font-weight:400;">?</span>
@@ -1615,15 +1586,6 @@
 <div class="results-section" id="results-section">
   <div class="results-header">MATCH RESULTS<span class="results-live-dot" id="results-live-dot" style="display:none"></span></div>
   <div class="results-list">
-<div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-16T03:50:00Z">
-  <div class="rc-meta"><span>GROUP F</span><span class="rc-time"></span></div>
-  <div class="rc-row">
-    <div class="rc-team rc-win"><span class="rc-flag">🇸🇪</span><span class="rc-name">Sweden</span></div>
-    <div class="rc-score">5–1</div>
-    <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇹🇳</span><span class="rc-name">Tunisia</span></div>
-  </div>
-  <div class="rc-elo">SWE +13.2 · TUN -13.2</div>
-</div>
 <div class="result-card" style="border-left:3px solid #C9A84C" data-ended="2026-06-15T17:50:00Z">
   <div class="rc-meta"><span>GROUP H</span><span class="rc-time"></span></div>
   <div class="rc-row">
@@ -1641,6 +1603,15 @@
     <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇹🇷</span><span class="rc-name">Türkiye</span></div>
   </div>
   <div class="rc-elo">AUS +19.5 · TUR -19.5</div>
+</div>
+<div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-15T03:50:00Z">
+  <div class="rc-meta"><span>GROUP F</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇸🇪</span><span class="rc-name">Sweden</span></div>
+    <div class="rc-score">5–1</div>
+    <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇹🇳</span><span class="rc-name">Tunisia</span></div>
+  </div>
+  <div class="rc-elo">SWE +13.2 · TUN -13.2</div>
 </div>
 <div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-15T00:50:00Z">
   <div class="rc-meta"><span>GROUP E</span><span class="rc-time"></span></div>
@@ -1669,7 +1640,73 @@
   </div>
   <div class="rc-elo">GER +1.6 · CUW -1.6</div>
 </div>
+<div class="results-extra" id="results-extra" style="display:none">
+<div class="result-card" style="border-left:3px solid #E8002D" data-ended="2026-06-14T02:50:00Z">
+  <div class="rc-meta"><span>GROUP C</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-lose"><span class="rc-flag">🇭🇹</span><span class="rc-name">Haiti</span></div>
+    <div class="rc-score">0–1</div>
+    <div class="rc-team rc-right rc-win"><span class="rc-flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><span class="rc-name">Scotland</span></div>
   </div>
+  <div class="rc-elo">HAI -7.7 · SCO +7.7</div>
+</div>
+<div class="result-card" style="border-left:3px solid #C9A84C" data-ended="2026-06-13T23:50:00Z">
+  <div class="rc-meta"><span>GROUP C</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇧🇷</span><span class="rc-name">Brazil</span></div>
+    <div class="rc-score">1–1</div>
+    <div class="rc-team rc-right rc-win"><span class="rc-flag">🇲🇦</span><span class="rc-name">Morocco</span></div>
+  </div>
+  <div class="rc-elo">BRA -9.7 · MAR +9.7</div>
+</div>
+<div class="result-card" style="border-left:3px solid #C9A84C" data-ended="2026-06-13T20:50:00Z">
+  <div class="rc-meta"><span>GROUP B</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇶🇦</span><span class="rc-name">Qatar</span></div>
+    <div class="rc-score">1–1</div>
+    <div class="rc-team rc-right rc-win"><span class="rc-flag">🇨🇭</span><span class="rc-name">Switzerland</span></div>
+  </div>
+  <div class="rc-elo">QAT +13.7 · SUI -13.7</div>
+</div>
+<div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-13T02:50:00Z">
+  <div class="rc-meta"><span>GROUP D</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇺🇸</span><span class="rc-name">USA</span></div>
+    <div class="rc-score">4–1</div>
+    <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇵🇾</span><span class="rc-name">Paraguay</span></div>
+  </div>
+  <div class="rc-elo">USA +10.6 · PAR -10.6</div>
+</div>
+<div class="result-card" style="border-left:3px solid #C9A84C" data-ended="2026-06-12T20:50:00Z">
+  <div class="rc-meta"><span>GROUP B</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇨🇦</span><span class="rc-name">Canada</span></div>
+    <div class="rc-score">1–1</div>
+    <div class="rc-team rc-right rc-win"><span class="rc-flag">🇧🇦</span><span class="rc-name">Bosnia-Herzegovina</span></div>
+  </div>
+  <div class="rc-elo">CAN +0.9 · BOS -0.9</div>
+</div>
+<div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-12T03:50:00Z">
+  <div class="rc-meta"><span>GROUP A</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇰🇷</span><span class="rc-name">South Korea</span></div>
+    <div class="rc-score">2–1</div>
+    <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇨🇿</span><span class="rc-name">Czechia</span></div>
+  </div>
+  <div class="rc-elo">KOR +16.0 · CZE -16.0</div>
+</div>
+<div class="result-card" style="border-left:3px solid #22C55E" data-ended="2026-06-11T20:50:00Z">
+  <div class="rc-meta"><span>GROUP A</span><span class="rc-time"></span></div>
+  <div class="rc-row">
+    <div class="rc-team rc-win"><span class="rc-flag">🇲🇽</span><span class="rc-name">Mexico</span></div>
+    <div class="rc-score">2–0</div>
+    <div class="rc-team rc-right rc-lose"><span class="rc-flag">🇿🇦</span><span class="rc-name">South Africa</span></div>
+  </div>
+  <div class="rc-elo">MEX +4.6 · RSA -4.6</div>
+</div>
+</div>
+  </div>
+  <div class="results-show-all" id="results-show-all" onclick="toggleAllResults()">Show all 13 results &#9662;</div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1697,18 +1734,18 @@
   </div>
   <div class="confidence-body" id="conf-body">
     <div class="confidence-inner">
-<div class="conf-row"><span class="conf-rank">1</span><span class="conf-team">🇪🇸 SPAIN <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:100%"></div></div><span class="conf-pct">9.38%</span></div>
-<div class="conf-row"><span class="conf-rank">2</span><span class="conf-team">🇳🇱 NETHERLANDS <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:78%"></div></div><span class="conf-pct">7.33%</span></div>
-<div class="conf-row"><span class="conf-rank">3</span><span class="conf-team">🇦🇷 ARGENTINA <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:72%"></div></div><span class="conf-pct">6.73%</span></div>
-<div class="conf-row"><span class="conf-rank">4</span><span class="conf-team">🇩🇪 GERMANY <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:60%"></div></div><span class="conf-pct">5.66%</span></div>
-<div class="conf-row"><span class="conf-rank">5</span><span class="conf-team">🇫🇷 FRANCE <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:59%"></div></div><span class="conf-pct">5.58%</span></div>
+<div class="conf-row"><span class="conf-rank">1</span><span class="conf-team">🇪🇸 SPAIN <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:100%"></div></div><span class="conf-pct">9.9%</span></div>
+<div class="conf-row"><span class="conf-rank">2</span><span class="conf-team">🇳🇱 NETHERLANDS <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:73%"></div></div><span class="conf-pct">7.2%</span></div>
+<div class="conf-row"><span class="conf-rank">3</span><span class="conf-team">🇦🇷 ARGENTINA <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:69%"></div></div><span class="conf-pct">6.79%</span></div>
+<div class="conf-row"><span class="conf-rank">4</span><span class="conf-team">🇩🇪 GERMANY <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:56%"></div></div><span class="conf-pct">5.56%</span></div>
+<div class="conf-row"><span class="conf-rank">5</span><span class="conf-team">🇫🇷 FRANCE <span style="color:#EF9F27;font-size:10px;" title="Rating uncertainty high — fewer matches observed">&#9679;</span></span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:54%"></div></div><span class="conf-pct">5.36%</span></div>
     </div>
   </div>
 </div>
 
 <div class="site-footer">
   <div class="footer-text">
-    <span id="footer-refreshed">Data refreshed: 2026-06-15 12:11 COT</span>
+    <span id="footer-refreshed">Data refreshed: 2026-06-15 12:12 COT</span>
     <span class="footer-sep"> &middot; </span>
     <span id="footer-now"></span>
     <span class="footer-sep"> &middot; </span>
