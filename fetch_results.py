@@ -212,6 +212,19 @@ def _fetch_espn_wc_api(check_date):
         print(f"[fetch] espn-api request failed for {check_date.isoformat()}: {e}")
         return []
 
+    fixture_kickoffs = {}
+    try:
+        with open(ROOT / "fixtures.json") as _f:
+            for fx in json.load(_f):
+                pair = frozenset([_fn(fx["home"]), _fn(fx["away"])])
+                ko_naive = datetime.strptime(
+                    f"{fx['date']} {fx['time']}", "%Y-%m-%d %H:%M"
+                )
+                fixture_kickoffs[pair] = ko_naive.replace(
+                    tzinfo=timezone(timedelta(hours=-5))
+                )
+    except Exception:
+        pass
     matches = []
     for evt in data.get("events", []):
         comp = evt.get("competitions", [{}])[0]
@@ -227,11 +240,19 @@ def _fetch_espn_wc_api(check_date):
             a_s = int(away.get("score"))
         except (TypeError, ValueError):
             continue
+        home_name = _fn(home["team"]["displayName"])
+        away_name = _fn(away["team"]["displayName"])
+        if fixture_kickoffs:
+            ko_utc = fixture_kickoffs.get(frozenset([home_name, away_name]))
+            if ko_utc is None:
+                continue
+            if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+                continue
         evt_date = (evt.get("date", "") or "")[:10]
         matches.append({
             "date": evt_date or check_date.isoformat(),
-            "home": _fn(home["team"]["displayName"]),
-            "away": _fn(away["team"]["displayName"]),
+            "home": home_name,
+            "away": away_name,
             "home_score": h_s,
             "away_score": a_s,
         })
@@ -429,6 +450,19 @@ def parse_worldcup26ir(data):
     Team names come from home_team_name_en / away_team_name_en, normalized
     via _fn() (e.g. "Czech Republic" -> "Czechia").
     """
+    fixture_kickoffs = {}
+    try:
+        with open(ROOT / "fixtures.json") as _f:
+            for fx in json.load(_f):
+                pair = frozenset([_fn(fx["home"]), _fn(fx["away"])])
+                ko_naive = datetime.strptime(
+                    f"{fx['date']} {fx['time']}", "%Y-%m-%d %H:%M"
+                )
+                fixture_kickoffs[pair] = ko_naive.replace(
+                    tzinfo=timezone(timedelta(hours=-5))
+                )
+    except Exception:
+        pass
     matches = []
     games = data if isinstance(data, list) else data.get("games", data.get("data", []))
     for m in games:
@@ -443,6 +477,12 @@ def parse_worldcup26ir(data):
         t2 = _fn((m.get("away_team_name_en") or "").strip())
         if not _is_wc(t1) or not _is_wc(t2):
             continue
+        if fixture_kickoffs:
+            ko_utc = fixture_kickoffs.get(frozenset([t1, t2]))
+            if ko_utc is None:
+                continue
+            if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+                continue
         local_date = m.get("local_date", "")
         try:
             match_date = datetime.strptime(local_date, "%m/%d/%Y %H:%M").date().isoformat()
