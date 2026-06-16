@@ -591,5 +591,61 @@
     ],
     "key_absences": [],
     "fetched_at": "2026-06-16T01:00:47Z"
+  },
+  {
+    "match": "France vs Senegal",
+    "date": "2026-06-16",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Mike Maignan",
+      "Theo Hernandez",
+      "Dayot Upamecano",
+      "William Saliba",
+      "Jules Kounde",
+      "Adrien Rabiot",
+      "Aurelien Tchouameni",
+      "Desire Doue",
+      "Ousmane Dembele",
+      "Michael Olise",
+      "Kylian Mbappe"
+    ],
+    "away_xi": [
+      "Edouard Mendy",
+      "El Hadji Malick Diouf",
+      "Moussa Niakhate",
+      "Kalidou Koulibaly",
+      "Krepin Diatta",
+      "Pape Gueye",
+      "Idrissa Gueye",
+      "Lamine Camara",
+      "Sadio Mane",
+      "Ismaila Sarr",
+      "Nicolas Jackson"
+    ],
+    "key_absences": [
+      {
+        "player": "Kylian Mbapp\u00e9",
+        "team": "France",
+        "penalty": 0.116,
+        "base_lambda": 2.23,
+        "adjusted_lambda": 1.97
+      },
+      {
+        "player": "B. Barcola",
+        "team": "France",
+        "penalty": 0.068,
+        "base_lambda": 2.23,
+        "adjusted_lambda": 2.08
+      },
+      {
+        "player": "M. Faye",
+        "team": "Senegal",
+        "penalty": 0.18,
+        "base_lambda": 1.49,
+        "adjusted_lambda": 1.22
+      }
+    ],
+    "fetched_at": "2026-06-16T18:10:50Z"
   }
 ]
