@@ -1,7 +1,7 @@
 {
-  "matches_scored": 19,
-  "mean_brier": 0.932685,
-  "mean_rps": 0.23649,
+  "matches_scored": 20,
+  "mean_brier": 0.939647,
+  "mean_rps": 0.235369,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -249,6 +249,19 @@
       "p_loss": 0.557696,
       "brier": 0.970224,
       "rps": 0.180375
+    },
+    {
+      "key": "Iran|New Zealand|2026-06-15",
+      "home": "Iran",
+      "away": "New Zealand",
+      "date": "2026-06-15",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.63167,
+      "p_draw": 0.197638,
+      "p_loss": 0.170692,
+      "brier": 1.071928,
+      "rps": 0.214071
     }
   ]
 }
