@@ -421,6 +421,16 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   seeding from the existing `wc2026_results.json` before merging live sources — the file now
   only grows, never shrinks. Live sources still enrich existing records with group/round/date
   corrections when available.
+- **ELO duplicate key fix (2026-06-16)**: `update_elo_from_results()` built `wc_applied_keys`
+  dedup keys from `m['date']` (scraper-reported date) which shifted between pipeline runs as
+  different sources reported different dates (Sky Sports always stamps today, worldcup26.ir uses
+  local COT time). When the date shifted, the old key stayed and the new date passed the dedup
+  check, applying ELO a second time. Affected 5 matches and 10 teams (USA, Paraguay, Australia,
+  Türkiye, Haiti, Scotland, Ivory Coast, Ecuador, Sweden, Tunisia). Fixed by anchoring the key
+  to `fixtures.json` canonical COT dates via a `frozenset({team1, team2})` lookup — keys are
+  now immutable regardless of scraper date. One-time reset script `reset_elo_duplicates.py`
+  (completed 2026-06-16, do not re-run) restored correct single-application ELO/RD for all
+  10 teams using git-history pre-match baselines.
 
 ## 8. DASHBOARD STRUCTURE
 
