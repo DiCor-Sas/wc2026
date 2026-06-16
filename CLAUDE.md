@@ -461,6 +461,14 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `datetime.now(UTC) < kickoff_utc + 110 minutes` regardless of their own
   completion status field. Graceful degradation: if `fixtures.json` fails to
   load the guard is skipped and each source behaves as before.
+- **Score merge priority fix (2026-06-16)**: `_merge_wc_results()` gave
+  priority to whichever source reported a match first. `worldcup26.ir`
+  reported France vs Senegal as 0-0 (`finished=TRUE` prematurely) and won
+  the merge race over ESPN's correct 3-1. Fixed by adding a score overwrite
+  rule: if the existing merged record has `home_score==0` and `away_score==0`
+  and an incoming source reports a non-zero score, the non-zero score
+  overwrites the 0-0. Genuine 0-0 results are safe since all sources agree
+  and no overwrite triggers.
 
 ## 8. DASHBOARD STRUCTURE
 
