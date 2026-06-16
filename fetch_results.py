@@ -503,16 +503,45 @@ def _parse_skysports_wc():
 
     soup = BeautifulSoup(html, "html.parser")
     today_iso = date.today().isoformat()
+
+    # Build kickoff-time lookup from fixtures.json so we can reject pre-match results.
+    # Falls back to empty dict on any error — empty dict means no guard applied (safe degradation).
+    fixture_kickoffs = {}
+    try:
+        with open(ROOT / "fixtures.json") as _f:
+            for fx in json.load(_f):
+                pair = frozenset([_fn(fx["home"]), _fn(fx["away"])])
+                # fixtures.json times are COT (UTC-5); convert to UTC
+                ko_naive = datetime.strptime(
+                    f"{fx['date']} {fx['time']}", "%Y-%m-%d %H:%M"
+                )
+                fixture_kickoffs[pair] = ko_naive.replace(
+                    tzinfo=timezone(timedelta(hours=-5))
+                )
+    except Exception:
+        pass  # degrade gracefully: fixture_kickoffs stays {}
+
     matches = []
     for el in soup.select("a.sdc-site-fixres__match"):
         label = el.get("aria-label", "")
         m = re.match(r"^(.+) (\d+) - (.+) (\d+)$", label)
         if not m:
             continue
+        home = _fn(m.group(1).strip())
+        away = _fn(m.group(3).strip())
+        # Time guard: only accept if kickoff + 110 min has passed in UTC.
+        # Skips pre-match and live placeholders. If pair not in fixtures.json
+        # (e.g. knockout placeholder not yet resolved), skip it too.
+        if fixture_kickoffs:
+            ko_utc = fixture_kickoffs.get(frozenset([home, away]))
+            if ko_utc is None:
+                continue
+            if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+                continue
         matches.append({
             "date": today_iso,
-            "home": _fn(m.group(1).strip()),
-            "away": _fn(m.group(3).strip()),
+            "home": home,
+            "away": away,
             "home_score": int(m.group(2)),
             "away_score": int(m.group(4)),
         })

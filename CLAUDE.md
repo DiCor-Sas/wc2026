@@ -443,6 +443,14 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   and `def_mod` both clamped to `[0.85, 1.15]`. Applied as:
   `lam1 = lam1 * atk_mod(team1) * def_mod(team2)`. Teams with no completed matches default to
   neutral `(1.0, 1.0)`. `match_stats.json` added to CI FILES variable so it persists across runs.
+- **Sky Sports pre-match false positive guard (2026-06-16)**: `_parse_skysports_wc()` matched any
+  aria-label fitting the score regex with no completion status check. Pre-match fixtures render as
+  `TeamA 0 - TeamB 0` on the Sky Sports page, which the regex accepted as completed results.
+  Observed live: France vs Senegal ingested as 0-0 before kickoff, corrupting ELO for both teams.
+  Fixed by loading `fixtures.json` once per function call and rejecting any match where
+  `datetime.now(UTC) < kickoff_utc + 110 minutes`. Graceful degradation: if `fixtures.json`
+  fails to load, the guard is skipped and the function behaves as before. Knockout placeholders
+  not yet in fixtures are also rejected via `ko_utc is None` check.
 
 ## 8. DASHBOARD STRUCTURE
 
