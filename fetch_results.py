@@ -405,8 +405,18 @@ def fetch_results():
         wc26_matches = []
         print(f"[fetch] worldcup26.ir failed: {e}")
 
+    # Seed from existing file so history is never lost when live sources are unreachable
+    seed_matches = []
+    try:
+        with open(ROOT / "wc2026_results.json") as f:
+            seed_matches = json.load(f)
+        if not isinstance(seed_matches, list):
+            seed_matches = []
+    except Exception:
+        seed_matches = []
+
     # Merge all sources
-    matches = _merge_wc_results([sky_matches, espn_matches, wc26_matches])
+    matches = _merge_wc_results([seed_matches, sky_matches, espn_matches, wc26_matches])
     matches.sort(key=lambda m: m.get("date", ""))
 
     sources_used = []

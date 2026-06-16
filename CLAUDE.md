@@ -413,6 +413,14 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   mobile. Chips are scoped to the rolling upcoming/live window via
   `_match_cards_html()` — completed matches in `_results_section_html()`
   are unaffected.
+- **`wc2026_results.json` history preservation (2026-06-16)**: `fetch_results.fetch_results()`
+  previously rebuilt `wc2026_results.json` entirely from live sources on every run with no
+  historical memory. When worldcup26.ir (the only source with full match history) was
+  unreachable, all matches older than yesterday were silently wiped. Observed live on
+  2026-06-16: 5 CI runs wrote only 4 matches, losing all 12 June 11–14 results. Fixed by
+  seeding from the existing `wc2026_results.json` before merging live sources — the file now
+  only grows, never shrinks. Live sources still enrich existing records with group/round/date
+  corrections when available.
 
 ## 8. DASHBOARD STRUCTURE
 
