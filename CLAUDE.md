@@ -535,6 +535,8 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 10. WORKING AGREEMENT
 
+- Every Claude Code response must begin with 'Diego:' as the first word. This
+  is a self-control convention to confirm context is loaded correctly.
 - Always **show proposed code before writing any file** and wait for approval.
 - Never run `update_results.py` casually — it makes live network calls and
   takes ~10–15 minutes (full Monte Carlo simulation).
