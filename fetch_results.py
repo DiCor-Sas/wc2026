@@ -824,6 +824,18 @@ def update_elo_from_results():
     with open(elo_path) as f:
         elo_data = json.load(f)
 
+    # Load canonical dates from fixtures.json to anchor dedup keys
+    # regardless of scraper-reported dates
+    fixture_dates = {}
+    try:
+        with open(ROOT / "fixtures.json") as f:
+            fixtures = json.load(f)
+        for fx in fixtures:
+            pair = frozenset([fx["home"], fx["away"]])
+            fixture_dates[pair] = fx["date"]
+    except Exception:
+        fixture_dates = {}
+
     if not matches:
         print("[elo] No completed matches — ELO unchanged.")
         return
@@ -847,7 +859,11 @@ def update_elo_from_results():
         hs = m["home_score"]
         as_ = m["away_score"]
 
-        match_key = f"{m['date']}|{m['team1']}|{m['team2']}"
+        canonical_date = fixture_dates.get(
+            frozenset([m["team1"], m["team2"]]),
+            m["date"]
+        )
+        match_key = f"{canonical_date}|{m['team1']}|{m['team2']}"
         if match_key in wc_applied_keys:
             continue
 
