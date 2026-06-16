@@ -1,7 +1,7 @@
 {
-  "matches_scored": 21,
-  "mean_brier": 0.945352,
-  "mean_rps": 0.234159,
+  "matches_scored": 22,
+  "mean_brier": 0.952876,
+  "mean_rps": 0.233827,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -275,6 +275,19 @@
       "p_loss": 0.176081,
       "brier": 1.059442,
       "rps": 0.209956
+    },
+    {
+      "key": "France|Senegal|2026-06-16",
+      "home": "France",
+      "away": "Senegal",
+      "date": "2026-06-16",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.655493,
+      "p_draw": 0.189358,
+      "p_loss": 0.155149,
+      "brier": 1.110883,
+      "rps": 0.226871
     }
   ]
 }
