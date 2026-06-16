@@ -451,6 +451,16 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `datetime.now(UTC) < kickoff_utc + 110 minutes`. Graceful degradation: if `fixtures.json`
   fails to load, the guard is skipped and the function behaves as before. Knockout placeholders
   not yet in fixtures are also rejected via `ko_utc is None` check.
+- **Kickoff time guard extended to all three fetch sources (2026-06-16)**:
+  `worldcup26.ir` and ESPN both ingested France vs Senegal as a completed 0-0
+  result while the match was still live (`worldcup26.ir` set `finished=TRUE`
+  prematurely; ESPN `STATUS_FULL_TIME` fired incorrectly). The
+  `fixtures.json` kickoff UTC + 110 minute guard already applied to Sky Sports
+  on the same day was extended to `parse_worldcup26ir()` and
+  `_fetch_espn_wc_api()`. All three sources now reject any match where
+  `datetime.now(UTC) < kickoff_utc + 110 minutes` regardless of their own
+  completion status field. Graceful degradation: if `fixtures.json` fails to
+  load the guard is skipped and each source behaves as before.
 
 ## 8. DASHBOARD STRUCTURE
 
