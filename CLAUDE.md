@@ -431,6 +431,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   now immutable regardless of scraper date. One-time reset script `reset_elo_duplicates.py`
   (completed 2026-06-16, do not re-run) restored correct single-application ELO/RD for all
   10 teams using git-history pre-match baselines.
+- **Match statistics pipeline and form modifier (2026-06-16)**: added `fetch_match_stats()` to
+  `fetch_results.py` as step 1b in the pipeline. Fetches per-match stats from ESPN summary API
+  (`shotsOnTarget`, `totalShots`, `possessionPct`, `passPct`, `wonCorners`, `saves`,
+  `foulsCommitted`, `yellowCards`, `redCards`) for all completed WC matches. Implements
+  seed-and-complement pattern so `match_stats.json` only grows, never shrinks. D+1 fallback
+  handles late-night COT matches that cross the UTC date boundary (e.g. Australia vs Türkiye,
+  Iran vs New Zealand). Form modifiers applied in `_strength_lambdas()` via `_form_modifiers()`
+  in `generate_index.py`: exponential decay weighting (most recent match = 1.0, each older =
+  0.5x) on shots on target for and against, normalized against tournament average SOT. `atk_mod`
+  and `def_mod` both clamped to `[0.85, 1.15]`. Applied as:
+  `lam1 = lam1 * atk_mod(team1) * def_mod(team2)`. Teams with no completed matches default to
+  neutral `(1.0, 1.0)`. `match_stats.json` added to CI FILES variable so it persists across runs.
 
 ## 8. DASHBOARD STRUCTURE
 

@@ -41,6 +41,14 @@ def step1_fetch_and_update():
     return len(matches)
 
 
+def step1b_fetch_match_stats():
+    print("\n" + "═" * 60)
+    print("STEP 1b — Fetch ESPN match statistics")
+    print("═" * 60)
+    import fetch_results
+    fetch_results.fetch_match_stats()
+
+
 def step2_recalculate_team_strength():
     print("\n" + "═" * 60)
     print("STEP 2 — Recalculate team_strength.json with updated ELO")
@@ -150,6 +158,7 @@ if __name__ == "__main__":
 
     step0_fetch_daily_results()
     n_results = step1_fetch_and_update()
+    step1b_fetch_match_stats()
     step2_recalculate_team_strength()
     step3_run_simulation()
     step4_regenerate_html()

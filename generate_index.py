@@ -17,7 +17,8 @@ TEAM_STRENGTH_FILE = _ROOT / "team_strength.json"
 FIXTURES_FILE      = _ROOT / "fixtures.json"
 LINEUPS_FILE       = _ROOT / "lineups.json"
 MATCH_ADJUSTMENTS_FILE = _ROOT / "match_adjustments.json"
-BRACKET_STATE_FILE = _ROOT / "bracket_state.json"
+MATCH_STATS_FILE       = _ROOT / "match_stats.json"
+BRACKET_STATE_FILE     = _ROOT / "bracket_state.json"
 RESULTS_FILE       = _ROOT / "wc2026_results.json"
 
 PENDING_NOTE = "* Pending FIFA confirmation — highest-ranked confederation proxy used."
@@ -274,6 +275,86 @@ def _load_match_adjustments():
             pass
 
 
+_MATCH_STATS_DATA: dict = {}
+
+
+def _load_match_stats():
+    global _MATCH_STATS_DATA
+    if not _MATCH_STATS_DATA:
+        try:
+            with open(MATCH_STATS_FILE) as f:
+                entries = json.load(f)
+            by_teams: dict = {}
+            for entry in entries:
+                key = frozenset([entry["team1"], entry["team2"]])
+                by_teams.setdefault(key, []).append(entry)
+            for key in by_teams:
+                by_teams[key].sort(key=lambda e: e["date"])
+            _MATCH_STATS_DATA = by_teams
+        except Exception:
+            pass
+
+
+def _form_modifiers(team):
+    """Return (atk_mod, def_mod) based on in-tournament shots-on-target performance.
+
+    atk_mod: team's weighted SOT-for / tournament average — > 1 boosts their lambda.
+    def_mod: team's weighted SOT-against / tournament average — > 1 boosts opponent's lambda.
+    Both clamped to [0.85, 1.15]. Returns (1.0, 1.0) if no data.
+    """
+    if not _MATCH_STATS_DATA:
+        return (1.0, 1.0)
+
+    # Collect (date, sot_for, sot_against) for all this team's matches
+    records = []
+    for entries in _MATCH_STATS_DATA.values():
+        for e in entries:
+            if e["team1"] == team:
+                records.append((
+                    e["date"],
+                    e["team1_stats"].get("shotsOnTarget") or 0,
+                    e["team2_stats"].get("shotsOnTarget") or 0,
+                ))
+            elif e["team2"] == team:
+                records.append((
+                    e["date"],
+                    e["team2_stats"].get("shotsOnTarget") or 0,
+                    e["team1_stats"].get("shotsOnTarget") or 0,
+                ))
+
+    if not records:
+        return (1.0, 1.0)
+
+    records.sort(key=lambda r: r[0])  # oldest first
+    n = len(records)
+
+    # Exponential decay: most recent = 1.0, each older step = 0.5x
+    weights = [0.5 ** (n - 1 - i) for i in range(n)]
+    w_sum = sum(weights)
+    weighted_sot_for     = sum(w * r[1] for w, r in zip(weights, records)) / w_sum
+    weighted_sot_against = sum(w * r[2] for w, r in zip(weights, records)) / w_sum
+
+    # Tournament-wide average SOT (all teams, all matches, no weighting — stable baseline)
+    all_sot = []
+    for entries in _MATCH_STATS_DATA.values():
+        for e in entries:
+            v1 = e["team1_stats"].get("shotsOnTarget")
+            v2 = e["team2_stats"].get("shotsOnTarget")
+            if v1 is not None:
+                all_sot.append(v1)
+            if v2 is not None:
+                all_sot.append(v2)
+
+    if not all_sot or sum(all_sot) == 0:
+        return (1.0, 1.0)
+
+    tournament_avg = sum(all_sot) / len(all_sot)
+
+    atk_mod = max(0.85, min(1.15, weighted_sot_for     / tournament_avg))
+    def_mod = max(0.85, min(1.15, weighted_sot_against / tournament_avg))
+    return (atk_mod, def_mod)
+
+
 def _strength_lambdas(team1, team2):
     """Return (lam1, lam2): lambda = 1.5 * (s_attack/s_defend)^2, capped [0.3, 3.5]."""
     _load_team_strength()
@@ -295,6 +376,16 @@ def _strength_lambdas(team1, team2):
 
     lam1 = max(0.3, min(3.5, lam1))
     lam2 = max(0.3, min(3.5, lam2))
+
+    # In-tournament form modifier: SOT-based attack/defence scaling
+    _load_match_stats()
+    if _MATCH_STATS_DATA:
+        atk1, def1 = _form_modifiers(team1)
+        atk2, def2 = _form_modifiers(team2)
+        lam1 = lam1 * atk1 * def2
+        lam2 = lam2 * atk2 * def1
+        lam1 = max(0.3, min(3.5, lam1))
+        lam2 = max(0.3, min(3.5, lam2))
     return lam1, lam2
 
 

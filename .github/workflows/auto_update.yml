@@ -125,7 +125,7 @@ jobs:
 
       - name: Commit and push if changed
         run: |
-          FILES="wc2026_results.json bracket_state.json elo_ratings.json team_strength.json predictions.json index.html version.txt daily_results.json model_accuracy.json"
+          FILES="wc2026_results.json bracket_state.json elo_ratings.json team_strength.json predictions.json index.html version.txt daily_results.json model_accuracy.json match_stats.json"
           tmpdir=$(mktemp -d)
           for f in $FILES; do
             [ -f "$f" ] && cp "$f" "$tmpdir/$f"

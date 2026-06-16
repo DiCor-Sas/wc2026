@@ -238,6 +238,188 @@ def _fetch_espn_wc_api(check_date):
     return matches
 
 
+def _parse_stat(val):
+    """Convert an ESPN stat displayValue string to int or float."""
+    if val is None:
+        return None
+    try:
+        f = float(val)
+        return int(f) if f == int(f) else round(f, 4)
+    except (ValueError, TypeError):
+        return val
+
+
+def fetch_match_stats():
+    """Fetch per-match statistics from ESPN for all completed WC matches.
+
+    Reads wc2026_results.json, seeds from existing match_stats.json,
+    appends stats for any match not yet cached, writes match_stats.json.
+    Wrapped in try/except — any failure leaves match_stats.json untouched.
+    """
+    try:
+        import requests
+        from datetime import datetime as _dt
+    except ImportError:
+        print("[stats] requests not available — skipping")
+        return
+
+    try:
+        with open(ROOT / "wc2026_results.json") as f:
+            completed = json.load(f)
+        if not isinstance(completed, list):
+            completed = []
+
+        stats_path = ROOT / "match_stats.json"
+        try:
+            with open(stats_path) as f:
+                existing = json.load(f)
+            if not isinstance(existing, list):
+                existing = []
+        except FileNotFoundError:
+            existing = []
+
+        fetched_keys = {frozenset([e["team1"], e["team2"]]) for e in existing}
+
+        needed = [
+            m for m in completed
+            if frozenset([m["team1"], m["team2"]]) not in fetched_keys
+        ]
+        if not needed:
+            print(f"[stats] 0 new matches, {len(existing)} already cached")
+            return
+
+        by_date = {}
+        for m in needed:
+            by_date.setdefault(m["date"], []).append(m)
+
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36"
+            )
+        }
+        STAT_FIELDS = [
+            "shotsOnTarget", "totalShots", "possessionPct", "passPct",
+            "wonCorners", "saves", "foulsCommitted", "yellowCards", "redCards",
+        ]
+        new_entries = []
+
+        for date_str, matches_on_date in sorted(by_date.items()):
+            sb_url = (
+                "https://site.api.espn.com/apis/site/v2/sports/soccer"
+                f"/fifa.world/scoreboard?dates={date_str.replace('-', '')}"
+            )
+            try:
+                r = requests.get(sb_url, headers=headers, timeout=15)
+                sb_data = r.json()
+            except Exception as e:
+                print(f"[stats] ESPN scoreboard failed for {date_str}: {e}")
+                continue
+
+            # Index events by frozenset of normalized team names
+            espn_index = {}
+            for evt in sb_data.get("events", []):
+                comp = evt.get("competitions", [{}])[0]
+                names = frozenset(
+                    _fn(c["team"]["displayName"])
+                    for c in comp.get("competitors", [])
+                    if "team" in c
+                )
+                espn_index[names] = evt["id"]
+
+            # D+1 fallback: late COT matches cross the UTC midnight boundary
+            # (e.g. 22:00 COT = 03:00 UTC next day); query next calendar day
+            # and merge any new events — setdefault keeps original date if both have it
+            unmatched_keys = {
+                frozenset([m["team1"], m["team2"]])
+                for m in matches_on_date
+                if frozenset([m["team1"], m["team2"]]) not in espn_index
+            }
+            if unmatched_keys:
+                from datetime import date as _date, timedelta as _td
+                next_day = (
+                    _date.fromisoformat(date_str) + _td(days=1)
+                ).strftime("%Y%m%d")
+                try:
+                    r2 = requests.get(
+                        "https://site.api.espn.com/apis/site/v2/sports/soccer"
+                        f"/fifa.world/scoreboard?dates={next_day}",
+                        headers=headers, timeout=15,
+                    )
+                    for evt in r2.json().get("events", []):
+                        comp = evt.get("competitions", [{}])[0]
+                        names = frozenset(
+                            _fn(c["team"]["displayName"])
+                            for c in comp.get("competitors", [])
+                            if "team" in c
+                        )
+                        espn_index.setdefault(names, evt["id"])
+                except Exception:
+                    pass  # fallback failure is non-fatal
+
+            for m in matches_on_date:
+                key = frozenset([m["team1"], m["team2"]])
+                event_id = espn_index.get(key)
+                if not event_id:
+                    print(
+                        f"[stats] no ESPN event for "
+                        f"{m['team1']} vs {m['team2']} on {date_str}"
+                    )
+                    continue
+
+                sum_url = (
+                    "https://site.api.espn.com/apis/site/v2/sports/soccer"
+                    f"/fifa.world/summary?event={event_id}"
+                )
+                try:
+                    sr = requests.get(sum_url, headers=headers, timeout=15)
+                    sum_data = sr.json()
+                except Exception as e:
+                    print(f"[stats] ESPN summary failed for event {event_id}: {e}")
+                    continue
+
+                team_stats = {}
+                for t in sum_data.get("boxscore", {}).get("teams", []):
+                    tname = _fn(t.get("team", {}).get("displayName", ""))
+                    raw = {
+                        s["name"]: s["displayValue"]
+                        for s in t.get("statistics", [])
+                    }
+                    team_stats[tname] = {
+                        field: _parse_stat(raw.get(field))
+                        for field in STAT_FIELDS
+                    }
+
+                t1_stats = team_stats.get(m["team1"])
+                t2_stats = team_stats.get(m["team2"])
+                if not t1_stats or not t2_stats:
+                    print(
+                        f"[stats] team name alignment failed for "
+                        f"{m['team1']} vs {m['team2']}"
+                    )
+                    continue
+
+                new_entries.append({
+                    "match": f"{m['team1']} vs {m['team2']}",
+                    "date": m["date"],
+                    "team1": m["team1"],
+                    "team2": m["team2"],
+                    "team1_stats": t1_stats,
+                    "team2_stats": t2_stats,
+                    "fetched_at": _dt.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                })
+
+        all_entries = existing + new_entries
+        with open(stats_path, "w") as f:
+            json.dump(all_entries, f, indent=2)
+
+        print(
+            f"[stats] fetched {len(new_entries)} new match(es), "
+            f"{len(existing)} already cached"
+        )
+
+    except Exception as e:
+        print(f"[stats] match stats fetch failed: {e} — match_stats.json unchanged")
 
 
 def parse_worldcup26ir(data):
