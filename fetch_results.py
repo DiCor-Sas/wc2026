@@ -608,6 +608,14 @@ def _merge_wc_results(sources_results):
                     existing["round"] = m["round"]
                 if existing.get("date") == today_iso and m.get("date") != today_iso:
                     existing["date"] = m["date"]
+                # If existing score is 0-0 and incoming has a non-zero score,
+                # the existing record is likely a prematch placeholder — overwrite.
+                if (existing.get("home_score") == 0
+                        and existing.get("away_score") == 0
+                        and (m.get("home_score", 0) != 0
+                             or m.get("away_score", 0) != 0)):
+                    existing["home_score"] = m["home_score"]
+                    existing["away_score"] = m["away_score"]
     return list(merged.values())
 
 

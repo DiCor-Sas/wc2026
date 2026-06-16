@@ -8,7 +8,16 @@
       "Bash(python3 -m pip install duckdb --quiet)",
       "Bash(python3 run_predictions.py)",
       "Bash(python3 -m pip install numpy scipy --quiet)",
-      "Bash(python3 -m pip install pandas scikit-learn --quiet)"
+      "Bash(python3 -m pip install pandas scikit-learn --quiet)",
+      "Bash(python3 *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(gh workflow *)",
+      "Bash(brew list *)",
+      "Bash(git fetch *)"
     ]
   }
 }
