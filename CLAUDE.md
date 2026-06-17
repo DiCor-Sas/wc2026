@@ -469,6 +469,15 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   and an incoming source reports a non-zero score, the non-zero score
   overwrites the 0-0. Genuine 0-0 results are safe since all sources agree
   and no overwrite triggers.
+- **Form modifier null-stats fix (2026-06-17)**: `_form_modifiers()` used
+  `.get('shotsOnTarget') or 0`, which coerced missing data (`None`, e.g.
+  from a failed ESPN fetch) into a genuine zero, incorrectly penalizing a
+  team's attacking and defensive modifiers to the 0.85 floor even when they
+  had no usable stats. Observed for France/Senegal, whose `match_stats.json`
+  entry had all-null fields. Fixed by skipping any match record where
+  `shotsOnTarget` is `None` for either team, rather than treating it as
+  zero — such teams now correctly fall through to the neutral `(1.0, 1.0)`
+  default when they have no valid stats data.
 
 ## 8. DASHBOARD STRUCTURE
 

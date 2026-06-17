@@ -310,17 +310,17 @@ def _form_modifiers(team):
     for entries in _MATCH_STATS_DATA.values():
         for e in entries:
             if e["team1"] == team:
-                records.append((
-                    e["date"],
-                    e["team1_stats"].get("shotsOnTarget") or 0,
-                    e["team2_stats"].get("shotsOnTarget") or 0,
-                ))
+                sot_for = e["team1_stats"].get("shotsOnTarget")
+                sot_ag  = e["team2_stats"].get("shotsOnTarget")
+                if sot_for is None or sot_ag is None:
+                    continue
+                records.append((e["date"], sot_for, sot_ag))
             elif e["team2"] == team:
-                records.append((
-                    e["date"],
-                    e["team2_stats"].get("shotsOnTarget") or 0,
-                    e["team1_stats"].get("shotsOnTarget") or 0,
-                ))
+                sot_for = e["team2_stats"].get("shotsOnTarget")
+                sot_ag  = e["team1_stats"].get("shotsOnTarget")
+                if sot_for is None or sot_ag is None:
+                    continue
+                records.append((e["date"], sot_for, sot_ag))
 
     if not records:
         return (1.0, 1.0)
