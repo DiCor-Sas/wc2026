@@ -36,7 +36,7 @@ def step1_fetch_and_update():
     print("═" * 60)
     import fetch_results
     matches, source = fetch_results.fetch_results()
-    fetch_results.update_elo_from_results()
+    fetch_results.recompute_wc_elo_from_scratch()
     fetch_results.update_bracket_state()
     return len(matches)
 

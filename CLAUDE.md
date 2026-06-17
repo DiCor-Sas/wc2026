@@ -478,6 +478,27 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `shotsOnTarget` is `None` for either team, rather than treating it as
   zero — such teams now correctly fall through to the neutral `(1.0, 1.0)`
   default when they have no valid stats data.
+- **Stateless WC ELO recomputation (2026-06-17)**: The incremental
+  `wc_applied_keys` approach in `update_elo_from_results()` was structurally
+  vulnerable to CI race conditions — an in-flight pipeline run that checked
+  out stale data before a fix landed would faithfully push its stale output
+  on top of the fix via the fetch-reset-overwrite pattern, silently reverting
+  corrections. This happened three times in one day to the same 10-team ELO
+  double-application bug. Replaced entirely with
+  `recompute_wc_elo_from_scratch()`: every pipeline run now recomputes every
+  WC team's ELO and RD from a frozen pre-tournament baseline
+  (`wc_elo_baseline.json`, extracted once from commit `a0fb45d`, never
+  modified afterward) by replaying all completed WC matches in chronological
+  order (using `fixtures.json` canonical dates) with the same
+  K=40\*decay\_weight and Glicko-1 formulas as before. `wc_applied_keys` is
+  retired entirely for the WC bracket — there is nothing left to corrupt via
+  a race, since the output is a pure function of `wc2026_results.json` plus
+  the frozen baseline. Verified idempotent: running twice in a row with no
+  new matches produces identical output. The daily-friendly ELO system
+  (step0) remains architecturally separate and untouched. Also corrected:
+  Iraq vs Norway score (was intermittently fetched as 1-3 from a mid-match
+  ESPN snapshot; confirmed 1-4 final via ESPN/FIFA/Sky Sports/FOX Sports).
+  ELO unaffected by this correction since both scores represent an Iraq loss.
 
 ## 8. DASHBOARD STRUCTURE
 
@@ -570,3 +591,8 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 - After display/HTML changes, verify with `python3 generate_index.py`.
 - Commit messages: short and descriptive.
 - Owner prefers step-by-step confirmation over large unreviewed batches.
+- GitHub Actions schedule and the external cron job should be paused before
+  pushing any fix to `elo_ratings.json`, `wc2026_results.json`, or any file
+  in the `auto_update.yml` `FILES` list, when a clean uncontested push is
+  required. Re-enable only after confirming `origin/main` matches the
+  expected state.

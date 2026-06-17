@@ -1074,68 +1074,71 @@ def expected_score(elo_a, elo_b):
     return 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 400.0))
 
 
-def update_elo_from_results():
+def recompute_wc_elo_from_scratch():
+    """Stateless WC ELO recomputation from frozen pre-tournament baseline.
+
+    Replays all completed WC matches chronologically from wc_elo_baseline.json,
+    producing deterministic ELO/RD values regardless of pipeline run history
+    or race conditions. Called on every pipeline run; replaces the incremental
+    wc_applied_keys approach entirely.
+    """
     results_path = ROOT / "wc2026_results.json"
     elo_path = ROOT / "elo_ratings.json"
+    baseline_path = ROOT / "wc_elo_baseline.json"
+    fixtures_path = ROOT / "fixtures.json"
 
     with open(results_path) as f:
         matches = json.load(f)
     with open(elo_path) as f:
         elo_data = json.load(f)
-
-    # Load canonical dates from fixtures.json to anchor dedup keys
-    # regardless of scraper-reported dates
-    fixture_dates = {}
-    try:
-        with open(ROOT / "fixtures.json") as f:
-            fixtures = json.load(f)
-        for fx in fixtures:
-            pair = frozenset([fx["home"], fx["away"]])
-            fixture_dates[pair] = fx["date"]
-    except Exception:
-        fixture_dates = {}
+    with open(baseline_path) as f:
+        baseline = json.load(f)
 
     if not matches:
-        print("[elo] No completed matches — ELO unchanged.")
+        print("[elo] No completed WC matches — ELO unchanged.")
         return
 
-    wc_applied_keys = set(elo_data.pop("wc_applied_keys", []))
+    # Canonical date lookup from fixtures.json for chronological sorting
+    fixture_dates = {}
+    try:
+        with open(fixtures_path) as f:
+            for fx in json.load(f):
+                pair = frozenset([fx["home"], fx["away"]])
+                fixture_dates[pair] = fx["date"]
+    except Exception:
+        pass
 
-    # Initialize rd/volatility for any team missing these fields
-    for team, d in elo_data.items():
-        d.setdefault("rd", 200.0)
-        d.setdefault("volatility", 0.06)
-
-    # Build mutable elo dict {team: elo_value}
-    elo = {team: d["elo"] for team, d in elo_data.items()}
-    rd_updates = {}
-
-    new_matches_applied = 0
-
+    # Assign canonical dates and sort chronologically
     for m in matches:
-        t1 = m["team1"]
-        t2 = m["team2"]
-        hs = m["home_score"]
-        as_ = m["away_score"]
-
-        canonical_date = fixture_dates.get(
-            frozenset([m["team1"], m["team2"]]),
-            m["date"]
+        m["_canonical_date"] = fixture_dates.get(
+            frozenset([m["team1"], m["team2"]]), m["date"]
         )
-        match_key = f"{canonical_date}|{m['team1']}|{m['team2']}"
-        if match_key in wc_applied_keys:
-            continue
+    matches_sorted = sorted(matches, key=lambda m: m["_canonical_date"])
 
-        K = 40 * _decay_weight(m.get("date", date.today().isoformat()))
+    # Initialize per-team ELO/RD from frozen baseline
+    elo = {}
+    rd = {}
+    for team, data in baseline.items():
+        if isinstance(data, dict) and "elo" in data:
+            elo[team] = data["elo"]
+            rd[team] = data.get("rd", 200.0)
+
+    # Replay every WC match in chronological order
+    teams_updated = set()
+    for m in matches_sorted:
+        t1, t2 = m["team1"], m["team2"]
+        hs, as_ = m["home_score"], m["away_score"]
+        canonical_date = m["_canonical_date"]
 
         if t1 not in elo or t2 not in elo:
             missing = [t for t in [t1, t2] if t not in elo]
-            print(f"[elo] WARNING: team(s) not in elo_ratings.json: {missing} — skipping")
+            print(f"[elo] WARNING: {missing} not in baseline — skipping")
             continue
 
         score_prediction_accuracy(t1, t2, hs, as_, m.get("date", ""))
-        e1 = elo[t1]
-        e2 = elo[t2]
+
+        e1, e2 = elo[t1], elo[t2]
+        K = 40 * _decay_weight(canonical_date)
         exp1 = expected_score(e1, e2)
         exp2 = 1.0 - exp1
 
@@ -1146,59 +1149,50 @@ def update_elo_from_results():
         else:
             actual1 = actual2 = 0.5
 
-        delta1 = K * (actual1 - exp1)
-        delta2 = K * (actual2 - exp2)
+        elo[t1] = round(e1 + K * (actual1 - exp1), 1)
+        elo[t2] = round(e2 + K * (actual2 - exp2), 1)
 
-        elo[t1] = round(e1 + delta1, 1)
-        elo[t2] = round(e2 + delta2, 1)
-
-        # Glicko-1 RD update — both teams updated symmetrically
+        # Glicko-1 RD update (symmetric, uses pre-match RDs)
         q = _math.log(10) / 400
-        rd1 = elo_data.get(t1, {}).get("rd", 200.0)
-        rd2 = elo_data.get(t2, {}).get("rd", 200.0)
+        rd1, rd2 = rd[t1], rd[t2]
 
-        # Team 1 RD update (uses opponent rd2 as rd_opp)
         g_rd2 = 1 / _math.sqrt(1 + 3 * q**2 * rd2**2 / _math.pi**2)
         E1 = 1 / (1 + 10 ** (-(e1 - e2) / 400))
         d_sq1 = 1 / (q**2 * g_rd2**2 * E1 * (1 - E1))
-        rd1_new = _math.sqrt(1 / (1/rd1**2 + 1/d_sq1))
-        rd1_new = max(30.0, min(350.0, rd1_new))
+        rd[t1] = max(30.0, min(350.0, _math.sqrt(1 / (1 / rd1**2 + 1 / d_sq1))))
 
-        # Team 2 RD update (uses opponent rd1 as rd_opp)
         g_rd1 = 1 / _math.sqrt(1 + 3 * q**2 * rd1**2 / _math.pi**2)
         E2 = 1 / (1 + 10 ** (-(e2 - e1) / 400))
         d_sq2 = 1 / (q**2 * g_rd1**2 * E2 * (1 - E2))
-        rd2_new = _math.sqrt(1 / (1/rd2**2 + 1/d_sq2))
-        rd2_new = max(30.0, min(350.0, rd2_new))
+        rd[t2] = max(30.0, min(350.0, _math.sqrt(1 / (1 / rd2**2 + 1 / d_sq2))))
 
-        rd_updates[t1] = rd1_new
-        rd_updates[t2] = rd2_new
-
+        teams_updated.add(t1)
+        teams_updated.add(t2)
         print(f"[elo] {t1} {hs}-{as_} {t2}  |  "
-              f"{t1}: {e1}→{elo[t1]} ({delta1:+.1f})  "
-              f"{t2}: {e2}→{elo[t2]} ({delta2:+.1f})")
+              f"{t1}: {e1}→{elo[t1]} ({elo[t1]-e1:+.1f})  "
+              f"{t2}: {e2}→{elo[t2]} ({elo[t2]-e2:+.1f})")
 
-        wc_applied_keys.add(match_key)
-        new_matches_applied += 1
+    # Update elo_ratings.json: only teams with WC matches
+    elo_data.pop("wc_applied_keys", None)
 
-    # Write back elo, rd, and volatility together
-    for team in elo_data:
-        if team in elo:
+    drift_warnings = []
+    for team in teams_updated:
+        if team in elo_data:
+            old_elo = elo_data[team].get("elo", 0)
+            if abs(elo[team] - old_elo) > 1.0:
+                drift_warnings.append((team, old_elo, elo[team]))
             elo_data[team]["elo"] = elo[team]
-        if team in rd_updates:
-            elo_data[team]["rd"] = rd_updates[team]
-        if "volatility" not in elo_data[team]:
-            elo_data[team]["volatility"] = 0.06
-
-    elo_data["wc_applied_keys"] = sorted(wc_applied_keys)
+            elo_data[team]["rd"] = rd[team]
 
     with open(elo_path, "w") as f:
         json.dump(elo_data, f, indent=2)
 
-    if new_matches_applied:
-        print(f"[ELO] Updated. Applied keys now: {len(wc_applied_keys)}")
-    else:
-        print("[ELO] No new WC matches to process.")
+    print(f"[elo] Stateless recompute: {len(matches_sorted)} matches replayed, "
+          f"{len(teams_updated)} teams updated.")
+    if drift_warnings:
+        print(f"[elo] Drift corrections (>1 pt):")
+        for team, old, new in sorted(drift_warnings):
+            print(f"  {team}: {old} → {new} ({new-old:+.1f})")
 
 
 # ── TASK 3: Bracket state ──────────────────────────────────────────────────────
