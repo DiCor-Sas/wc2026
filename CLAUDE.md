@@ -499,6 +499,34 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   Iraq vs Norway score (was intermittently fetched as 1-3 from a mid-match
   ESPN snapshot; confirmed 1-4 final via ESPN/FIFA/Sky Sports/FOX Sports).
   ELO unaffected by this correction since both scores represent an Iraq loss.
+- **Knockout stage business rules (2026-06-17, decided ahead of Session 4)**:
+  Two rules established for handling extra time and penalty shootouts, not yet
+  implemented since no knockout match has been played:
+  **(1) ELO scoring** — the score stored in `wc2026_results.json` for a knockout
+  match should be the full final result including extra time goals when
+  applicable (e.g. a 1-1 after 90 that becomes 2-1 after extra time is stored
+  as 2-1 and treated as a normal win/loss by
+  `recompute_wc_elo_from_scratch()`, no special handling needed). Only when a
+  match remains level after extra time and is decided by a penalty shootout
+  does a special rule apply: the shootout winner is recorded as the match
+  winner (`actual=1.0`) and the loser as `actual=0.0`, the same as a
+  regulation win — a shootout win is treated as a full win for ELO purposes,
+  not a half-credit draw, since advancing carries real momentum and
+  psychological value into the next round regardless of the coin-flip nature
+  of penalties. No K-factor damping was added for shootout-decided results;
+  this was discussed and deliberately deferred as a possible future refinement
+  if observed to matter in practice.
+  **(2) Match stats and the form modifier** — ESPN's match stats for matches
+  that go to extra time are expected to report cumulative 120-minute totals
+  rather than 90-minute regulation-only stats (not yet explicitly verified
+  against a real extra-time match). No per-90-minute normalization will be
+  applied to `shotsOnTarget` before it feeds `_form_modifiers()` — extra-time
+  matches are expected to be infrequent (roughly 3-5 of 16 round-of-32
+  matches based on typical knockout rates) and the inflation in shot volume
+  from 30 extra minutes is expected to be modest, well within the existing
+  `[0.85, 1.15]` modifier clamp. This is a deliberate simplification, not an
+  oversight — revisit only if a specific team's modifier looks unrealistically
+  inflated after a genuine extra-time match is observed in `match_stats.json`.
 
 ## 8. DASHBOARD STRUCTURE
 
