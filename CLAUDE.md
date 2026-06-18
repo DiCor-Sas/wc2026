@@ -608,6 +608,24 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   distribution used for win probability, or (c) add a UI note that the two
   metrics are independent (mitigates cause 2). (b) is preferred for
   architectural consistency.
+- **Matchday-2 form-modifier expansion** (target: once every team has played
+  2 group matches, expected around June 19-20): once real prior-match data
+  exists for every team, re-run a leave-one-out backtest to evaluate whether
+  totalShots and/or possessionPct improve prediction accuracy beyond the
+  current shotsOnTarget-only form modifier. Per the 2026-06-18 field analysis,
+  these were the two least-bad candidates among the 9 match_stats.json fields
+  (totalShots r=0.182, possessionPct r=0.214, same-match correlation with
+  goals, n=40 — below the n=40 significance threshold of |r|≈0.31, but the
+  only data available at single-match depth). Only incorporate a field if it
+  beats the SOT-only baseline on real held-out LOO data; do not add fields on
+  a forward-looking promise the way it was deferred today. The standalone
+  ensemble engine (`ensemble.py`) and prequential LOO harness
+  (`backtest_ensemble.py`) built 2026-06-18 are ready to re-run for this — note
+  the 2026-06-18 three-model ensemble (DC + NegBinom + Bivariate Poisson,
+  adaptive Brier weights) backtested as a statistical wash vs the production
+  Skellam baseline (mean Brier 0.6592 vs 0.6590, RPS tied) precisely because
+  LOO neutralized all form inputs on matchday-1 data, and was therefore not
+  wired live.
 
 ## 10. WORKING AGREEMENT
 
