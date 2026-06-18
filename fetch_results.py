@@ -719,8 +719,21 @@ def score_prediction_accuracy(home_team, away_team, home_score, away_score, matc
     if entry is None:
         return  # no Skellam data for this match; nothing to score
 
-    # 3. deduplicate — skip if this (home|away|date) key is already in history
-    scored_key = f"{home_team}|{away_team}|{match_date}"
+    # 3. deduplicate — skip if this (home|away|canonical-date) key is already in
+    #    history. The date is anchored to fixtures.json via frozenset({home, away}),
+    #    NOT the scraper-reported match_date, so a date-shifted scrape can never
+    #    mint a second key for the same match (the same canonical-date anchoring
+    #    used by wc_applied_keys / recompute_wc_elo_from_scratch()). Falls back to
+    #    the scraper date if the pair isn't in fixtures.json (graceful degradation).
+    fixture_dates = {}
+    try:
+        with open(ROOT / "fixtures.json") as f:
+            for fx in json.load(f):
+                fixture_dates[frozenset([fx["home"], fx["away"]])] = fx["date"]
+    except Exception:
+        pass
+    canonical_date = fixture_dates.get(frozenset([home_team, away_team]), match_date)
+    scored_key = f"{home_team}|{away_team}|{canonical_date}"
     if any(e["key"] == scored_key for e in accuracy["history"]):
         return
 
@@ -739,7 +752,7 @@ def score_prediction_accuracy(home_team, away_team, home_score, away_score, matc
     # 5. write — append record, recompute means, save model_accuracy.json
     accuracy["history"].append({
         "key": scored_key,
-        "home": home_team, "away": away_team, "date": match_date,
+        "home": home_team, "away": away_team, "date": canonical_date,
         "home_score": home_score, "away_score": away_score,
         "p_win": p_win, "p_draw": p_draw, "p_loss": p_loss,
         "brier": round(brier, 6), "rps": round(rps, 6),

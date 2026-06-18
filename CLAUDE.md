@@ -527,6 +527,18 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   `[0.85, 1.15]` modifier clamp. This is a deliberate simplification, not an
   oversight — revisit only if a specific team's modifier looks unrealistically
   inflated after a genuine extra-time match is observed in `match_stats.json`.
+- **model_accuracy.json duplicate key fix (2026-06-18)**:
+  `score_prediction_accuracy()` built dedup keys from the scraper-reported
+  `match_date`, the same date-shift vulnerability already fixed for
+  `wc_applied_keys` and ELO. Found 10 stale duplicate entries (34 total, 24
+  real matches) using the same +1-day shifted dates. Cleaned to 24 canonical
+  entries; `mean_brier` and `mean_rps` corrected from 0.778/0.206 (artificially
+  flattered by duplicates) to the honest 0.833/0.225. Fixed root cause by
+  anchoring both the dedup key and the stored date field to fixtures.json
+  canonical dates via `frozenset({home, away})` lookup, mirroring the existing
+  pattern in `recompute_wc_elo_from_scratch()`. No downstream consumers of this
+  file exist (confirmed: not read by `generate_index.py`, `run_predictions.py`,
+  or `notify_telegram.py`), so this was a zero-risk cleanup.
 
 ## 8. DASHBOARD STRUCTURE
 

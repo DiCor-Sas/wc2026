@@ -1,7 +1,7 @@
 {
-  "matches_scored": 34,
-  "mean_brier": 0.778275,
-  "mean_rps": 0.206281,
+  "matches_scored": 24,
+  "mean_brier": 0.832972,
+  "mean_rps": 0.224562,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -56,19 +56,6 @@
       "rps": 0.211802
     },
     {
-      "key": "USA|Paraguay|2026-06-13",
-      "home": "USA",
-      "away": "Paraguay",
-      "date": "2026-06-13",
-      "home_score": 4,
-      "away_score": 1,
-      "p_win": 0.511453,
-      "p_draw": 0.22958,
-      "p_loss": 0.258968,
-      "brier": 0.35845,
-      "rps": 0.152871
-    },
-    {
       "key": "Brazil|Morocco|2026-06-13",
       "home": "Brazil",
       "away": "Morocco",
@@ -93,32 +80,6 @@
       "p_loss": 0.601802,
       "brier": 1.0273,
       "rps": 0.199335
-    },
-    {
-      "key": "Haiti|Scotland|2026-06-14",
-      "home": "Haiti",
-      "away": "Scotland",
-      "date": "2026-06-14",
-      "home_score": 0,
-      "away_score": 0,
-      "p_win": 0.197688,
-      "p_draw": 0.209925,
-      "p_loss": 0.592386,
-      "brier": 1.01422,
-      "rps": 0.195001
-    },
-    {
-      "key": "Australia|T\u00fcrkiye|2026-06-14",
-      "home": "Australia",
-      "away": "T\u00fcrkiye",
-      "date": "2026-06-14",
-      "home_score": 0,
-      "away_score": 0,
-      "p_win": 0.377226,
-      "p_draw": 0.242999,
-      "p_loss": 0.379775,
-      "brier": 0.859579,
-      "rps": 0.143264
     },
     {
       "key": "Australia|T\u00fcrkiye|2026-06-13",
@@ -171,32 +132,6 @@
       "p_loss": 0.369501,
       "brier": 0.859891,
       "rps": 0.14337
-    },
-    {
-      "key": "Ivory Coast|Ecuador|2026-06-15",
-      "home": "Ivory Coast",
-      "away": "Ecuador",
-      "date": "2026-06-15",
-      "home_score": 0,
-      "away_score": 0,
-      "p_win": 0.386514,
-      "p_draw": 0.242947,
-      "p_loss": 0.370539,
-      "brier": 0.859821,
-      "rps": 0.143346
-    },
-    {
-      "key": "Sweden|Tunisia|2026-06-15",
-      "home": "Sweden",
-      "away": "Tunisia",
-      "date": "2026-06-15",
-      "home_score": 0,
-      "away_score": 0,
-      "p_win": 0.427592,
-      "p_draw": 0.24106,
-      "p_loss": 0.331348,
-      "brier": 0.868616,
-      "rps": 0.146313
     },
     {
       "key": "Sweden|Tunisia|2026-06-14",
@@ -264,19 +199,6 @@
       "rps": 0.214071
     },
     {
-      "key": "Iran|New Zealand|2026-06-16",
-      "home": "Iran",
-      "away": "New Zealand",
-      "date": "2026-06-16",
-      "home_score": 0,
-      "away_score": 0,
-      "p_win": 0.623625,
-      "p_draw": 0.200294,
-      "p_loss": 0.176081,
-      "brier": 1.059442,
-      "rps": 0.209956
-    },
-    {
       "key": "France|Senegal|2026-06-16",
       "home": "France",
       "away": "Senegal",
@@ -301,32 +223,6 @@
       "p_loss": 0.549872,
       "brier": 0.303953,
       "rps": 0.127505
-    },
-    {
-      "key": "Argentina|Algeria|2026-06-17",
-      "home": "Argentina",
-      "away": "Algeria",
-      "date": "2026-06-17",
-      "home_score": 3,
-      "away_score": 0,
-      "p_win": 0.724531,
-      "p_draw": 0.161956,
-      "p_loss": 0.113513,
-      "brier": 0.114998,
-      "rps": 0.044384
-    },
-    {
-      "key": "Austria|Jordan|2026-06-17",
-      "home": "Austria",
-      "away": "Jordan",
-      "date": "2026-06-17",
-      "home_score": 3,
-      "away_score": 1,
-      "p_win": 0.630863,
-      "p_draw": 0.197907,
-      "p_loss": 0.17123,
-      "brier": 0.204749,
-      "rps": 0.082791
     },
     {
       "key": "Canada|Bosnia-Herzegovina|2026-06-12",
@@ -392,32 +288,6 @@
       "p_loss": 0.359885,
       "brier": 0.551539,
       "rps": 0.246317
-    },
-    {
-      "key": "England|Croatia|2026-06-18",
-      "home": "England",
-      "away": "Croatia",
-      "date": "2026-06-18",
-      "home_score": 4,
-      "away_score": 2,
-      "p_win": 0.404534,
-      "p_draw": 0.242445,
-      "p_loss": 0.353022,
-      "brier": 0.537984,
-      "rps": 0.239602
-    },
-    {
-      "key": "Ghana|Panama|2026-06-18",
-      "home": "Ghana",
-      "away": "Panama",
-      "date": "2026-06-18",
-      "home_score": 1,
-      "away_score": 0,
-      "p_win": 0.37671,
-      "p_draw": 0.242998,
-      "p_loss": 0.380292,
-      "brier": 0.59216,
-      "rps": 0.266556
     },
     {
       "key": "Ghana|Panama|2026-06-17",
