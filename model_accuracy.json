@@ -1,7 +1,7 @@
 {
-  "matches_scored": 25,
-  "mean_brier": 0.836067,
-  "mean_rps": 0.221993,
+  "matches_scored": 26,
+  "mean_brier": 0.816347,
+  "mean_rps": 0.218704,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -327,6 +327,19 @@
       "p_loss": 0.270193,
       "brier": 0.910346,
       "rps": 0.16035
+    },
+    {
+      "key": "Switzerland|Bosnia-Herzegovina|2026-06-18",
+      "home": "Switzerland",
+      "away": "Bosnia-Herzegovina",
+      "date": "2026-06-18",
+      "home_score": 4,
+      "away_score": 1,
+      "p_win": 0.535803,
+      "p_draw": 0.224502,
+      "p_loss": 0.239696,
+      "brier": 0.323334,
+      "rps": 0.136466
     }
   ]
 }
