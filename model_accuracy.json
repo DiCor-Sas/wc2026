@@ -1,7 +1,7 @@
 {
-  "matches_scored": 30,
-  "mean_brier": 0.82326,
-  "mean_rps": 0.207621,
+  "matches_scored": 31,
+  "mean_brier": 0.814058,
+  "mean_rps": 0.208652,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -392,6 +392,19 @@
       "p_loss": 0.359885,
       "brier": 0.551539,
       "rps": 0.246317
+    },
+    {
+      "key": "England|Croatia|2026-06-18",
+      "home": "England",
+      "away": "Croatia",
+      "date": "2026-06-18",
+      "home_score": 4,
+      "away_score": 2,
+      "p_win": 0.404534,
+      "p_draw": 0.242445,
+      "p_loss": 0.353022,
+      "brier": 0.537984,
+      "rps": 0.239602
     }
   ]
 }
