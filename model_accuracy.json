@@ -1,7 +1,7 @@
 {
-  "matches_scored": 24,
-  "mean_brier": 0.832972,
-  "mean_rps": 0.224562,
+  "matches_scored": 25,
+  "mean_brier": 0.836067,
+  "mean_rps": 0.221993,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -314,6 +314,19 @@
       "p_loss": 0.793445,
       "brier": 0.065391,
       "rps": 0.024288
+    },
+    {
+      "key": "Czechia|South Africa|2026-06-18",
+      "home": "Czechia",
+      "away": "South Africa",
+      "date": "2026-06-18",
+      "home_score": 1,
+      "away_score": 1,
+      "p_win": 0.497691,
+      "p_draw": 0.232116,
+      "p_loss": 0.270193,
+      "brier": 0.910346,
+      "rps": 0.16035
     }
   ]
 }
