@@ -1120,5 +1120,61 @@
     ],
     "key_absences": [],
     "fetched_at": "2026-06-19T19:00:49Z"
+  },
+  {
+    "match": "Scotland vs Morocco",
+    "date": "2026-06-19",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Angus Gunn",
+      "Andrew Robertson",
+      "Kieran Tierney",
+      "Grant Hanley",
+      "Jack Hendry",
+      "Nathan Patterson",
+      "John McGinn",
+      "Ryan Christie",
+      "Lewis Ferguson",
+      "Scott McTominay",
+      "Che Adams"
+    ],
+    "away_xi": [
+      "Bono",
+      "Noussair Mazraoui",
+      "Issa Diop",
+      "Chadi Riad",
+      "Achraf Hakimi",
+      "Neil El Aynaoui",
+      "Ayyoub Bouaddi",
+      "Bilal El Khannouss",
+      "Azzedine Ounahi",
+      "Brahim Diaz",
+      "Ismael Saibari"
+    ],
+    "key_absences": [
+      {
+        "player": "Youssef En-Nesyri",
+        "team": "Morocco",
+        "penalty": 0.124,
+        "base_lambda": 1.62,
+        "adjusted_lambda": 1.42
+      },
+      {
+        "player": "Soufiane Rahimi",
+        "team": "Morocco",
+        "penalty": 0.107,
+        "base_lambda": 1.62,
+        "adjusted_lambda": 1.45
+      },
+      {
+        "player": "Hakim Ziyech",
+        "team": "Morocco",
+        "penalty": 0.101,
+        "base_lambda": 1.62,
+        "adjusted_lambda": 1.46
+      }
+    ],
+    "fetched_at": "2026-06-19T20:49:21Z"
   }
 ]
