@@ -638,6 +638,32 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   Skellam baseline (mean Brier 0.6592 vs 0.6590, RPS tied) precisely because
   LOO neutralized all form inputs on matchday-1 data, and was therefore not
   wired live.
+- **Form-field LOO comparison, first result (2026-06-19)**:
+  `backtest_form_fields.py` tested SOT-only vs
+  SOT+totalShots+possessionPct (averaged, each individually clamped
+  [0.85,1.15]) on the 4 matches where LOO-active prior data existed
+  (Czechia-South Africa, Switzerland-Bosnia, Canada-Qatar,
+  Mexico-South Korea). Result: 3-field edges out SOT-only on both
+  Brier (0.5997→0.5967) and RPS (0.1690→0.1676) across all 28
+  matches, but 3 of 4 active matches drove the gain and all 3 were
+  blowout wins by the stronger team (Switzerland 4-1, Canada 6-0,
+  Mexico 1-0 vs a weakened South Korea) — exactly the cases where the
+  strength confound flagged on 2026-06-19 applies most directly.
+  Czechia vs South Africa (a 1-1 draw, no blowout) moved the other
+  way (+0.0192 worse). With n=4 active matches, structurally 2-4
+  independent units once the coupled-pair issue is accounted for, this
+  is a genuine first signal but indistinguishable from 'the modifier
+  is just re-encoding team strength ELO already knows' rather than
+  capturing real form deviation. Combination methodology caveat from
+  the same date still applies: averaging may dilute SOT's stronger
+  signal with two noisier ones, so a negative OR a positive result at
+  this sample size should not be over-read in either direction.
+  Re-check trigger: re-run once every team has completed matchday 2
+  (~12 LOO-active matches instead of 4). Only draft a production
+  change if the 3-field delta survives at that depth and is not
+  carried entirely by blowout/strength-confounded matches — a single
+  upset or close result could flip or erase today's directional
+  result entirely.
 
 ## 10. WORKING AGREEMENT
 
