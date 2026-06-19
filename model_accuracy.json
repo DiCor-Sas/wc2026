@@ -1,7 +1,7 @@
 {
-  "matches_scored": 26,
-  "mean_brier": 0.816347,
-  "mean_rps": 0.218704,
+  "matches_scored": 27,
+  "mean_brier": 0.800718,
+  "mean_rps": 0.216895,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -340,6 +340,19 @@
       "p_loss": 0.239696,
       "brier": 0.323334,
       "rps": 0.136466
+    },
+    {
+      "key": "Canada|Qatar|2026-06-18",
+      "home": "Canada",
+      "away": "Qatar",
+      "date": "2026-06-18",
+      "home_score": 6,
+      "away_score": 0,
+      "p_win": 0.487886,
+      "p_draw": 0.233773,
+      "p_loss": 0.278341,
+      "brier": 0.394384,
+      "rps": 0.169867
     }
   ]
 }
