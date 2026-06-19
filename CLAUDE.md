@@ -576,6 +576,54 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
 
 ## 9. PENDING ITEMS AND ROADMAP
 
+### PRE-DEPARTURE CHECK-IN PLAN (target: 2026-06-24 or 2026-06-25, before Diego's absence 2026-06-26 through 2026-07-01, covering group stage matchday 3 and Round of 32 kickoff 2026-06-28)
+
+Target date: June 24-25, 2026 (before Diego departs June 26 - July 1, covering group stage matchday 3 and Round of 32 kickoff June 28)
+
+GOAL: One final, decisive go/no-go session on the form-field expansion (SOT+totalShots+possessionPct) and the ensemble engine, using whatever real data exists by then. No new analysis design, no new hyperparameters, no new ideas — just running what already exists (backtest_ensemble.py, backtest_form_fields.py) against the larger dataset and applying these pre-agreed criteria.
+
+═══════════════════════════════════════════
+DECISION 1 — Form-field expansion (SOT-only vs SOT+totalShots+possessionPct)
+═══════════════════════════════════════════
+
+Re-run backtest_form_fields.py with whatever LOO-active match count exists by June 24-25 (expected ~24+ if matchday 2 completed everywhere by then, possibly more if some groups reach matchday 3 early).
+
+GO criteria (all three must hold):
+1. 3-field beats SOT-only on BOTH Brier and RPS across the full match set (not just active matches).
+2. The improvement is NOT carried entirely by blowout/lopsided-score matches. Specifically: manually inspect the LOO-active per-match table and confirm at least one close match (decided by 1 goal or a draw) also favors the 3-field arm, not only landslide wins.
+3. At least 12 LOO-active matches exist (the original ~matchday-2-everywhere threshold). Fewer than that, the result is still too thin to trust regardless of direction.
+
+NO-GO (default): if any criterion fails, keep SOT-only in production. Do not deploy on a "probably fine" read — the cost of an unvalidated change going live during Diego's absence outweighs the upside of a marginal improvement.
+
+If GO: implement via the same show-before-implement process as every other change this week (propose code, review, compile check, sanity test, commit while automations briefly paused, verify on origin/main, re-enable automations). This must happen IN this same June 24-25 session, not deferred — no partial deployments left mid-flight before a 5-day absence.
+
+═══════════════════════════════════════════
+DECISION 2 — Three-model ensemble (DC + NegBin + BivPois vs current Skellam)
+═══════════════════════════════════════════
+
+Re-run backtest_ensemble.py with the same updated dataset.
+
+GO criteria (both must hold):
+1. Ensemble beats baseline Skellam on BOTH Brier and RPS, using whichever form-modifier decision was just made in Decision 1 (SOT-only or 3-field, whichever is now in production).
+2. loo_active is high enough that the result isn't dominated by the ~40% of matches still on matchday 1 with neutral modifiers (use judgment here — if most matches are still neutral, the ensemble has little room to differentiate and a wash is expected regardless of true merit).
+
+NO-GO (default): keep current Skellam-only path. Same reasoning as Decision 1 — do not deploy unvalidated.
+
+═══════════════════════════════════════════
+DECISION 3 — Departure readiness check (regardless of Decisions 1 & 2 outcomes)
+═══════════════════════════════════════════
+
+Before Diego leaves, confirm explicitly:
+1. GitHub Actions schedule is ENABLED and running normally (not left paused from any prior debugging session).
+2. cron-job.org external backup is ENABLED.
+3. No uncommitted local changes sitting on disk unpushed — origin/main reflects the true final state.
+4. CLAUDE.md is fully up to date with whatever was decided in Decisions 1 and 2, so if Diego or anyone else opens a session during the trip, the documentation explains the current state without needing this conversation's context.
+5. Quick sanity check: trigger one manual pipeline run, confirm Step 1 and Step 2 output look normal (matches fetched, ELO recomputed cleanly, no errors), same verification pattern used throughout this week.
+
+If anything in Decision 3 fails, fix it before ending the session — this is the actual safety net for the 5-day unattended period, independent of which model is running underneath it.
+
+---
+
 - **June 18 (Session 4)**: three-model ensemble — Dixon-Coles + Negative
   Binomial + Bivariate Poisson, combined with adaptive Brier-score weights.
   Requires **8+ real match results** with clean ELO inputs (C1 fixed
