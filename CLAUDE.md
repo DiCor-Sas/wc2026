@@ -712,6 +712,25 @@ If anything in Decision 3 fails, fix it before ending the session — this is th
   carried entirely by blowout/strength-confounded matches — a single
   upset or close result could flip or erase today's directional
   result entirely.
+- **Form-field and ensemble progress check (2026-06-20)**: re-ran both backtests
+  with 33 matches (up from 28) and 9 LOO-active matches (up from 4 on June 19,
+  18 teams now have 2+ matches). Ensemble (DC+NB+BVP): still NO-GO, third
+  consecutive wash across June 18/19/20 — Brier 0.5735→0.5738, RPS
+  0.1727→0.1728 (both marginally worse), weights stayed near-uniform (DC=0.331,
+  NB=0.334, BVP=0.334) all three times. This is now a stable pattern, not
+  noise — the ensemble shows no sign of differentiating from baseline Skellam at
+  current data depth. Form-field (SOT-only vs SOT+totalShots+possessionPct):
+  NO-GO but trending positive — passes Criterion 1 (beats SOT-only on both
+  Brier 0.5735→0.5649 and RPS 0.1727→0.1687) and partially passes Criterion 2
+  (close matches split 2-2 rather than being swept by blowouts; notably Scotland
+  0-1 Morocco, a non-blowout away win, favors the 3-field arm with a large
+  Brier improvement 0.5901→0.3495 — the first close-match result that doesn't
+  look like pure strength-confound). Still fails Criterion 3 (9 of 12 required
+  LOO-active matches). Expected to clear 12 by ~June 21-22 per the fixture
+  schedule, meaning the June 24-25 pre-departure check-in should have a
+  genuinely decisive sample rather than being borderline. This is the most
+  credible signal yet for the 3-field expansion — worth prioritizing in the
+  June 24-25 session even if the ensemble result stays negative.
 
 ## 10. WORKING AGREEMENT
 
