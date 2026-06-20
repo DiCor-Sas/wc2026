@@ -1,7 +1,7 @@
 {
-  "matches_scored": 29,
-  "mean_brier": 0.779954,
-  "mean_rps": 0.217161,
+  "matches_scored": 30,
+  "mean_brier": 0.767283,
+  "mean_rps": 0.215671,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -379,6 +379,19 @@
       "p_loss": 0.346011,
       "brier": 0.524196,
       "rps": 0.232794
+    },
+    {
+      "key": "Scotland|Morocco|2026-06-19",
+      "home": "Scotland",
+      "away": "Morocco",
+      "date": "2026-06-19",
+      "home_score": 0,
+      "away_score": 1,
+      "p_win": 0.281243,
+      "p_draw": 0.234326,
+      "p_loss": 0.484431,
+      "brier": 0.399818,
+      "rps": 0.172455
     }
   ]
 }
