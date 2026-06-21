@@ -1,7 +1,7 @@
 {
-  "matches_scored": 34,
-  "mean_brier": 0.741562,
-  "mean_rps": 0.210841,
+  "matches_scored": 35,
+  "mean_brier": 0.758389,
+  "mean_rps": 0.213329,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -444,6 +444,19 @@
       "p_loss": 0.117433,
       "brier": 1.22621,
       "rps": 0.264414
+    },
+    {
+      "key": "Ecuador|Cura\u00e7ao|2026-06-20",
+      "home": "Ecuador",
+      "away": "Cura\u00e7ao",
+      "date": "2026-06-20",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.766563,
+      "p_draw": 0.14285,
+      "p_loss": 0.090587,
+      "brier": 1.330531,
+      "rps": 0.297912
     }
   ]
 }
