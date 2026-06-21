@@ -1499,5 +1499,63 @@
     ],
     "key_absences": [],
     "fetched_at": "2026-06-21T19:00:45Z"
+  },
+  {
+    "match": "Uruguay vs Cabo Verde",
+    "date": "2026-06-21",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Fernando Muslera",
+      "Juan Sanabria",
+      "Sebastian Caceres",
+      "Mathias Olivera",
+      "Guillermo Varela",
+      "Rodrigo Bentancur",
+      "Federico Valverde",
+      "Manuel Ugarte",
+      "Maxi Araujo",
+      "Agustin Canobbio",
+      "Federico Vinas",
+      "Ronald Araujo",
+      "Giorgian De Arrascaeta"
+    ],
+    "away_xi": [
+      "Vozinha",
+      "Sidny Lopes Cabral",
+      "Pico",
+      "Diney",
+      "Steven Moreira",
+      "Kevin Pina",
+      "Garry Rodrigues",
+      "Jamiro Monteiro",
+      "Telmo Arcanjo",
+      "Ryan Mendes",
+      "Gilson Benchimol"
+    ],
+    "key_absences": [
+      {
+        "player": "L. Pino",
+        "team": "Uruguay",
+        "penalty": 0.16,
+        "base_lambda": 1.59,
+        "adjusted_lambda": 1.34
+      },
+      {
+        "player": "Darwin Nunez",
+        "team": "Uruguay",
+        "penalty": 0.12,
+        "base_lambda": 1.59,
+        "adjusted_lambda": 1.4
+      },
+      {
+        "player": "Facundo Pellistri",
+        "team": "Uruguay",
+        "penalty": 0.078,
+        "base_lambda": 1.59,
+        "adjusted_lambda": 1.47
+      }
+    ],
+    "fetched_at": "2026-06-21T20:56:50Z"
   }
 ]
