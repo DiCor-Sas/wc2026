@@ -752,6 +752,32 @@ If anything in Decision 3 fails, fix it before ending the session — this is th
   genuinely decisive sample rather than being borderline. This is the most
   credible signal yet for the 3-field expansion — worth prioritizing in the
   June 24-25 session even if the ensemble result stays negative.
+- **Form-field and ensemble progress check, first criteria pass (2026-06-21)**:
+  re-ran both backtests with 36 matches and 12 LOO-active matches (up from 9 on
+  June 20, all 24 teams with 2+ matches counted). Ensemble (DC+NB+BVP): 4th
+  consecutive wash (June 18/19/20/21) — Brier 0.5795 vs 0.5795 (tied), RPS
+  0.1738 vs 0.1739 (marginally worse), weights stayed near-uniform a 4th time.
+  This is now a settled, stable pattern — the ensemble shows no sign of
+  differentiating from baseline Skellam at any data depth reached so far.
+  Expectation for June 24-25 is this stays NO-GO. Form-field (SOT-only vs
+  SOT+totalShots+possessionPct): all three pre-agreed criteria pass for the first
+  time — Criterion 1 (beats SOT-only on both Brier 0.5795→0.5746 and RPS
+  0.1738→0.1712), Criterion 3 (12 of 12 required LOO-active matches), and
+  Criterion 2 (close/1-goal/draw matches are 3-3, not swept by blowouts —
+  satisfies "at least one close match favors 3-field"). IMPORTANT CAVEAT — do not
+  treat this as a clean GO: the result is significantly carried by one outlier,
+  Scotland 0-1 Morocco (Brier 0.5901→0.3495, a −0.2406 improvement, by far the
+  largest single delta of any match). Excluding this one match, the remaining 5
+  close matches roughly cancel out (2 favor 3-field modestly, 3 favor SOT-only,
+  including Czechia-South Africa, Türkiye-Paraguay, and Ecuador-Curaçao all going
+  the other way). The criteria were met honestly per the pre-agreed numeric
+  thresholds, but the underlying signal should be considered fragile, not yet a
+  confident GO. Required before deployment: re-run at the June 24-25 check-in
+  with the larger expected sample (~18+ LOO-active matches). If the advantage
+  holds or strengthens once diluted by more data, that's a credible deploy. If it
+  collapses back toward parity once Scotland-Morocco's weight is diluted by more
+  matches, the honest call is NO-GO despite today's technical pass — do not deploy
+  on outlier-driven signal just because a numeric threshold was crossed.
 
 ## 10. WORKING AGREEMENT
 
