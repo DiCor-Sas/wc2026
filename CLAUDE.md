@@ -539,6 +539,27 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   pattern in `recompute_wc_elo_from_scratch()`. No downstream consumers of this
   file exist (confirmed: not read by `generate_index.py`, `run_predictions.py`,
   or `notify_telegram.py`), so this was a zero-risk cleanup.
+- **Seed score-pinning bug (2026-06-21)**: the seed-and-complement pattern
+  (2026-06-16, built to prevent history loss on source outages) had no
+  mechanism to correct a stale non-zero score once written — the existing 0-0
+  overwrite rule only handled the placeholder-score case. Germany 1-1 Ivory
+  Coast was ingested as a stale in-progress score (real final: 2-1, Undav 68'
+  and 90+4', Kessié 30') and was silently re-pinned on every subsequent run
+  because, although both ESPN and worldcup26.ir independently agreed on 2-1,
+  the seed's incorrect 1-1 always won the merge regardless. Confirmed isolated
+  to this one match (35 others cross-checked clean against worldcup26.ir's full
+  history). Fixed by replacing the 0-0-only rule with a general Option-B rule in
+  `_merge_wc_results()`: past kickoff+110min (canonical fixtures.json time), if
+  every live source responding in the current run unanimously agrees on a score
+  differing from the seed, the live score overwrites; disagreement or an
+  unsettled match keeps the seed unchanged (conservative default, avoids
+  re-introducing the mid-match-snapshot false positives fixed on
+  2026-06-16/17). The function signature changed to
+  `_merge_wc_results(seed_matches, live_batches)` to separate the
+  history-preserving seed from the live sources that may correct it. This is the
+  4th distinct score-ingestion incident this tournament (France/Senegal and
+  Iraq/Norway were live-source mid-match snapshots; this one was the seed itself
+  permanently pinning a stale value with no self-correction path).
 
 ## 8. DASHBOARD STRUCTURE
 

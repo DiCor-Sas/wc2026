@@ -589,33 +589,89 @@ def _parse_skysports_wc():
     return matches
 
 
-def _merge_wc_results(sources_results):
-    """Merge completed-match lists from multiple sources, deduplicating on the
-    unordered (team1, team2) pair. Later sources fill in missing group/round
-    metadata and replace a "today" date fallback with a real event date."""
+def _merge_wc_results(seed_matches, live_batches):
+    """Merge completed-match lists, deduplicating on the unordered (team1, team2) pair.
+
+    The seed (existing wc2026_results.json) establishes base records so history is
+    never lost when live sources are unreachable. Live sources fill in missing
+    group/round metadata and replace a "today" date fallback with a real event date.
+
+    Score-correction rule (Option B, 2026-06-21): a match's stored (seed) score is
+    overwritten by the live sources only when BOTH hold:
+      (a) the match is definitively over — now >= kickoff + 110 min, using the
+          canonical fixtures.json kickoff (the same 110-min gate the per-source
+          fetchers already apply); and
+      (b) every live source that reports the match in THIS run agrees on a single
+          score that differs from the seed.
+    If the responding live sources disagree, or the match is not past the 110-min
+    mark, or its kickoff is unknown (e.g. an unresolved knockout placeholder), the
+    seed score is kept unchanged. This corrects a stale in-progress score locked
+    into the seed (e.g. Germany 1-1 -> 2-1) without letting a lone mid-match
+    snapshot or a pre-final reading overwrite a settled result. The previous
+    0-0-only overwrite is a strict subset of this rule and is no longer a special
+    case."""
     today_iso = date.today().isoformat()
+
+    # Canonical kickoff times for the 110-min "definitely over" gate.
+    fixture_kickoffs = {}
+    try:
+        with open(ROOT / "fixtures.json") as _f:
+            for fx in json.load(_f):
+                pair = frozenset([_fn(fx["home"]), _fn(fx["away"])])
+                ko_naive = datetime.strptime(
+                    f"{fx['date']} {fx['time']}", "%Y-%m-%d %H:%M"
+                )
+                fixture_kickoffs[pair] = ko_naive.replace(
+                    tzinfo=timezone(timedelta(hours=-5))
+                )
+    except Exception:
+        pass
+
+    # 1. Seed establishes base records (history preservation).
     merged = {}
-    for batch in sources_results:
+    for m in seed_matches:
+        key = tuple(sorted([m.get("team1", ""), m.get("team2", "")]))
+        if key not in merged:
+            merged[key] = dict(m)
+
+    # 2. Fold in live sources: backfill metadata/date, and collect every live score
+    #    reported for each match key (oriented to the merged record's team order)
+    #    so we can test unanimity in step 3.
+    live_scores = {}  # key -> list of (home_score, away_score) aligned to merged team1/team2
+    for batch in live_batches:
         for m in batch:
             key = tuple(sorted([m.get("team1", ""), m.get("team2", "")]))
             if key not in merged:
-                merged[key] = dict(m)
-            else:
-                existing = merged[key]
-                if not existing.get("group") and m.get("group"):
-                    existing["group"] = m["group"]
-                if not existing.get("round") and m.get("round"):
-                    existing["round"] = m["round"]
-                if existing.get("date") == today_iso and m.get("date") != today_iso:
-                    existing["date"] = m["date"]
-                # If existing score is 0-0 and incoming has a non-zero score,
-                # the existing record is likely a prematch placeholder — overwrite.
-                if (existing.get("home_score") == 0
-                        and existing.get("away_score") == 0
-                        and (m.get("home_score", 0) != 0
-                             or m.get("away_score", 0) != 0)):
-                    existing["home_score"] = m["home_score"]
-                    existing["away_score"] = m["away_score"]
+                merged[key] = dict(m)          # new match, not in seed: first live source wins base
+            existing = merged[key]
+            if not existing.get("group") and m.get("group"):
+                existing["group"] = m["group"]
+            if not existing.get("round") and m.get("round"):
+                existing["round"] = m["round"]
+            if existing.get("date") == today_iso and m.get("date") != today_iso:
+                existing["date"] = m["date"]
+            # align this live source's score to the merged record's team1/team2 order
+            score_by_team = {m.get("team1", ""): m.get("home_score"),
+                             m.get("team2", ""): m.get("away_score")}
+            live_scores.setdefault(key, []).append(
+                (score_by_team.get(existing["team1"]), score_by_team.get(existing["team2"]))
+            )
+
+    # 3. Option-B score correction: overwrite the seed score only if the match is
+    #    definitively over AND every responding live source agrees on a differing score.
+    now_utc = datetime.now(timezone.utc)
+    for key, scores in live_scores.items():
+        existing = merged[key]
+        ko = fixture_kickoffs.get(frozenset([existing["team1"], existing["team2"]]))
+        if ko is None or now_utc < ko + timedelta(minutes=110):
+            continue                            # not definitively over (or unknown kickoff): keep seed
+        valid = [s for s in scores if s[0] is not None and s[1] is not None]
+        if not valid or len(set(valid)) != 1:
+            continue                            # no usable score, or sources disagree: keep seed
+        live_score = valid[0]
+        if (existing.get("home_score"), existing.get("away_score")) != live_score:
+            existing["home_score"], existing["away_score"] = live_score
+
     return list(merged.values())
 
 
@@ -674,8 +730,8 @@ def fetch_results():
     except Exception:
         seed_matches = []
 
-    # Merge all sources
-    matches = _merge_wc_results([seed_matches, sky_matches, espn_matches, wc26_matches])
+    # Merge: seed preserves history; live sources enrich + can correct a stale score
+    matches = _merge_wc_results(seed_matches, [sky_matches, espn_matches, wc26_matches])
     matches.sort(key=lambda m: m.get("date", ""))
 
     sources_used = []
