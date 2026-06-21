@@ -1,7 +1,7 @@
 {
-  "matches_scored": 35,
-  "mean_brier": 0.758389,
-  "mean_rps": 0.213329,
+  "matches_scored": 36,
+  "mean_brier": 0.751723,
+  "mean_rps": 0.21379,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -457,6 +457,19 @@
       "p_loss": 0.090587,
       "brier": 1.330531,
       "rps": 0.297912
+    },
+    {
+      "key": "Tunisia|Japan|2026-06-20",
+      "home": "Tunisia",
+      "away": "Japan",
+      "date": "2026-06-20",
+      "home_score": 0,
+      "away_score": 4,
+      "p_win": 0.34306,
+      "p_draw": 0.241916,
+      "p_loss": 0.415024,
+      "brier": 0.51841,
+      "rps": 0.229944
     }
   ]
 }
