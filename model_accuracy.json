@@ -1,7 +1,7 @@
 {
-  "matches_scored": 40,
-  "mean_brier": 0.734221,
-  "mean_rps": 0.205033,
+  "matches_scored": 41,
+  "mean_brier": 0.719749,
+  "mean_rps": 0.201379,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -522,6 +522,19 @@
       "p_loss": 0.584498,
       "brier": 0.259002,
       "rps": 0.10699
+    },
+    {
+      "key": "Argentina|Austria|2026-06-22",
+      "home": "Argentina",
+      "away": "Austria",
+      "date": "2026-06-22",
+      "home_score": 2,
+      "away_score": 0,
+      "p_win": 0.69457,
+      "p_draw": 0.174462,
+      "p_loss": 0.130969,
+      "brier": 0.140877,
+      "rps": 0.05522
     }
   ]
 }
