@@ -1,7 +1,7 @@
 {
-  "matches_scored": 38,
-  "mean_brier": 0.739997,
-  "mean_rps": 0.208089,
+  "matches_scored": 39,
+  "mean_brier": 0.746406,
+  "mean_rps": 0.207546,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -496,6 +496,19 @@
       "p_loss": 0.198785,
       "brier": 1.012121,
       "rps": 0.194305
+    },
+    {
+      "key": "Uruguay|Cabo Verde|2026-06-21",
+      "home": "Uruguay",
+      "away": "Cabo Verde",
+      "date": "2026-06-21",
+      "home_score": 2,
+      "away_score": 2,
+      "p_win": 0.573905,
+      "p_draw": 0.215101,
+      "p_loss": 0.210994,
+      "brier": 0.989952,
+      "rps": 0.186943
     }
   ]
 }
