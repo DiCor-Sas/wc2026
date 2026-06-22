@@ -175,6 +175,63 @@ def run_arm(fields, results, fixtures, strength, stats):
                 loo_active=loo_active, rows=rows, weights=weights)
 
 
+def sensitivity_report(a, b):
+    """LEAVE-ONE-ACTIVE-MATCH-OUT sensitivity on the whole-set delta.
+
+    The whole-set delta (positive = 3-field better) is driven entirely by the
+    LOO-active matches: every inactive match scores identically under both arms
+    and contributes exactly 0 to the delta. So neutralizing one active match
+    ('as if its modifier had never differed from neutral') simply drops that
+    match's (SOT - 3field) difference from the delta, keeping the whole-set
+    denominator N. If neutralizing any single match flips the sign of EITHER
+    metric's delta, the headline result rests on that one match — and since the
+    GO rule needs both metrics positive, a flip on either breaks the verdict.
+    """
+    N = len(a['base_b'])
+    full_db = (sum(a['base_b']) - sum(b['base_b'])) / N   # + => 3-field better
+    full_dr = (sum(a['base_r']) - sum(b['base_r'])) / N
+
+    # each active match's share of the full delta (label, brier_share, rps_share)
+    active = []
+    for i, (dt, t1, t2, res, *_rest, act_a) in enumerate(a['rows']):
+        if not (act_a or b['rows'][i][8]):
+            continue
+        cb = (a['base_b'][i] - b['base_b'][i]) / N
+        cr = (a['base_r'][i] - b['base_r'][i]) / N
+        active.append((f"{t1} v {t2}", cb, cr))
+
+    excl_b = [(name, full_db - cb) for name, cb, _ in active]
+    excl_r = [(name, full_dr - cr) for name, _, cr in active]
+
+    bmin, bmax = min(excl_b, key=lambda x: x[1]), max(excl_b, key=lambda x: x[1])
+    rmin, rmax = min(excl_r, key=lambda x: x[1]), max(excl_r, key=lambda x: x[1])
+
+    print("\n" + "-" * 72)
+    print("SINGLE-MATCH SENSITIVITY (leave-one-active-match-out on whole-set delta)")
+    print(f"  Full delta (positive = 3-field better): "
+          f"Brier {full_db:+.4f}  RPS {full_dr:+.4f}  over {len(active)} active matches")
+    print(f"  Brier delta range: min {bmin[1]:+.4f} (drop {bmin[0]})  ..  "
+          f"max {bmax[1]:+.4f} (drop {bmax[0]})")
+    print(f"  RPS   delta range: min {rmin[1]:+.4f} (drop {rmin[0]})  ..  "
+          f"max {rmax[1]:+.4f} (drop {rmax[0]})")
+
+    # a flip = full delta and some single-exclusion delta have opposite signs
+    flippers = []
+    for name, ed in excl_b:
+        if (full_db >= 0) != (ed >= 0):
+            flippers.append(f"{name} (Brier)")
+    for name, ed in excl_r:
+        if (full_dr >= 0) != (ed >= 0):
+            flippers.append(f"{name} (RPS)")
+
+    if flippers:
+        print(f"  FRAGILE: result sign depends on a single match "
+              f"({'; '.join(flippers)}) — do not treat as a stable signal.")
+    else:
+        print("  STABLE: result sign survives removal of any single match — "
+              "this is a more credible signal.")
+
+
 def main():
     results  = _load("wc2026_results.json")
     fixtures = _load("fixtures.json")
@@ -203,7 +260,7 @@ def main():
                   f"{bb_a:8.4f} {bb_b:8.4f} {d:+8.4f}")
 
     print("-" * 72)
-    print("WHOLE-SET MEANS (all 28 matches):")
+    print(f"WHOLE-SET MEANS (all {len(a['rows'])} matches):")
     print(f"  Baseline Skellam  SOT-only : Brier={mean(a['base_b']):.4f}  RPS={mean(a['base_r']):.4f}")
     print(f"  Baseline Skellam  3-field  : Brier={mean(b['base_b']):.4f}  RPS={mean(b['base_r']):.4f}")
     db = mean(a['base_b']) - mean(b['base_b'])
@@ -218,6 +275,8 @@ def main():
           "3-field does NOT beat SOT-only — keep production SOT-only modifier")
     print("\nNOTE: only the LOO-active matches above can differ between arms; with",
           f"{a['loo_active']} active of {len(a['rows'])}, this is directional, not conclusive.")
+
+    sensitivity_report(a, b)
 
 
 if __name__ == "__main__":
