@@ -778,6 +778,22 @@ If anything in Decision 3 fails, fix it before ending the session — this is th
   collapses back toward parity once Scotland-Morocco's weight is diluted by more
   matches, the honest call is NO-GO despite today's technical pass — do not deploy
   on outlier-driven signal just because a numeric threshold was crossed.
+- **Single-match sensitivity check added to backtest_form_fields.py
+  (2026-06-22)**: every run now automatically reports a
+  leave-one-active-match-out sensitivity analysis at the end of the output —
+  for each LOO-active match, it recomputes the whole-set Brier/RPS delta with
+  that one match's contribution removed, and flags FRAGILE if removing any
+  single match flips the sign of either metric (meaning the result depends
+  entirely on that one match), or STABLE if the sign survives every
+  single-match removal. Built specifically because the June 21/22 form-field
+  "pass" was driven almost entirely by one match (Scotland-Morocco) and this
+  wasn't caught by the original 3 numeric criteria — this check makes that kind
+  of fragility visible automatically in every future report, no manual digging
+  required. At time of writing (June 22), the form-field result is correctly
+  flagged FRAGILE (both Brier and RPS sign-flip on Scotland-Morocco's removal),
+  meaning despite passing the original 3 criteria, the honest current verdict is
+  NO-GO. Future GO decisions for this feature should require STABLE, not just a
+  passing aggregate delta.
 
 ## 10. WORKING AGREEMENT
 
