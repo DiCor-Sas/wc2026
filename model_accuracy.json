@@ -1,7 +1,7 @@
 {
-  "matches_scored": 41,
-  "mean_brier": 0.719749,
-  "mean_rps": 0.201379,
+  "matches_scored": 42,
+  "mean_brier": 0.704065,
+  "mean_rps": 0.197121,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -535,6 +535,19 @@
       "p_loss": 0.130969,
       "brier": 0.140877,
       "rps": 0.05522
+    },
+    {
+      "key": "France|Iraq|2026-06-22",
+      "home": "France",
+      "away": "Iraq",
+      "date": "2026-06-22",
+      "home_score": 1,
+      "away_score": 0,
+      "p_win": 0.800606,
+      "p_draw": 0.126043,
+      "p_loss": 0.073351,
+      "brier": 0.061025,
+      "rps": 0.022569
     }
   ]
 }
