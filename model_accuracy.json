@@ -1,7 +1,7 @@
 {
-  "matches_scored": 39,
-  "mean_brier": 0.746406,
-  "mean_rps": 0.207546,
+  "matches_scored": 40,
+  "mean_brier": 0.734221,
+  "mean_rps": 0.205033,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -509,6 +509,19 @@
       "p_loss": 0.210994,
       "brier": 0.989952,
       "rps": 0.186943
+    },
+    {
+      "key": "New Zealand|Egypt|2026-06-21",
+      "home": "New Zealand",
+      "away": "Egypt",
+      "date": "2026-06-21",
+      "home_score": 1,
+      "away_score": 3,
+      "p_win": 0.203319,
+      "p_draw": 0.212183,
+      "p_loss": 0.584498,
+      "brier": 0.259002,
+      "rps": 0.10699
     }
   ]
 }
