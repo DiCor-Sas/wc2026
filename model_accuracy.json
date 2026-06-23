@@ -1,7 +1,7 @@
 {
-  "matches_scored": 43,
-  "mean_brier": 0.700831,
-  "mean_rps": 0.198421,
+  "matches_scored": 44,
+  "mean_brier": 0.690375,
+  "mean_rps": 0.196156,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -561,6 +561,19 @@
       "p_loss": 0.366686,
       "brier": 0.565023,
       "rps": 0.253016
+    },
+    {
+      "key": "Jordan|Algeria|2026-06-22",
+      "home": "Jordan",
+      "away": "Algeria",
+      "date": "2026-06-22",
+      "home_score": 1,
+      "away_score": 2,
+      "p_win": 0.192681,
+      "p_draw": 0.207833,
+      "p_loss": 0.599486,
+      "brier": 0.240732,
+      "rps": 0.098769
     }
   ]
 }
