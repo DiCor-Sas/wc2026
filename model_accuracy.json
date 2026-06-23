@@ -1,7 +1,7 @@
 {
-  "matches_scored": 45,
-  "mean_brier": 0.676096,
-  "mean_rps": 0.192185,
+  "matches_scored": 46,
+  "mean_brier": 0.689048,
+  "mean_rps": 0.194075,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -587,6 +587,19 @@
       "p_loss": 0.062232,
       "brier": 0.047827,
       "rps": 0.017435
+    },
+    {
+      "key": "England|Ghana|2026-06-23",
+      "home": "England",
+      "away": "Ghana",
+      "date": "2026-06-23",
+      "home_score": 0,
+      "away_score": 0,
+      "p_win": 0.739767,
+      "p_draw": 0.15524,
+      "p_loss": 0.104993,
+      "brier": 1.271898,
+      "rps": 0.279139
     }
   ]
 }
