@@ -2014,5 +2014,118 @@
     ],
     "key_absences": [],
     "fetched_at": "2026-06-24T19:00:56Z"
+  },
+  {
+    "match": "Scotland vs Brazil",
+    "date": "2026-06-24",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Angus Gunn",
+      "Andrew Robertson",
+      "Jack Hendry",
+      "Scott McKenna",
+      "Nathan Patterson",
+      "John McGinn",
+      "Kenny McLean",
+      "Lewis Ferguson",
+      "Scott McTominay",
+      "Ben Gannon Doak",
+      "Lawrence Shankland"
+    ],
+    "away_xi": [
+      "Alisson",
+      "Douglas",
+      "Gabriel",
+      "Marquinhos",
+      "Danilo",
+      "Casemiro",
+      "Bruno Guimaraes",
+      "Vinicius Junior",
+      "Lucas Paqueta",
+      "Rayan",
+      "Matheus Cunha",
+      "Raphinha"
+    ],
+    "key_absences": [
+      {
+        "player": "Endrick",
+        "team": "Brazil",
+        "penalty": 0.175,
+        "base_lambda": 2.16,
+        "adjusted_lambda": 1.78
+      },
+      {
+        "player": "Vin\u00edcius J\u00fanior",
+        "team": "Brazil",
+        "penalty": 0.074,
+        "base_lambda": 2.16,
+        "adjusted_lambda": 2.0
+      },
+      {
+        "player": "Rodrygo",
+        "team": "Brazil",
+        "penalty": 0.051,
+        "base_lambda": 2.16,
+        "adjusted_lambda": 2.05
+      }
+    ],
+    "fetched_at": "2026-06-24T21:00:51Z"
+  },
+  {
+    "match": "Morocco vs Haiti",
+    "date": "2026-06-24",
+    "kickoff_cot": "",
+    "source": "rotowire",
+    "home_xi": [
+      "Bono",
+      "Anass Salah-Eddine",
+      "Redouane Halhal",
+      "Chadi Riad",
+      "Achraf Hakimi",
+      "Sofyan Amrabat",
+      "Neil El Aynaoui",
+      "Bilal El Khannouss",
+      "Ismael Saibari",
+      "Brahim Diaz",
+      "Ayoub El Kaabi"
+    ],
+    "away_xi": [
+      "Johnny Placide",
+      "Martin Experience",
+      "Hannes Delcroix",
+      "Ricardo Ade",
+      "Jean-Kevin Duverne",
+      "Ruben Providence",
+      "Danley Jean Jacques",
+      "Jean-Ricner Bellegarde",
+      "Josue Casimir",
+      "Wilson Isidor",
+      "Lenny Joseph"
+    ],
+    "key_absences": [
+      {
+        "player": "Youssef En-Nesyri",
+        "team": "Morocco",
+        "penalty": 0.124,
+        "base_lambda": 1.63,
+        "adjusted_lambda": 1.43
+      },
+      {
+        "player": "Soufiane Rahimi",
+        "team": "Morocco",
+        "penalty": 0.107,
+        "base_lambda": 1.63,
+        "adjusted_lambda": 1.46
+      },
+      {
+        "player": "Hakim Ziyech",
+        "team": "Morocco",
+        "penalty": 0.101,
+        "base_lambda": 1.63,
+        "adjusted_lambda": 1.47
+      }
+    ],
+    "fetched_at": "2026-06-24T21:00:51Z"
   }
 ]
