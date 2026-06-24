@@ -1,7 +1,7 @@
 {
-  "matches_scored": 47,
-  "mean_brier": 0.676813,
-  "mean_rps": 0.190882,
+  "matches_scored": 48,
+  "mean_brier": 0.664557,
+  "mean_rps": 0.187603,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -613,6 +613,19 @@
       "p_loss": 0.725719,
       "brier": 0.114026,
       "rps": 0.043981
+    },
+    {
+      "key": "Colombia|Congo DR|2026-06-23",
+      "home": "Colombia",
+      "away": "Congo DR",
+      "date": "2026-06-23",
+      "home_score": 1,
+      "away_score": 0,
+      "p_win": 0.758977,
+      "p_draw": 0.146433,
+      "p_loss": 0.09459,
+      "brier": 0.088482,
+      "rps": 0.03352
     }
   ]
 }
