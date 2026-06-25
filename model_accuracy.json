@@ -1,7 +1,7 @@
 {
-  "matches_scored": 54,
-  "mean_brier": 0.634722,
-  "mean_rps": 0.186184,
+  "matches_scored": 56,
+  "mean_brier": 0.638015,
+  "mean_rps": 0.192132,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -704,6 +704,32 @@
       "p_loss": 0.514913,
       "brier": 0.870794,
       "rps": 0.409199
+    },
+    {
+      "key": "Cura\u00e7ao|Ivory Coast|2026-06-25",
+      "home": "Cura\u00e7ao",
+      "away": "Ivory Coast",
+      "date": "2026-06-25",
+      "home_score": 0,
+      "away_score": 2,
+      "p_win": 0.085551,
+      "p_draw": 0.13818,
+      "p_loss": 0.776269,
+      "brier": 0.076468,
+      "rps": 0.028687
+    },
+    {
+      "key": "Ecuador|Germany|2026-06-25",
+      "home": "Ecuador",
+      "away": "Germany",
+      "date": "2026-06-25",
+      "home_score": 2,
+      "away_score": 1,
+      "p_win": 0.103813,
+      "p_draw": 0.154277,
+      "p_loss": 0.74191,
+      "brier": 1.377383,
+      "rps": 0.676791
     }
   ]
 }
