@@ -794,6 +794,34 @@ If anything in Decision 3 fails, fix it before ending the session — this is th
   meaning despite passing the original 3 criteria, the honest current verdict is
   NO-GO. Future GO decisions for this feature should require STABLE, not just a
   passing aggregate delta.
+- **Pre-departure check-in, both decisions NO-GO (2026-06-25)**: ran the
+  June 24-25 §9 pre-departure go/no-go on 54 matches (30 LOO-active, up from
+  12 on June 21). DECISION 1 (form-field SOT-only vs
+  SOT+totalShots+possessionPct): **NO-GO**. All 3 numeric criteria technically
+  pass, but the aggregate advantage *collapsed* from +0.0049 Brier on June 21
+  to +0.0004 Brier / +0.0004 RPS now, and the single-match sensitivity check
+  still reports **FRAGILE** — Scotland-Morocco remains the sole load-bearing
+  match (dropping it flips the whole-set Brier delta to −0.0041, i.e. SOT-only
+  wins). The added matchday-2/3 data did not dilute Scotland-Morocco's
+  dominance; it shrank the aggregate to near-zero while leaving the sign
+  dependent on that one match. Per the 2026-06-22 rule (GO requires STABLE, not
+  just passing numeric criteria), the honest verdict is NO-GO — the signal is
+  weaker and more clearly outlier-driven than on June 21, not stronger.
+  DECISION 2 (ensemble DC+NB+BVP vs Skellam): **NO-GO**, 6th consecutive wash
+  (June 18/19/20/21/25) — Brier 0.5201 vs 0.5203, RPS 0.1580 vs 0.1582 (both
+  marginally worse), weights still near-uniform (dc=0.331, nb=0.334,
+  bvp=0.334). Settled pattern; no differentiation at any data depth reached.
+  Production stays Skellam + SOT-only form modifier — nothing wired live.
+  DECISION 3 (departure readiness): **GREEN**. Automation healthy (clean
+  auto-commits every ~15-30 min through 15:31 UTC), working tree clean
+  (no production files dirty), local == origin/main. Manual pipeline sanity
+  check run as Steps 0-2 in an isolated copy (zero production impact): all 3
+  WC sources used, 54 matches, stateless ELO recompute replayed 54 matches /
+  48 teams with **0 teams differing from the committed elo_ratings.json**
+  (deterministic, no drift). Two items left for Diego to eyeball before
+  departure: confirm cron-job.org backup is enabled on its dashboard, and
+  optionally fire one production workflow_dispatch from his phone via
+  MANUAL_TRIGGER.md (local `gh` CLI is not installed).
 
 ## 10. WORKING AGREEMENT
 
