@@ -1,7 +1,7 @@
 {
-  "matches_scored": 56,
-  "mean_brier": 0.638015,
-  "mean_rps": 0.192132,
+  "matches_scored": 58,
+  "mean_brier": 0.632875,
+  "mean_rps": 0.188765,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -730,6 +730,32 @@
       "p_loss": 0.74191,
       "brier": 1.377383,
       "rps": 0.676791
+    },
+    {
+      "key": "Japan|Sweden|2026-06-25",
+      "home": "Japan",
+      "away": "Sweden",
+      "date": "2026-06-25",
+      "home_score": 1,
+      "away_score": 1,
+      "p_win": 0.36404,
+      "p_draw": 0.242823,
+      "p_loss": 0.393137,
+      "brier": 0.860399,
+      "rps": 0.143541
+    },
+    {
+      "key": "Tunisia|Netherlands|2026-06-25",
+      "home": "Tunisia",
+      "away": "Netherlands",
+      "date": "2026-06-25",
+      "home_score": 1,
+      "away_score": 3,
+      "p_win": 0.115244,
+      "p_draw": 0.163269,
+      "p_loss": 0.721486,
+      "brier": 0.117508,
+      "rps": 0.045425
     }
   ]
 }
