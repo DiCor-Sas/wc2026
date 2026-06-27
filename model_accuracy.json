@@ -1,7 +1,7 @@
 {
   "matches_scored": 66,
-  "mean_brier": 0.611846,
-  "mean_rps": 0.183088,
+  "mean_brier": 0.61716,
+  "mean_rps": 0.181832,
   "history": [
     {
       "key": "Mexico|South Africa|2026-06-11",
@@ -836,6 +836,19 @@
       "rps": 0.14361
     },
     {
+      "key": "Egypt|Iran|2026-06-26",
+      "home": "Egypt",
+      "away": "Iran",
+      "date": "2026-06-26",
+      "home_score": 1,
+      "away_score": 1,
+      "p_win": 0.341079,
+      "p_draw": 0.241789,
+      "p_loss": 0.417132,
+      "brier": 0.865218,
+      "rps": 0.145167
+    },
+    {
       "key": "New Zealand|Belgium|2026-06-26",
       "home": "New Zealand",
       "away": "Belgium",
@@ -847,19 +860,6 @@
       "p_loss": 0.809547,
       "brier": 0.055782,
       "rps": 0.020518
-    },
-    {
-      "key": "Egypt|Iran|2026-06-26",
-      "home": "Egypt",
-      "away": "Iran",
-      "date": "2026-06-26",
-      "home_score": 1,
-      "away_score": 2,
-      "p_win": 0.341079,
-      "p_draw": 0.241789,
-      "p_loss": 0.417132,
-      "brier": 0.514532,
-      "rps": 0.228035
     }
   ]
 }
