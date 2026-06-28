@@ -255,13 +255,13 @@
     "slot": "Group J 1st",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.0738,
+    "probability": 0.0682,
     "qualified_via": "Group J 1st (projected)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 7.4%",
+      "label": "PROJECTED 6.8%",
       "style": "muted"
     }
   },
@@ -269,7 +269,7 @@
     "slot": "Group J 2nd",
     "status": "PROJECTED",
     "team": "Austria",
-    "probability": 0.0217,
+    "probability": 0.0224,
     "qualified_via": "Group J 2nd (projected)",
     "result": "",
     "display": {
@@ -281,30 +281,30 @@
   },
   "Group K 1st": {
     "slot": "Group K 1st",
-    "status": "PROJECTED",
-    "team": "Portugal",
-    "probability": 0.0421,
-    "qualified_via": "Group K 1st (projected)",
-    "result": "",
+    "status": "CONFIRMED",
+    "team": "Colombia",
+    "probability": 1.0,
+    "qualified_via": "Group K 1st",
+    "result": "P3 Pts7 GD+3 GF4",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 4.2%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "Group K 2nd": {
     "slot": "Group K 2nd",
-    "status": "PROJECTED",
-    "team": "Colombia",
-    "probability": 0.0315,
-    "qualified_via": "Group K 2nd (projected)",
-    "result": "",
+    "status": "CONFIRMED",
+    "team": "Portugal",
+    "probability": 1.0,
+    "qualified_via": "Group K 2nd",
+    "result": "P3 Pts5 GD+5 GF6",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 3.1%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "Group L 1st": {
@@ -339,27 +339,27 @@
     "slot": "3rd Place Best 1",
     "status": "PROJECTED",
     "team": "Norway",
-    "probability": 0.0245,
+    "probability": 0.024,
     "qualified_via": "Best 3rd projected (Group I)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 2.5%",
+      "label": "PROJECTED 2.4%",
       "style": "muted"
     }
   },
   "3rd Place Best 2": {
     "slot": "3rd Place Best 2",
     "status": "PROJECTED",
-    "team": "Scotland",
-    "probability": 0.0141,
-    "qualified_via": "Best 3rd projected (Group C)",
+    "team": "T\u00fcrkiye",
+    "probability": 0.0126,
+    "qualified_via": "Best 3rd projected (Group D)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 1.4%",
+      "label": "PROJECTED 1.3%",
       "style": "muted"
     }
   },
@@ -367,22 +367,22 @@
     "slot": "3rd Place Best 3",
     "status": "PROJECTED",
     "team": "Japan",
-    "probability": 0.0139,
+    "probability": 0.0122,
     "qualified_via": "Best 3rd projected (Group F)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 1.4%",
+      "label": "PROJECTED 1.2%",
       "style": "muted"
     }
   },
   "3rd Place Best 4": {
     "slot": "3rd Place Best 4",
     "status": "PROJECTED",
-    "team": "Australia",
-    "probability": 0.012,
-    "qualified_via": "Best 3rd projected (Group D)",
+    "team": "Scotland",
+    "probability": 0.0118,
+    "qualified_via": "Best 3rd projected (Group C)",
     "result": "",
     "display": {
       "color": "projected",
@@ -395,13 +395,13 @@
     "slot": "3rd Place Best 5",
     "status": "PROJECTED",
     "team": "Czechia",
-    "probability": 0.0119,
+    "probability": 0.0104,
     "qualified_via": "Best 3rd projected (Group A)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 1.2%",
+      "label": "PROJECTED 1.0%",
       "style": "muted"
     }
   },
@@ -409,7 +409,7 @@
     "slot": "3rd Place Best 6",
     "status": "PROJECTED",
     "team": "Algeria",
-    "probability": 0.0099,
+    "probability": 0.0098,
     "qualified_via": "Best 3rd projected (Group J)",
     "result": "",
     "display": {
@@ -423,27 +423,27 @@
     "slot": "3rd Place Best 7",
     "status": "PROJECTED",
     "team": "Egypt",
-    "probability": 0.0068,
+    "probability": 0.0057,
     "qualified_via": "Best 3rd projected (Group G)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 0.7%",
+      "label": "PROJECTED 0.6%",
       "style": "muted"
     }
   },
   "3rd Place Best 8": {
     "slot": "3rd Place Best 8",
     "status": "PROJECTED",
-    "team": "Ghana",
-    "probability": 0.0066,
-    "qualified_via": "Best 3rd projected (Group L)",
+    "team": "Ecuador",
+    "probability": 0.0052,
+    "qualified_via": "Best 3rd projected (Group E)",
     "result": "",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 0.7%",
+      "label": "PROJECTED 0.5%",
       "style": "muted"
     }
   },
@@ -451,13 +451,13 @@
     "slot": "R32 M73",
     "status": "PROJECTED",
     "team": "South Korea",
-    "probability": 0.1593,
+    "probability": 0.1664,
     "qualified_via": "2nd-A vs 2nd-B",
-    "result": "South Korea 1-1 Canada (15.93%)",
+    "result": "South Korea 3-1 Canada (16.64%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 15.9%",
+      "label": "PROJECTED 16.6%",
       "style": "muted"
     }
   },
@@ -465,13 +465,13 @@
     "slot": "R32 M74",
     "status": "PROJECTED",
     "team": "Germany",
-    "probability": 0.4957,
+    "probability": 0.4905,
     "qualified_via": "1st-E vs 3rd (A/B/C/D/F)",
-    "result": "Germany 4-1 Czechia (49.57%)",
+    "result": "Germany 1-2 Czechia (49.05%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 49.6%",
+      "label": "PROJECTED 49.0%",
       "style": "muted"
     }
   },
@@ -479,13 +479,13 @@
     "slot": "R32 M75",
     "status": "PROJECTED",
     "team": "Netherlands",
-    "probability": 0.4445,
+    "probability": 0.4436,
     "qualified_via": "1st-F vs 2nd-C",
-    "result": "Netherlands 0-2 Morocco (44.45%)",
+    "result": "Netherlands 5-0 Morocco (44.36%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 44.5%",
+      "label": "PROJECTED 44.4%",
       "style": "muted"
     }
   },
@@ -493,51 +493,9 @@
     "slot": "R32 M76",
     "status": "PROJECTED",
     "team": "Brazil",
-    "probability": 0.3313,
+    "probability": 0.3426,
     "qualified_via": "1st-C vs 2nd-F",
-    "result": "Brazil 4-2 Sweden (33.13%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 33.1%",
-      "style": "muted"
-    }
-  },
-  "R32 M77": {
-    "slot": "R32 M77",
-    "status": "PROJECTED",
-    "team": "France",
-    "probability": 0.4102,
-    "qualified_via": "1st-I vs 3rd (C/D/F/G/H)",
-    "result": "France 1-0 Scotland (41.02%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 41.0%",
-      "style": "muted"
-    }
-  },
-  "R32 M78": {
-    "slot": "R32 M78",
-    "status": "PROJECTED",
-    "team": "Norway",
-    "probability": 0.2057,
-    "qualified_via": "2nd-E vs 2nd-I",
-    "result": "Norway 1-2 Ivory Coast (20.57%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 20.6%",
-      "style": "muted"
-    }
-  },
-  "R32 M79": {
-    "slot": "R32 M79",
-    "status": "PROJECTED",
-    "team": "Mexico",
-    "probability": 0.3431,
-    "qualified_via": "1st-A vs 3rd (C/E/F/H/I)",
-    "result": "Mexico 3-3 Ecuador (34.31%)",
+    "result": "Brazil 2-0 Sweden (34.26%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -545,55 +503,27 @@
       "style": "muted"
     }
   },
-  "R32 M80": {
-    "slot": "R32 M80",
+  "R32 M77": {
+    "slot": "R32 M77",
     "status": "PROJECTED",
-    "team": "England",
-    "probability": 0.3129,
-    "qualified_via": "1st-L vs 3rd (E/H/I/J/K)",
-    "result": "England 1-2 Croatia (31.29%)",
+    "team": "France",
+    "probability": 0.4133,
+    "qualified_via": "1st-I vs 3rd (C/D/F/G/H)",
+    "result": "France 2-0 Scotland (41.33%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 31.3%",
+      "label": "PROJECTED 41.3%",
       "style": "muted"
     }
   },
-  "R32 M81": {
-    "slot": "R32 M81",
+  "R32 M78": {
+    "slot": "R32 M78",
     "status": "PROJECTED",
-    "team": "USA",
-    "probability": 0.2842,
-    "qualified_via": "1st-D vs 3rd (B/E/F/I/J)",
-    "result": "USA 2-3 T\u00fcrkiye (28.42%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 28.4%",
-      "style": "muted"
-    }
-  },
-  "R32 M82": {
-    "slot": "R32 M82",
-    "status": "PROJECTED",
-    "team": "Belgium",
-    "probability": 0.3379,
-    "qualified_via": "1st-G vs 3rd (A/E/H/I/J)",
-    "result": "Belgium 2-1 Egypt (33.79%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 33.8%",
-      "style": "muted"
-    }
-  },
-  "R32 M83": {
-    "slot": "R32 M83",
-    "status": "PROJECTED",
-    "team": "Colombia",
-    "probability": 0.1978,
-    "qualified_via": "2nd-K vs 2nd-L",
-    "result": "Colombia 0-2 Ghana (19.78%)",
+    "team": "Senegal",
+    "probability": 0.1979,
+    "qualified_via": "2nd-E vs 2nd-I",
+    "result": "Senegal 3-1 Ivory Coast (19.79%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -601,17 +531,87 @@
       "style": "muted"
     }
   },
+  "R32 M79": {
+    "slot": "R32 M79",
+    "status": "PROJECTED",
+    "team": "Mexico",
+    "probability": 0.347,
+    "qualified_via": "1st-A vs 3rd (C/E/F/H/I)",
+    "result": "Mexico 2-1 Ecuador (34.7%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 34.7%",
+      "style": "muted"
+    }
+  },
+  "R32 M80": {
+    "slot": "R32 M80",
+    "status": "PROJECTED",
+    "team": "England",
+    "probability": 0.3054,
+    "qualified_via": "1st-L vs 3rd (E/H/I/J/K)",
+    "result": "England 0-3 Croatia (30.54%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 30.5%",
+      "style": "muted"
+    }
+  },
+  "R32 M81": {
+    "slot": "R32 M81",
+    "status": "PROJECTED",
+    "team": "USA",
+    "probability": 0.2877,
+    "qualified_via": "1st-D vs 3rd (B/E/F/I/J)",
+    "result": "USA 0-1 T\u00fcrkiye (28.77%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 28.8%",
+      "style": "muted"
+    }
+  },
+  "R32 M82": {
+    "slot": "R32 M82",
+    "status": "PROJECTED",
+    "team": "Belgium",
+    "probability": 0.3326,
+    "qualified_via": "1st-G vs 3rd (A/E/H/I/J)",
+    "result": "Belgium 4-1 Egypt (33.26%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 33.3%",
+      "style": "muted"
+    }
+  },
+  "R32 M83": {
+    "slot": "R32 M83",
+    "status": "PROJECTED",
+    "team": "Colombia",
+    "probability": 0.2019,
+    "qualified_via": "2nd-K vs 2nd-L",
+    "result": "Colombia 6-1 Ghana (20.19%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 20.2%",
+      "style": "muted"
+    }
+  },
   "R32 M84": {
     "slot": "R32 M84",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.5066,
+    "probability": 0.5087,
     "qualified_via": "1st-H vs 2nd-J",
-    "result": "Spain 4-1 Austria (50.66%)",
+    "result": "Spain 2-0 Austria (50.87%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 50.7%",
+      "label": "PROJECTED 50.9%",
       "style": "muted"
     }
   },
@@ -619,13 +619,13 @@
     "slot": "R32 M85",
     "status": "PROJECTED",
     "team": "Switzerland",
-    "probability": 0.279,
+    "probability": 0.2819,
     "qualified_via": "1st-B vs 3rd (E/F/G/I/J)",
-    "result": "Switzerland 5-0 Bosnia-Herzegovina (27.9%)",
+    "result": "Switzerland 5-1 Bosnia-Herzegovina (28.19%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 27.9%",
+      "label": "PROJECTED 28.2%",
       "style": "muted"
     }
   },
@@ -633,13 +633,13 @@
     "slot": "R32 M86",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.4761,
+    "probability": 0.4812,
     "qualified_via": "1st-J vs 2nd-H",
-    "result": "Argentina 1-0 Uruguay (47.61%)",
+    "result": "Argentina 3-0 Uruguay (48.12%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 47.6%",
+      "label": "PROJECTED 48.1%",
       "style": "muted"
     }
   },
@@ -647,27 +647,27 @@
     "slot": "R32 M87",
     "status": "PROJECTED",
     "team": "Portugal",
-    "probability": 0.3759,
+    "probability": 0.3804,
     "qualified_via": "1st-K vs 3rd (D/E/I/J/L)",
-    "result": "Portugal 2-0 Panama (37.59%)",
+    "result": "Portugal 2-0 Panama (38.04%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 37.6%",
+      "label": "PROJECTED 38.0%",
       "style": "muted"
     }
   },
   "R32 M88": {
     "slot": "R32 M88",
     "status": "PROJECTED",
-    "team": "Iran",
-    "probability": 0.1479,
+    "team": "Australia",
+    "probability": 0.15,
     "qualified_via": "2nd-D vs 2nd-G",
-    "result": "Iran 1-2 Australia (14.79%)",
+    "result": "Australia 0-1 Iran (15.0%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 14.8%",
+      "label": "PROJECTED 15.0%",
       "style": "muted"
     }
   },
@@ -675,13 +675,13 @@
     "slot": "R16 M89",
     "status": "PROJECTED",
     "team": "Germany",
-    "probability": 0.2633,
+    "probability": 0.2592,
     "qualified_via": "Round of 16",
-    "result": "Germany 2-3 France (26.33%)",
+    "result": "Germany 0-4 France (25.92%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 26.3%",
+      "label": "PROJECTED 25.9%",
       "style": "muted"
     }
   },
@@ -689,13 +689,13 @@
     "slot": "R16 M90",
     "status": "PROJECTED",
     "team": "Netherlands",
-    "probability": 0.3284,
+    "probability": 0.3249,
     "qualified_via": "Round of 16",
-    "result": "Netherlands 0-0 Mexico (32.84%)",
+    "result": "Netherlands 3-2 Mexico (32.49%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 32.8%",
+      "label": "PROJECTED 32.5%",
       "style": "muted"
     }
   },
@@ -703,13 +703,13 @@
     "slot": "R16 M91",
     "status": "PROJECTED",
     "team": "Brazil",
-    "probability": 0.2126,
+    "probability": 0.2203,
     "qualified_via": "Round of 16",
-    "result": "Brazil 2-1 Norway (21.26%)",
+    "result": "Brazil 3-0 Senegal (22.03%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 21.3%",
+      "label": "PROJECTED 22.0%",
       "style": "muted"
     }
   },
@@ -717,37 +717,9 @@
     "slot": "R16 M92",
     "status": "PROJECTED",
     "team": "England",
-    "probability": 0.1883,
+    "probability": 0.18,
     "qualified_via": "Round of 16",
-    "result": "England 0-1 Mexico (18.83%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 18.8%",
-      "style": "muted"
-    }
-  },
-  "R16 M93": {
-    "slot": "R16 M93",
-    "status": "PROJECTED",
-    "team": "Spain",
-    "probability": 0.3464,
-    "qualified_via": "Round of 16",
-    "result": "Spain 0-1 Croatia (34.64%)",
-    "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 34.6%",
-      "style": "muted"
-    }
-  },
-  "R16 M94": {
-    "slot": "R16 M94",
-    "status": "PROJECTED",
-    "team": "USA",
-    "probability": 0.1804,
-    "qualified_via": "Round of 16",
-    "result": "USA 2-3 Belgium (18.04%)",
+    "result": "England 1-2 Mexico (18.0%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -755,17 +727,45 @@
       "style": "muted"
     }
   },
+  "R16 M93": {
+    "slot": "R16 M93",
+    "status": "PROJECTED",
+    "team": "Spain",
+    "probability": 0.3514,
+    "qualified_via": "Round of 16",
+    "result": "Spain 2-0 Croatia (35.14%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 35.1%",
+      "style": "muted"
+    }
+  },
+  "R16 M94": {
+    "slot": "R16 M94",
+    "status": "PROJECTED",
+    "team": "USA",
+    "probability": 0.183,
+    "qualified_via": "Round of 16",
+    "result": "USA 0-2 Belgium (18.3%)",
+    "display": {
+      "color": "projected",
+      "icon": "~",
+      "label": "PROJECTED 18.3%",
+      "style": "muted"
+    }
+  },
   "R16 M95": {
     "slot": "R16 M95",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.3462,
+    "probability": 0.3451,
     "qualified_via": "Round of 16",
-    "result": "Argentina 6-1 Uruguay (34.62%)",
+    "result": "Argentina 3-1 USA (34.51%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 34.6%",
+      "label": "PROJECTED 34.5%",
       "style": "muted"
     }
   },
@@ -775,7 +775,7 @@
     "team": "Portugal",
     "probability": 0.2602,
     "qualified_via": "Round of 16",
-    "result": "Portugal 2-3 Colombia (26.02%)",
+    "result": "Portugal 2-0 Colombia (26.02%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -787,9 +787,9 @@
     "slot": "QF M97",
     "status": "PROJECTED",
     "team": "Netherlands",
-    "probability": 0.1753,
+    "probability": 0.1752,
     "qualified_via": "Quarter-final",
-    "result": "Netherlands 2-0 Germany (17.53%)",
+    "result": "Netherlands 1-0 Germany (17.52%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -801,13 +801,13 @@
     "slot": "QF M98",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.248,
+    "probability": 0.2503,
     "qualified_via": "Quarter-final",
-    "result": "Spain 2-1 USA (24.8%)",
+    "result": "Spain 1-2 USA (25.03%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 24.8%",
+      "label": "PROJECTED 25.0%",
       "style": "muted"
     }
   },
@@ -815,13 +815,13 @@
     "slot": "QF M99",
     "status": "PROJECTED",
     "team": "Brazil",
-    "probability": 0.1158,
+    "probability": 0.1269,
     "qualified_via": "Quarter-final",
-    "result": "Brazil 2-4 England (11.58%)",
+    "result": "Brazil 2-2 England (12.69%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 11.6%",
+      "label": "PROJECTED 12.7%",
       "style": "muted"
     }
   },
@@ -829,13 +829,13 @@
     "slot": "QF M100",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.2226,
+    "probability": 0.2175,
     "qualified_via": "Quarter-final",
-    "result": "Argentina 0-1 Portugal (22.26%)",
+    "result": "Argentina 1-0 Portugal (21.75%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 22.3%",
+      "label": "PROJECTED 21.8%",
       "style": "muted"
     }
   },
@@ -843,13 +843,13 @@
     "slot": "SF M101",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.1288,
+    "probability": 0.1328,
     "qualified_via": "Semi-final",
-    "result": "Spain 0-1 Netherlands (12.88%)",
+    "result": "Spain 2-0 Netherlands (13.28%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 12.9%",
+      "label": "PROJECTED 13.3%",
       "style": "muted"
     }
   },
@@ -857,13 +857,13 @@
     "slot": "SF M102",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.1279,
+    "probability": 0.1205,
     "qualified_via": "Semi-final",
-    "result": "Argentina 4-0 Portugal (12.79%)",
+    "result": "Argentina 2-1 Brazil (12.05%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 12.8%",
+      "label": "PROJECTED 12.0%",
       "style": "muted"
     }
   },
@@ -871,13 +871,13 @@
     "slot": "Final Winner",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.0912,
+    "probability": 0.0957,
     "qualified_via": "Final",
-    "result": "Spain 2-2 Argentina (9.12%)",
+    "result": "Spain 1-0 Argentina (9.57%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 9.1%",
+      "label": "PROJECTED 9.6%",
       "style": "muted"
     }
   }
