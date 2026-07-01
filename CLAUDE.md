@@ -583,6 +583,37 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   shootouts (Germany-Paraguay, Netherlands-Morocco) with correct winners, group
   records untouched, ELO idempotent, override confirmed via explicit
   draw-vs-win delta comparison.
+- **RC-2/RC-3/RC-4 knockout display fixes (2026-07-01)**: Three display
+  failures fixed now that RC-1 provides real knockout results. RC-2:
+  `update_bracket_state()` now includes a Step D2 completion pass that reads
+  `wc2026_results.json` for completed knockout matches (identified by
+  `match_num`) and confirms the real winner (`shootout.winner` when present,
+  else higher score) into `bracket_state.json`, overriding the stale
+  simulation projection. The simulation fallback is preserved for unplayed
+  matches. Both winner and loser are stored for future `LOSER M##`
+  resolution. RC-3: `_resolve_ko_slot()` now looks up `WINNER M##`/
+  `LOSER M##` labels in `bracket_state.json` confirmed slots (via
+  `_ko_bracket_key()`, match_num → slot key), returning the real team and
+  `confirmed=True` when available. A mismatch guard was added to
+  `_upcoming_matches()` so that cards where the simulation teams do not
+  match the real confirmed teams show an honest no-probability state
+  (real names/flags, TBD score, rendered via the ko-pending-card template
+  in `_match_cards_html()`) rather than garbage probabilities and wrong
+  winner names. The bracket section `_late_team` helper was added so R16+
+  bracket lines show confirmed winners with a checkmark rather than
+  `WINNER M##` placeholder text. RC-4: Results section now correctly labels
+  knockout matches as ROUND OF 32, ROUND OF 16 etc. (`KO_ROUND_LABELS`)
+  instead of GROUP R32; the ambiguous code "F" is resolved by `match_num`
+  presence so group-F results keep their GROUP F label. RC-4b: Knockout
+  results now look up their real kickoff time by `match_num` instead of
+  defaulting to 15:00. URGENT REMAINING ITEM: `run_predictions.py`
+  re-simulation must be conditioned on real confirmed results — it
+  currently re-simulates the entire tournament from scratch ignoring
+  `bracket_state.json` and `wc2026_results.json` entirely (verified: its
+  only live inputs are `team_strength.json` and `fixtures.json`; the
+  `engine/` package never reads results), so R32/R16 prediction cards show
+  stale or wrong probabilities until this is fixed. R16 starts July 4 —
+  this is the immediate next session.
 
 ## 8. DASHBOARD STRUCTURE
 

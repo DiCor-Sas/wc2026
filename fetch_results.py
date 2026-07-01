@@ -1727,6 +1727,58 @@ def update_bracket_state():
         "result": final.get("predicted_score", ""),
     }
 
+    # ── Step D2: Confirm completed knockout matches from real results ─────────
+    # Completed knockout matches carry match_num (RC-1). The real winner
+    # overrides the PROJECTED simulation slot; unplayed matches keep the
+    # simulation fallback. Shootout winner takes precedence per §7.
+    def _ko_slot_key(num):
+        if 73 <= num <= 88:
+            return f"R32 M{num}"
+        if 89 <= num <= 96:
+            return f"R16 M{num}"
+        if 97 <= num <= 100:
+            return f"QF M{num}"
+        if 101 <= num <= 102:
+            return f"SF M{num}"
+        if num == 103:
+            return "3P M103"
+        if num == 104:
+            return "Final Winner"
+        return None
+
+    for m in results:
+        num = m.get("match_num")
+        slot_key = _ko_slot_key(num) if num else None
+        if not slot_key:
+            continue
+        t1, t2 = m.get("team1"), m.get("team2")
+        hs, as_ = m.get("home_score"), m.get("away_score")
+        if not t1 or not t2 or hs is None or as_ is None:
+            continue
+        shootout = m.get("shootout") or {}
+        if shootout.get("winner"):
+            winner = shootout["winner"]
+            loser = t2 if winner == t1 else t1
+            result_str = (f"{t1} {hs}-{as_} {t2} "
+                          f"(pens {shootout.get('home_score', '?')}-{shootout.get('away_score', '?')})")
+        elif hs > as_:
+            winner, loser = t1, t2
+            result_str = f"{t1} {hs}-{as_} {t2}"
+        elif as_ > hs:
+            winner, loser = t2, t1
+            result_str = f"{t1} {hs}-{as_} {t2}"
+        else:
+            continue  # level with no shootout recorded — not settled, keep projection
+        bracket[slot_key] = {
+            "slot": slot_key,
+            "status": "CONFIRMED",
+            "team": winner,
+            "loser": loser,
+            "probability": 1.0,
+            "qualified_via": f"Won M{num}" + (" (pens)" if shootout.get("winner") else ""),
+            "result": result_str,
+        }
+
     # ── Step E: Dashboard display metadata ────────────────────────────────────
     # Attach display rules to each slot entry
     for key, entry in bracket.items():

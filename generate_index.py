@@ -404,14 +404,32 @@ def _ko_lookup(data):
     return idx
 
 
+def _ko_bracket_key(num):
+    """Map a knockout match number to its bracket_state.json slot key."""
+    if 73 <= num <= 88:
+        return f"R32 M{num}"
+    if 89 <= num <= 96:
+        return f"R16 M{num}"
+    if 97 <= num <= 100:
+        return f"QF M{num}"
+    if 101 <= num <= 102:
+        return f"SF M{num}"
+    if num == 103:
+        return "3P M103"
+    if num == 104:
+        return "Final Winner"
+    return None
+
+
 def _resolve_ko_slot(label, bracket):
     """Resolve a knockout fixture slot label to a confirmed real team name.
 
     Returns (display_name, confirmed). Slots of the form "1ST GROUP A" /
     "2ND GROUP A" resolve via bracket_state.json once that group position is
-    CONFIRMED. "3RD PLACE (POOL)" and "WINNER M.."/"LOSER M.." slots can't be
-    resolved without engine-level bracket assignment and stay PROJECTED.
-    Anything else is assumed to already be a real team name.
+    CONFIRMED. "WINNER M.."/"LOSER M.." slots resolve via the knockout slot
+    confirmed by update_bracket_state() once that match has been played.
+    "3RD PLACE (POOL)" can't be resolved without the FIFA allocation table
+    and stays PROJECTED. Anything else is assumed to be a real team name.
     """
     parts = label.split()
     if len(parts) == 3 and parts[1] == "GROUP" and parts[0] in ("1ST", "2ND"):
@@ -421,7 +439,16 @@ def _resolve_ko_slot(label, bracket):
         if slot and slot.get("status") == "CONFIRMED":
             return _norm(slot.get("team", label)), True
         return label, False
-    if label.startswith("WINNER M") or label.startswith("LOSER M") or label == "3RD PLACE (POOL)":
+    m = re.match(r"^(WINNER|LOSER) M(\d+)$", label)
+    if m:
+        bk_key = _ko_bracket_key(int(m.group(2)))
+        slot = bracket.get(bk_key) if bk_key else None
+        if slot and slot.get("status") == "CONFIRMED":
+            team = slot.get("team") if m.group(1) == "WINNER" else slot.get("loser")
+            if team:
+                return _norm(team), True
+        return label, False
+    if label == "3RD PLACE (POOL)":
         return label, False
     return label, True
 
@@ -450,6 +477,9 @@ CONF_TOOLTIPS = {
     "MED":  "Competitive match. Favorite has a real edge but outcome is uncertain. Trust the winner pick, be cautious on exact score.",
     "LOW":  "Toss-up. Win probabilities are close. Any outcome is realistic. Consider the draw. Highest Pollaya risk.",
 }
+
+KO_ROUND_LABELS = {"R32": "ROUND OF 32", "R16": "ROUND OF 16", "QF": "QUARTERFINAL",
+                   "SF": "SEMIFINAL", "3P": "THIRD PLACE", "F": "FINAL"}
 
 R32_MATCHES = [
     {"num": 73,  "date": "Jun 28", "city": "Los Angeles",   "home": "2nd Group A", "away": "2nd Group B"},
@@ -599,8 +629,9 @@ def _upcoming_matches(data):
                 "kickoff_utc": kickoff_utc_iso,
             }
 
-            if confirmed and ko_entry:
-                team_pcts = {t["name"]: t["overall_win_pct"] for t in ko_entry.get("teams", [])}
+            team_pcts = ({t["name"]: t["overall_win_pct"] for t in ko_entry.get("teams", [])}
+                         if ko_entry else {})
+            if confirmed and ko_entry and t1_disp in team_pcts and t2_disp in team_pcts:
                 win_p1 = team_pcts.get(t1_disp, 0)
                 win_p2 = team_pcts.get(t2_disp, 0)
                 m_ = re.search(r"(\d+)-(\d+)", ko_entry.get("predicted_score", ""))
@@ -722,7 +753,17 @@ def _match_cards_html(matches):
             delay = card_index * 200
 
             if m.get("is_ko"):
-                if not m["confirmed"]:
+                if not m["confirmed"] or "win_p1" not in m:
+                    # Confirmed teams whose sim entry doesn't match reality get
+                    # real names/flags but no probabilities (honest state until
+                    # run_predictions is conditioned on confirmed results).
+                    if m["confirmed"]:
+                        name_style = ""
+                        flag1 = f'<span class="mc-flag">{_flag(m["t1"])}</span>'
+                        flag2 = f'<span class="mc-flag">{_flag(m["t2"])}</span>'
+                    else:
+                        name_style = ' style="font-style:italic;opacity:0.55"'
+                        flag1 = flag2 = ""
                     cards += f'''<div class="match-card ko-pending-card" style="animation-delay:{delay}ms" data-kickoff="{m["kickoff_utc"]}">
   <div class="mc-card-header">
     <span class="mc-card-label">{h(m["match_lbl"])}</span>
@@ -731,13 +772,13 @@ def _match_cards_html(matches):
   <span class="countdown-timer"></span>
   <div class="teams-score-row">
     <div class="mc-team">
-      <span class="mc-name" style="font-style:italic;opacity:0.55">{h(m["t1"])}</span>
+      {flag1}<span class="mc-name"{name_style}>{h(m["t1"])}</span>
     </div>
     <div class="mc-score-block">
       <div class="mc-score-label" style="opacity:0.55">TBD</div>
     </div>
     <div class="mc-team mc-team-right">
-      <span class="mc-name" style="font-style:italic;opacity:0.55">{h(m["t2"])}</span>
+      {flag2}<span class="mc-name"{name_style}>{h(m["t2"])}</span>
     </div>
   </div>
 </div>
@@ -1011,12 +1052,23 @@ def _bracket_section_html():
         return cards
 
     def _later_rounds():
+        def _late_team(label):
+            m = re.match(r"^(Winner|Loser) M(\d+)$", label)
+            if m:
+                bk_key = _ko_bracket_key(int(m.group(2)))
+                slot = bracket.get(bk_key) if bk_key else None
+                if slot and slot.get("status") == "CONFIRMED":
+                    team = slot.get("team") if m.group(1) == "Winner" else slot.get("loser")
+                    if team:
+                        return f'<span class="bk-slot-confirmed">&#10003; {h(team)}</span>'
+            return f'<span class="bk-late-team">{h(label)}</span>'
+
         def _line(num, home, away, extra=""):
             return (
                 f'<div class="bk-late-match">M{num} &middot; '
-                f'<span class="bk-late-team">{h(home)}</span>'
+                f'{_late_team(home)}'
                 f' <span class="bk-late-vs">vs</span> '
-                f'<span class="bk-late-team">{h(away)}</span>'
+                f'{_late_team(away)}'
                 f'{extra}</div>'
             )
         out = ""
@@ -1155,10 +1207,13 @@ def _results_section_html():
 
     # Fixture lookup for kickoff time, group and matchday
     fixture_info = {}
+    fixture_by_num = {}
     try:
         with open(FIXTURES_FILE) as f:
             for fx in json.load(f):
                 fixture_info[(_norm(fx.get("home", "")), _norm(fx.get("away", "")))] = fx
+                if fx.get("match_num"):
+                    fixture_by_num[fx["match_num"]] = fx
     except Exception:
         pass
 
@@ -1169,7 +1224,8 @@ def _results_section_html():
         hs = r.get("home_score", 0)
         as_ = r.get("away_score", 0)
         date_str = r.get("date", "")
-        fx = fixture_info.get((t1, t2)) or fixture_info.get((t2, t1)) or {}
+        fx = (fixture_by_num.get(r.get("match_num"))
+              or fixture_info.get((t1, t2)) or fixture_info.get((t2, t1)) or {})
         time_str = fx.get("time", "15:00")
         try:
             hour, minute = int(time_str[:2]), int(time_str[3:5])
@@ -1185,12 +1241,15 @@ def _results_section_html():
         # Match end ≈ kickoff + 110 min; COT = UTC-5
         ended_utc = ko_col + timedelta(hours=5, minutes=110)
         group = r.get("group") or fx.get("group", "")
-        rnd = r.get("round", "")
-        if group:
+        rnd = (r.get("round") or "").upper()
+        code = rnd or (group.upper() if isinstance(group, str) else "")
+        if r.get("match_num") or code in ("R32", "R16", "QF", "SF", "3P"):
+            label = KO_ROUND_LABELS.get(code, code or date_str)
+        elif group:
             md = fx.get("matchday", "")
             label = f"GROUP {group} · MD {md}" if md else f"GROUP {group}"
         elif rnd:
-            label = rnd.upper()
+            label = rnd
         else:
             label = date_str
         entries.append((ended_utc, t1, t2, hs, as_, date_str, label))
