@@ -639,16 +639,17 @@
   },
   "R32 M82": {
     "slot": "R32 M82",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "Belgium",
-    "probability": 0.3443,
-    "qualified_via": "1st-G vs 3rd (A/E/H/I/J)",
-    "result": "Belgium 3-0 Egypt (34.43%)",
+    "loser": "Senegal",
+    "probability": 1.0,
+    "qualified_via": "Won M82",
+    "result": "Belgium 3-2 Senegal",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 34.4%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "R32 M83": {
