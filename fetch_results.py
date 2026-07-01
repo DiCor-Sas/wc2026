@@ -54,7 +54,7 @@ FRIENDLY_NAME_MAP = {
     "Türkiye": "Türkiye", "Turkey": "Türkiye",
     "Bosnia and Herzegovina": "Bosnia-Herzegovina",
     "Ivory Coast": "Ivory Coast", "Côte d'Ivoire": "Ivory Coast",
-    "DR Congo": "Congo DR",
+    "DR Congo": "Congo DR", "Democratic Republic of the Congo": "Congo DR",
     "USA": "USA", "United States": "USA",
     "IR Iran": "Iran",
     "Cabo Verde": "Cabo Verde", "Cape Verde": "Cabo Verde",
@@ -74,6 +74,51 @@ def _fn(name):
 
 def _is_wc(name):
     return name in WC_TEAMS
+
+
+# ── RC-1: knockout completion-gate helpers ────────────────────────────────────
+KNOCKOUT_ROUNDS = {"R32", "R16", "QF", "SF", "3P", "F"}
+
+
+def _knockout_kickoffs():
+    """{match_num: kickoff_utc} for all knockout fixtures.
+
+    Knockout fixtures store placeholder team names, so their kickoff cannot be
+    looked up by team-pair the way group matches are — key by match number
+    instead. Empty dict on any error → the knockout branch simply won't fire and
+    the group path is untouched (safe degradation)."""
+    out = {}
+    try:
+        with open(ROOT / "fixtures.json") as f:
+            for fx in json.load(f):
+                if fx.get("round") in KNOCKOUT_ROUNDS:
+                    num = fx.get("match_num", fx.get("id"))
+                    ko = datetime.strptime(
+                        f"{fx['date']} {fx['time']}", "%Y-%m-%d %H:%M"
+                    ).replace(tzinfo=timezone(timedelta(hours=-5)))  # COT → tz-aware
+                    out[num] = ko
+    except Exception:
+        pass
+    return out
+
+
+def _ko_complete(ko_utc):
+    """The SAME 110-min anti-snapshot gate group matches use, against a
+    canonical knockout kickoff. None kickoff ⇒ not complete (refuse)."""
+    return ko_utc is not None and \
+        datetime.now(timezone.utc) >= ko_utc + timedelta(minutes=110)
+
+
+def _resolve_ko_num_by_time(evt_utc, ko_kicks, tol_min=45):
+    """Map an ESPN event to our fixture match_num by kickoff time (ESPN has no
+    knowledge of our match numbers). Knockout kickoffs on a given day are hours
+    apart, so a 45-min tolerance is unambiguous. Returns match_num or None."""
+    best, best_d = None, None
+    for num, ko in ko_kicks.items():
+        d = abs((evt_utc - ko).total_seconds()) / 60.0
+        if d <= tol_min and (best_d is None or d < best_d):
+            best, best_d = num, d
+    return best
 
 
 # All 6 group-stage matchups (combinatorial) per group — used to check completion
@@ -188,11 +233,16 @@ def _scrape_espn_matches(url):
         return []
 
 
-def _fetch_espn_wc_api(check_date):
+def _fetch_espn_wc_api(check_date, ko_pairs=None):
     """Fetch completed WC 2026 results from ESPN's internal JSON scoreboard API.
 
     Returns list of dicts: {date, home, away, home_score, away_score}.
     Only events with status STATUS_FULL_TIME are returned.
+
+    ko_pairs: RC-1 addition A — {frozenset({team1, team2}): match_num}, built by
+    the caller from worldcup26.ir's same-run, native-id knockout resolutions.
+    Replaces time-based match_num inference for the knockout branch below with
+    an exact team-pair lookup, schedule-discrepancy-proof by construction.
     """
     try:
         import requests
@@ -225,10 +275,13 @@ def _fetch_espn_wc_api(check_date):
                 )
     except Exception:
         pass
+    ko_kicks = _knockout_kickoffs()  # RC-1: knockout kickoff lookup (by match_num)
     matches = []
     for evt in data.get("events", []):
         comp = evt.get("competitions", [{}])[0]
-        if comp.get("status", {}).get("type", {}).get("name") != "STATUS_FULL_TIME":
+        status_name = comp.get("status", {}).get("type", {}).get("name")
+        # RC-1: accept penalty-decided knockout finals in addition to full time
+        if status_name not in ("STATUS_FULL_TIME", "STATUS_FINAL_PEN"):
             continue
         competitors = comp.get("competitors", [])
         home = next((c for c in competitors if c.get("homeAway") == "home"), None)
@@ -242,20 +295,43 @@ def _fetch_espn_wc_api(check_date):
             continue
         home_name = _fn(home["team"]["displayName"])
         away_name = _fn(away["team"]["displayName"])
-        if fixture_kickoffs:
-            ko_utc = fixture_kickoffs.get(frozenset([home_name, away_name]))
-            if ko_utc is None:
+
+        pair = frozenset([home_name, away_name])
+        match_num = None
+        if fixture_kickoffs and pair in fixture_kickoffs:
+            # ── GROUP path: existing pair-keyed gate, UNCHANGED ──
+            if datetime.now(timezone.utc) < fixture_kickoffs[pair] + timedelta(minutes=110):
                 continue
-            if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+        else:
+            # ── RC-1 KNOCKOUT path (addition A): resolve match_num via worldcup26.ir's
+            #    same-run, native-id team-pair map — exact, no kickoff-time inference —
+            #    then the SAME canonical-kickoff + 110-min gate. ──
+            match_num = (ko_pairs or {}).get(pair)
+            if match_num is None or not _ko_complete(ko_kicks.get(match_num)):
                 continue
+
+        # RC-1: shootout capture from ESPN's EXPLICIT advance flag + shootoutScore
+        shootout = None
+        if status_name == "STATUS_FINAL_PEN" and h_s == a_s:
+            adv = home if home.get("advance") else (away if away.get("advance") else None)
+            hp, ap = home.get("shootoutScore"), away.get("shootoutScore")
+            if adv is not None and hp is not None and ap is not None:
+                shootout = {"winner": _fn(adv["team"]["displayName"]),
+                            "home_score": int(hp), "away_score": int(ap)}
+
         evt_date = (evt.get("date", "") or "")[:10]
-        matches.append({
+        rec = {
             "date": evt_date or check_date.isoformat(),
             "home": home_name,
             "away": away_name,
             "home_score": h_s,
             "away_score": a_s,
-        })
+        }
+        if match_num is not None:
+            rec["match_num"] = match_num
+        if shootout:
+            rec["shootout"] = shootout
+        matches.append(rec)
     return matches
 
 
@@ -463,6 +539,7 @@ def parse_worldcup26ir(data):
                 )
     except Exception:
         pass
+    ko_kicks = _knockout_kickoffs()  # RC-1: knockout kickoff lookup (by match_num)
     matches = []
     games = data if isinstance(data, list) else data.get("games", data.get("data", []))
     for m in games:
@@ -477,26 +554,56 @@ def parse_worldcup26ir(data):
         t2 = _fn((m.get("away_team_name_en") or "").strip())
         if not _is_wc(t1) or not _is_wc(t2):
             continue
-        if fixture_kickoffs:
-            ko_utc = fixture_kickoffs.get(frozenset([t1, t2]))
-            if ko_utc is None:
+
+        rtype = str(m.get("type") or "")
+        is_ko = rtype.lower() in {"r32", "r16", "qf", "sf", "final", "third"}
+
+        match_num = None
+        shootout = None
+        if is_ko:
+            # ── RC-1 KNOCKOUT path: resolve by native id (== our match_num),
+            #    then the SAME canonical-kickoff + 110-min gate. worldcup26.ir is
+            #    the anchor per Option A. ──
+            try:
+                match_num = int(m.get("id"))
+            except (TypeError, ValueError):
                 continue
-            if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+            if not _ko_complete(ko_kicks.get(match_num)):
                 continue
+            # shootout from EXPLICIT penalty-score fields (winner = higher tally)
+            hp, ap = m.get("home_penalty_score"), m.get("away_penalty_score")
+            if hp not in (None, "") and ap not in (None, "") and home_score == away_score:
+                hp, ap = int(hp), int(ap)
+                shootout = {"winner": t1 if hp > ap else t2,
+                            "home_score": hp, "away_score": ap}
+        else:
+            # ── GROUP path: existing pair-keyed gate, UNCHANGED ──
+            if fixture_kickoffs:
+                ko_utc = fixture_kickoffs.get(frozenset([t1, t2]))
+                if ko_utc is None:
+                    continue
+                if datetime.now(timezone.utc) < ko_utc + timedelta(minutes=110):
+                    continue
+
         local_date = m.get("local_date", "")
         try:
             match_date = datetime.strptime(local_date, "%m/%d/%Y %H:%M").date().isoformat()
         except ValueError:
             match_date = date.today().isoformat()
-        matches.append({
+        rec = {
             "date": match_date,
-            "group": str(m.get("group") or ""),
-            "round": str(m.get("type") or "").title(),
+            "group": str(m.get("group") or ""),   # "R32" for KO — never a group letter
+            "round": rtype.upper() if is_ko else str(m.get("type") or "").title(),
             "team1": t1,
             "team2": t2,
             "home_score": home_score,
             "away_score": away_score,
-        })
+        }
+        if match_num is not None:
+            rec["match_num"] = match_num
+        if shootout:
+            rec["shootout"] = shootout
+        matches.append(rec)
     return matches
 
 
@@ -626,6 +733,7 @@ def _merge_wc_results(seed_matches, live_batches):
                 )
     except Exception:
         pass
+    ko_kicks = _knockout_kickoffs()  # RC-1: knockout kickoff lookup (by match_num)
 
     # 1. Seed establishes base records (history preservation).
     merged = {}
@@ -650,6 +758,17 @@ def _merge_wc_results(seed_matches, live_batches):
                 existing["round"] = m["round"]
             if existing.get("date") == today_iso and m.get("date") != today_iso:
                 existing["date"] = m["date"]
+            # RC-1: carry match_num (anchors the KO Option-B gate + RC-2 later)
+            if not existing.get("match_num") and m.get("match_num") is not None:
+                existing["match_num"] = m["match_num"]
+            # RC-1: carry shootout; cross-check winner across sources, never drop it
+            if not existing.get("shootout") and m.get("shootout"):
+                existing["shootout"] = m["shootout"]
+            elif existing.get("shootout") and m.get("shootout") and \
+                    existing["shootout"]["winner"] != m["shootout"]["winner"]:
+                print(f"[merge] WARNING: shootout winner disagreement {key}: "
+                      f"{existing['shootout']['winner']} vs {m['shootout']['winner']} "
+                      f"— keeping first")
             # align this live source's score to the merged record's team1/team2 order
             score_by_team = {m.get("team1", ""): m.get("home_score"),
                              m.get("team2", ""): m.get("away_score")}
@@ -662,7 +781,12 @@ def _merge_wc_results(seed_matches, live_batches):
     now_utc = datetime.now(timezone.utc)
     for key, scores in live_scores.items():
         existing = merged[key]
-        ko = fixture_kickoffs.get(frozenset([existing["team1"], existing["team2"]]))
+        # RC-1: resolve the "definitely over" kickoff by match_num for knockout
+        # (placeholder team-pairs aren't in fixture_kickoffs), else by team-pair.
+        if existing.get("match_num") is not None:
+            ko = ko_kicks.get(existing["match_num"])
+        else:
+            ko = fixture_kickoffs.get(frozenset([existing["team1"], existing["team2"]]))
         if ko is None or now_utc < ko + timedelta(minutes=110):
             continue                            # not definitively over (or unknown kickoff): keep seed
         valid = [s for s in scores if s[0] is not None and s[1] is not None]
@@ -691,26 +815,10 @@ def fetch_results():
         sky_matches = []
         print(f"[fetch] skysports-wc failed: {e}")
 
-    # Source 2: ESPN JSON API (today, then yesterday)
-    espn_matches = []
-    today_dt = date.today()
-    yesterday_dt = today_dt - timedelta(days=1)
-    for check_date in [today_dt, yesterday_dt]:
-        try:
-            batch = _fetch_espn_wc_api(check_date)
-            wc_batch = [m for m in batch if _is_wc(m["home"]) and _is_wc(m["away"])]
-            if wc_batch:
-                espn_matches.extend([
-                    {"date": m["date"], "group": "", "round": "",
-                     "team1": m["home"], "team2": m["away"],
-                     "home_score": m["home_score"], "away_score": m["away_score"]}
-                    for m in wc_batch
-                ])
-                print(f"[fetch] espn-api: {len(wc_batch)} match(es) for {check_date.isoformat()}")
-        except Exception as e:
-            print(f"[fetch] espn-api failed for {check_date.isoformat()}: {e}")
-
-    # Source 3: worldcup26.ir
+    # Source 2: worldcup26.ir — fetched here, ahead of ESPN below (RC-1 addition A):
+    # its knockout matches carry a native `id` that equals our match_num exactly, so
+    # ESPN's knockout branch can look up match_num by team-pair instead of inferring
+    # it from kickoff time. Sources_used tag order below is unaffected by this reorder.
     try:
         raw = fetch_url("https://worldcup26.ir/get/games")
         data = json.loads(raw)
@@ -719,6 +827,35 @@ def fetch_results():
     except Exception as e:
         wc26_matches = []
         print(f"[fetch] worldcup26.ir failed: {e}")
+
+    # RC-1 addition A: {frozenset({team1, team2}): match_num} from worldcup26.ir's
+    # own knockout matches this run — the exact, schedule-discrepancy-proof anchor
+    # ESPN's knockout branch looks up below instead of resolving by kickoff time.
+    ko_pairs = {
+        frozenset([m["team1"], m["team2"]]): m["match_num"]
+        for m in wc26_matches if m.get("match_num") is not None
+    }
+
+    # Source 3: ESPN JSON API (today, then yesterday)
+    espn_matches = []
+    today_dt = date.today()
+    yesterday_dt = today_dt - timedelta(days=1)
+    for check_date in [today_dt, yesterday_dt]:
+        try:
+            batch = _fetch_espn_wc_api(check_date, ko_pairs=ko_pairs)
+            wc_batch = [m for m in batch if _is_wc(m["home"]) and _is_wc(m["away"])]
+            if wc_batch:
+                espn_matches.extend([
+                    {"date": m["date"], "group": "", "round": "",
+                     "team1": m["home"], "team2": m["away"],
+                     "home_score": m["home_score"], "away_score": m["away_score"],
+                     **({"match_num": m["match_num"]} if "match_num" in m else {}),
+                     **({"shootout": m["shootout"]} if "shootout" in m else {})}
+                    for m in wc_batch
+                ])
+                print(f"[fetch] espn-api: {len(wc_batch)} match(es) for {check_date.isoformat()}")
+        except Exception as e:
+            print(f"[fetch] espn-api failed for {check_date.isoformat()}: {e}")
 
     # Seed from existing file so history is never lost when live sources are unreachable
     seed_matches = []
@@ -1211,7 +1348,15 @@ def recompute_wc_elo_from_scratch():
         exp1 = expected_score(e1, e2)
         exp2 = 1.0 - exp1
 
-        if hs > as_:
+        # RC-1 §7: a penalty-shootout result is a FULL WIN for the shootout
+        # winner (actual=1.0), not a draw. The stored 120-min score stays 1-1
+        # (used as-is by score_prediction_accuracy above, which keeps scoring it
+        # as a draw per §2). No K-factor damping (§7 deferred).
+        so = m.get("shootout")
+        if so:
+            actual1 = 1.0 if so["winner"] == t1 else 0.0
+            actual2 = 1.0 - actual1
+        elif hs > as_:
             actual1, actual2 = 1.0, 0.0
         elif hs < as_:
             actual1, actual2 = 0.0, 1.0

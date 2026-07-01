@@ -560,6 +560,29 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   4th distinct score-ingestion incident this tournament (France/Senegal and
   Iraq/Norway were live-source mid-match snapshots; this one was the seed itself
   permanently pinning a stale value with no self-correction path).
+- **RC-1 knockout ingestion fix (2026-07-01)**: The fetch completion guard (all 3
+  sources) keyed the anti-mid-match-snapshot gate on team-pair lookups in
+  fixtures.json, which only stores placeholder names for knockout fixtures
+  ('2ND GROUP A', '3RD PLACE (POOL)') — so every real knockout pair failed the
+  lookup and was silently dropped. Zero knockout results entered
+  wc2026_results.json from June 28 onward, leaving ELO, bracket advancement, and
+  predictions all running on stale group-stage-only data. Fixed by adding a
+  knockout branch to all three parsers that resolves fixtures by match_num
+  instead of team-pair (worldcup26.ir's native id field maps 1:1 to match_num;
+  ESPN uses a pair-based lookup built from worldcup26.ir's same-run results —
+  exact and schedule-discrepancy-proof), then applies the identical
+  canonical-kickoff + 110-min anti-snapshot gate. Sky Sports excluded from
+  knockout ingestion (cannot resolve match_num or detect penalties). Also added:
+  optional 'shootout': {winner, home_score, away_score} schema on
+  penalty-decided matches per the locked design (§7: shootout winner gets
+  actual=1.0 for ELO, stored 120-min score kept as-is for accuracy tracking per
+  §2); match_num field on knockout records to anchor the Option-B
+  self-correction gate (extends the Germany-incident fix to knockout stage);
+  'Democratic Republic of the Congo': 'Congo DR' added to FRIENDLY_NAME_MAP.
+  Dry-run verified: 7 knockout results ingested correctly including both
+  shootouts (Germany-Paraguay, Netherlands-Morocco) with correct winners, group
+  records untouched, ELO idempotent, override confirmed via explicit
+  draw-vs-win delta comparison.
 
 ## 8. DASHBOARD STRUCTURE
 
