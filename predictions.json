@@ -1,49 +1,56 @@
 {
   "simulations": 10000,
   "predicted_winner": "Spain",
-  "predicted_winner_probability_pct": 9.63,
+  "predicted_winner_probability_pct": 9.83,
   "all_teams": [
     {
       "team": "Spain",
-      "count": 963,
-      "probability": 9.63,
-      "ci_low": 9.2584,
-      "ci_high": 10.0149
+      "count": 983,
+      "probability": 9.83,
+      "ci_low": 9.4549,
+      "ci_high": 10.2183
     },
     {
       "team": "Argentina",
-      "count": 697,
-      "probability": 6.97,
-      "ci_low": 6.6506,
-      "ci_high": 7.3036
+      "count": 692,
+      "probability": 6.92,
+      "ci_low": 6.6017,
+      "ci_high": 7.2525
     },
     {
       "team": "Netherlands",
-      "count": 681,
-      "probability": 6.81,
-      "ci_low": 6.4941,
-      "ci_high": 7.1401
+      "count": 685,
+      "probability": 6.85,
+      "ci_low": 6.5332,
+      "ci_high": 7.181
     },
     {
       "team": "France",
-      "count": 588,
-      "probability": 5.88,
-      "ci_low": 5.5856,
-      "ci_high": 6.1889
+      "count": 616,
+      "probability": 6.16,
+      "ci_low": 5.8589,
+      "ci_high": 6.4755
     },
     {
       "team": "Germany",
-      "count": 550,
-      "probability": 5.5,
-      "ci_low": 5.215,
-      "ci_high": 5.7997
+      "count": 546,
+      "probability": 5.46,
+      "ci_low": 5.176,
+      "ci_high": 5.7587
     },
     {
       "team": "Brazil",
-      "count": 482,
-      "probability": 4.82,
-      "ci_low": 4.5528,
-      "ci_high": 5.1021
+      "count": 423,
+      "probability": 4.23,
+      "ci_low": 3.9794,
+      "ci_high": 4.4956
+    },
+    {
+      "team": "Portugal",
+      "count": 413,
+      "probability": 4.13,
+      "ci_low": 3.8824,
+      "ci_high": 4.3927
     },
     {
       "team": "Mexico",
@@ -54,87 +61,80 @@
     },
     {
       "team": "England",
-      "count": 395,
-      "probability": 3.95,
-      "ci_low": 3.7078,
-      "ci_high": 4.2074
+      "count": 396,
+      "probability": 3.96,
+      "ci_low": 3.7175,
+      "ci_high": 4.2177
     },
     {
-      "team": "Portugal",
-      "count": 381,
-      "probability": 3.81,
-      "ci_low": 3.5721,
-      "ci_high": 4.0631
-    },
-    {
-      "team": "Croatia",
+      "team": "Morocco",
       "count": 377,
       "probability": 3.77,
       "ci_low": 3.5333,
       "ci_high": 4.0219
     },
     {
-      "team": "USA",
-      "count": 376,
-      "probability": 3.76,
-      "ci_low": 3.5236,
-      "ci_high": 4.0116
-    },
-    {
-      "team": "Morocco",
-      "count": 350,
-      "probability": 3.5,
-      "ci_low": 3.2719,
-      "ci_high": 3.7434
+      "team": "Croatia",
+      "count": 332,
+      "probability": 3.32,
+      "ci_low": 3.0979,
+      "ci_high": 3.5575
     },
     {
       "team": "Colombia",
-      "count": 317,
-      "probability": 3.17,
-      "ci_low": 2.953,
-      "ci_high": 3.4024
+      "count": 322,
+      "probability": 3.22,
+      "ci_low": 3.0013,
+      "ci_high": 3.4541
+    },
+    {
+      "team": "USA",
+      "count": 320,
+      "probability": 3.2,
+      "ci_low": 2.9819,
+      "ci_high": 3.4334
     },
     {
       "team": "Uruguay",
-      "count": 315,
-      "probability": 3.15,
-      "ci_low": 2.9337,
-      "ci_high": 3.3817
+      "count": 277,
+      "probability": 2.77,
+      "ci_low": 2.5672,
+      "ci_high": 2.9883
     },
     {
       "team": "Senegal",
+      "count": 249,
+      "probability": 2.49,
+      "ci_low": 2.2979,
+      "ci_high": 2.6977
+    },
+    {
+      "team": "Belgium",
       "count": 244,
       "probability": 2.44,
       "ci_low": 2.2499,
       "ci_high": 2.6458
     },
     {
-      "team": "Norway",
-      "count": 240,
-      "probability": 2.4,
-      "ci_low": 2.2115,
-      "ci_high": 2.6042
-    },
-    {
-      "team": "Belgium",
-      "count": 226,
-      "probability": 2.26,
-      "ci_low": 2.0772,
-      "ci_high": 2.4585
-    },
-    {
       "team": "Austria",
-      "count": 209,
-      "probability": 2.09,
-      "ci_low": 1.9143,
-      "ci_high": 2.2814
+      "count": 237,
+      "probability": 2.37,
+      "ci_low": 2.1827,
+      "ci_high": 2.573
+    },
+    {
+      "team": "Norway",
+      "count": 236,
+      "probability": 2.36,
+      "ci_low": 2.1731,
+      "ci_high": 2.5626
     },
     {
       "team": "Sweden",
-      "count": 200,
-      "probability": 2.0,
-      "ci_low": 1.8282,
-      "ci_high": 2.1875
+      "count": 178,
+      "probability": 1.78,
+      "ci_low": 1.6182,
+      "ci_high": 1.9576
     },
     {
       "team": "Switzerland",
@@ -144,294 +144,294 @@
       "ci_high": 1.6955
     },
     {
-      "team": "Australia",
-      "count": 142,
-      "probability": 1.42,
-      "ci_low": 1.2761,
-      "ci_high": 1.5799
+      "team": "Japan",
+      "count": 137,
+      "probability": 1.37,
+      "ci_low": 1.2288,
+      "ci_high": 1.5272
     },
     {
-      "team": "Scotland",
+      "team": "Australia",
       "count": 132,
       "probability": 1.32,
       "ci_low": 1.1815,
       "ci_high": 1.4745
     },
     {
-      "team": "South Korea",
-      "count": 129,
-      "probability": 1.29,
-      "ci_low": 1.1531,
-      "ci_high": 1.4429
-    },
-    {
-      "team": "Tunisia",
-      "count": 115,
-      "probability": 1.15,
-      "ci_low": 1.0211,
-      "ci_high": 1.2949
-    },
-    {
-      "team": "Czechia",
-      "count": 112,
-      "probability": 1.12,
-      "ci_low": 0.9929,
-      "ci_high": 1.2632
-    },
-    {
       "team": "T\u00fcrkiye",
-      "count": 110,
-      "probability": 1.1,
-      "ci_low": 0.9741,
-      "ci_high": 1.242
+      "count": 126,
+      "probability": 1.26,
+      "ci_low": 1.1248,
+      "ci_high": 1.4112
     },
     {
-      "team": "Japan",
-      "count": 110,
-      "probability": 1.1,
-      "ci_low": 0.9741,
-      "ci_high": 1.242
+      "team": "South Korea",
+      "count": 123,
+      "probability": 1.23,
+      "ci_low": 1.0965,
+      "ci_high": 1.3795
     },
     {
-      "team": "Iran",
-      "count": 106,
-      "probability": 1.06,
-      "ci_low": 0.9365,
-      "ci_high": 1.1996
+      "team": "Scotland",
+      "count": 123,
+      "probability": 1.23,
+      "ci_low": 1.0965,
+      "ci_high": 1.3795
     },
     {
       "team": "Canada",
-      "count": 100,
-      "probability": 1.0,
-      "ci_low": 0.8803,
-      "ci_high": 1.1359
+      "count": 120,
+      "probability": 1.2,
+      "ci_low": 1.0682,
+      "ci_high": 1.3478
+    },
+    {
+      "team": "Czechia",
+      "count": 116,
+      "probability": 1.16,
+      "ci_low": 1.0305,
+      "ci_high": 1.3055
     },
     {
       "team": "Algeria",
-      "count": 78,
-      "probability": 0.78,
-      "ci_low": 0.675,
-      "ci_high": 0.9011
+      "count": 108,
+      "probability": 1.08,
+      "ci_low": 0.9553,
+      "ci_high": 1.2208
     },
     {
-      "team": "Egypt",
+      "team": "Tunisia",
+      "count": 105,
+      "probability": 1.05,
+      "ci_low": 0.9271,
+      "ci_high": 1.189
+    },
+    {
+      "team": "Iran",
+      "count": 96,
+      "probability": 0.96,
+      "ci_low": 0.8428,
+      "ci_high": 1.0933
+    },
+    {
+      "team": "Ivory Coast",
       "count": 65,
       "probability": 0.65,
       "ci_low": 0.5548,
       "ci_high": 0.7614
     },
     {
-      "team": "Ivory Coast",
-      "count": 63,
-      "probability": 0.63,
-      "ci_low": 0.5364,
-      "ci_high": 0.7399
-    },
-    {
-      "team": "Saudi Arabia",
-      "count": 56,
-      "probability": 0.56,
-      "ci_low": 0.4721,
-      "ci_high": 0.6641
-    },
-    {
-      "team": "Ghana",
-      "count": 55,
-      "probability": 0.55,
-      "ci_low": 0.463,
-      "ci_high": 0.6533
+      "team": "Egypt",
+      "count": 64,
+      "probability": 0.64,
+      "ci_low": 0.5456,
+      "ci_high": 0.7507
     },
     {
       "team": "Paraguay",
+      "count": 62,
+      "probability": 0.62,
+      "ci_low": 0.5272,
+      "ci_high": 0.7291
+    },
+    {
+      "team": "Ecuador",
+      "count": 57,
+      "probability": 0.57,
+      "ci_low": 0.4813,
+      "ci_high": 0.675
+    },
+    {
+      "team": "Ghana",
+      "count": 53,
+      "probability": 0.53,
+      "ci_low": 0.4447,
+      "ci_high": 0.6316
+    },
+    {
+      "team": "Panama",
       "count": 49,
       "probability": 0.49,
       "ci_low": 0.4083,
       "ci_high": 0.588
     },
     {
-      "team": "Ecuador",
+      "team": "Bosnia-Herzegovina",
       "count": 48,
       "probability": 0.48,
       "ci_low": 0.3992,
       "ci_high": 0.5771
     },
     {
-      "team": "Bosnia-Herzegovina",
-      "count": 43,
-      "probability": 0.43,
-      "ci_low": 0.3539,
-      "ci_high": 0.5224
-    },
-    {
-      "team": "Qatar",
-      "count": 43,
-      "probability": 0.43,
-      "ci_low": 0.3539,
-      "ci_high": 0.5224
-    },
-    {
-      "team": "Panama",
-      "count": 42,
-      "probability": 0.42,
-      "ci_low": 0.3448,
-      "ci_high": 0.5114
+      "team": "South Africa",
+      "count": 48,
+      "probability": 0.48,
+      "ci_low": 0.3992,
+      "ci_high": 0.5771
     },
     {
       "team": "Iraq",
-      "count": 40,
-      "probability": 0.4,
-      "ci_low": 0.3268,
-      "ci_high": 0.4895
+      "count": 46,
+      "probability": 0.46,
+      "ci_low": 0.381,
+      "ci_high": 0.5553
     },
     {
-      "team": "South Africa",
-      "count": 38,
-      "probability": 0.38,
-      "ci_low": 0.3089,
-      "ci_high": 0.4674
-    },
-    {
-      "team": "Uzbekistan",
-      "count": 37,
-      "probability": 0.37,
-      "ci_low": 0.2999,
-      "ci_high": 0.4564
-    },
-    {
-      "team": "Congo DR",
-      "count": 31,
-      "probability": 0.31,
-      "ci_low": 0.2464,
-      "ci_high": 0.3899
-    },
-    {
-      "team": "Jordan",
-      "count": 29,
-      "probability": 0.29,
-      "ci_low": 0.2288,
-      "ci_high": 0.3676
-    },
-    {
-      "team": "Haiti",
-      "count": 25,
-      "probability": 0.25,
-      "ci_low": 0.1936,
-      "ci_high": 0.3227
-    },
-    {
-      "team": "New Zealand",
-      "count": 25,
-      "probability": 0.25,
-      "ci_low": 0.1936,
-      "ci_high": 0.3227
+      "team": "Saudi Arabia",
+      "count": 45,
+      "probability": 0.45,
+      "ci_low": 0.372,
+      "ci_high": 0.5443
     },
     {
       "team": "Cabo Verde",
-      "count": 23,
-      "probability": 0.23,
-      "ci_low": 0.1762,
-      "ci_high": 0.3001
+      "count": 33,
+      "probability": 0.33,
+      "ci_low": 0.2642,
+      "ci_high": 0.4121
+    },
+    {
+      "team": "Qatar",
+      "count": 32,
+      "probability": 0.32,
+      "ci_low": 0.2553,
+      "ci_high": 0.401
+    },
+    {
+      "team": "Congo DR",
+      "count": 28,
+      "probability": 0.28,
+      "ci_low": 0.2199,
+      "ci_high": 0.3564
+    },
+    {
+      "team": "Uzbekistan",
+      "count": 24,
+      "probability": 0.24,
+      "ci_low": 0.1849,
+      "ci_high": 0.3114
+    },
+    {
+      "team": "Haiti",
+      "count": 22,
+      "probability": 0.22,
+      "ci_low": 0.1676,
+      "ci_high": 0.2888
+    },
+    {
+      "team": "New Zealand",
+      "count": 21,
+      "probability": 0.21,
+      "ci_low": 0.1589,
+      "ci_high": 0.2774
+    },
+    {
+      "team": "Jordan",
+      "count": 20,
+      "probability": 0.2,
+      "ci_low": 0.1503,
+      "ci_high": 0.266
     },
     {
       "team": "Cura\u00e7ao",
-      "count": 11,
-      "probability": 0.11,
-      "ci_low": 0.0749,
-      "ci_high": 0.1615
+      "count": 19,
+      "probability": 0.19,
+      "ci_low": 0.1418,
+      "ci_high": 0.2546
     }
   ],
   "runners_up": [
     {
       "team": "Argentina",
-      "count": 721,
-      "probability": 7.21
+      "count": 725,
+      "probability": 7.25
     },
     {
       "team": "Netherlands",
-      "count": 528,
-      "probability": 5.28
-    },
-    {
-      "team": "Germany",
-      "count": 442,
-      "probability": 4.42
-    },
-    {
-      "team": "France",
-      "count": 438,
-      "probability": 4.38
+      "count": 533,
+      "probability": 5.33
     },
     {
       "team": "Brazil",
-      "count": 438,
-      "probability": 4.38
+      "count": 439,
+      "probability": 4.39
     },
     {
-      "team": "Portugal",
+      "team": "France",
       "count": 435,
       "probability": 4.35
     },
     {
-      "team": "Croatia",
-      "count": 390,
-      "probability": 3.9
+      "team": "Portugal",
+      "count": 422,
+      "probability": 4.22
     },
     {
       "team": "England",
-      "count": 370,
-      "probability": 3.7
+      "count": 412,
+      "probability": 4.12
     },
     {
-      "team": "Uruguay",
-      "count": 358,
-      "probability": 3.58
+      "team": "Germany",
+      "count": 407,
+      "probability": 4.07
+    },
+    {
+      "team": "Morocco",
+      "count": 378,
+      "probability": 3.78
+    },
+    {
+      "team": "Mexico",
+      "count": 354,
+      "probability": 3.54
     }
   ],
   "third_place": [
     {
       "team": "Netherlands",
-      "count": 553,
-      "probability": 5.53
+      "count": 539,
+      "probability": 5.39
     },
     {
       "team": "Argentina",
-      "count": 608,
-      "probability": 6.08
-    },
-    {
-      "team": "Brazil",
-      "count": 467,
-      "probability": 4.67
-    },
-    {
-      "team": "France",
-      "count": 460,
-      "probability": 4.6
+      "count": 611,
+      "probability": 6.11
     },
     {
       "team": "Germany",
-      "count": 441,
-      "probability": 4.41
+      "count": 494,
+      "probability": 4.94
     },
     {
-      "team": "Portugal",
-      "count": 396,
-      "probability": 3.96
+      "team": "France",
+      "count": 454,
+      "probability": 4.54
+    },
+    {
+      "team": "Brazil",
+      "count": 444,
+      "probability": 4.44
     },
     {
       "team": "England",
-      "count": 393,
-      "probability": 3.93
+      "count": 392,
+      "probability": 3.92
+    },
+    {
+      "team": "Portugal",
+      "count": 379,
+      "probability": 3.79
     },
     {
       "team": "Mexico",
-      "count": 355,
-      "probability": 3.55
+      "count": 361,
+      "probability": 3.61
     },
     {
       "team": "Croatia",
-      "count": 347,
-      "probability": 3.47
+      "count": 357,
+      "probability": 3.57
     }
   ],
   "match_probabilities": [
@@ -1377,19 +1377,19 @@
       {
         "match": 73,
         "likely_winner": "South Korea",
-        "predicted_score": "South Korea 1-2 Canada (16.06%)",
+        "predicted_score": "South Korea 2-0 Canada (16.04%)",
         "teams": [
           {
             "name": "Canada",
-            "reach_pct": 29.37,
-            "win_if_reached_pct": 45.76,
-            "overall_win_pct": 13.44
+            "reach_pct": 29.29,
+            "win_if_reached_pct": 46.06,
+            "overall_win_pct": 13.49
           },
           {
             "name": "South Korea",
-            "reach_pct": 28.25,
-            "win_if_reached_pct": 56.85,
-            "overall_win_pct": 16.06
+            "reach_pct": 28.82,
+            "win_if_reached_pct": 55.66,
+            "overall_win_pct": 16.04
           }
         ],
         "label": "2nd-A vs 2nd-B",
@@ -1398,46 +1398,40 @@
       {
         "match": 74,
         "likely_winner": "Germany",
-        "predicted_score": "Germany 0-0 Czechia (48.72%)",
+        "predicted_score": "Germany 3-1 Czechia (49.39%)",
         "teams": [
           {
             "name": "Germany",
-            "reach_pct": 68.41,
-            "win_if_reached_pct": 71.22,
-            "overall_win_pct": 48.72
+            "reach_pct": 68.44,
+            "win_if_reached_pct": 72.17,
+            "overall_win_pct": 49.39
           },
           {
             "name": "Czechia",
-            "reach_pct": 20.01,
-            "win_if_reached_pct": 37.63,
-            "overall_win_pct": 7.53
+            "reach_pct": 20.35,
+            "win_if_reached_pct": 35.68,
+            "overall_win_pct": 7.26
           }
         ],
-        "score_90": "0-0",
-        "score_120": "0-0",
-        "went_to_et": true,
-        "went_to_penalties": true,
-        "et_lambda_home": 0.6569,
-        "et_lambda_away": 0.2685,
         "label": "1st-E vs 3rd (A/B/C/D/F)",
         "city": "Boston"
       },
       {
         "match": 75,
         "likely_winner": "Netherlands",
-        "predicted_score": "Netherlands 3-1 Morocco (44.22%)",
+        "predicted_score": "Netherlands 2-0 Morocco (43.5%)",
         "teams": [
           {
             "name": "Netherlands",
-            "reach_pct": 64.98,
-            "win_if_reached_pct": 68.05,
-            "overall_win_pct": 44.22
+            "reach_pct": 64.47,
+            "win_if_reached_pct": 67.47,
+            "overall_win_pct": 43.5
           },
           {
             "name": "Morocco",
-            "reach_pct": 37.9,
-            "win_if_reached_pct": 39.05,
-            "overall_win_pct": 14.8
+            "reach_pct": 38.19,
+            "win_if_reached_pct": 40.59,
+            "overall_win_pct": 15.5
           }
         ],
         "label": "1st-F vs 2nd-C",
@@ -1446,19 +1440,19 @@
       {
         "match": 76,
         "likely_winner": "Brazil",
-        "predicted_score": "Brazil 3-0 Sweden (33.51%)",
+        "predicted_score": "Brazil 1-2 Sweden (33.67%)",
         "teams": [
           {
             "name": "Brazil",
-            "reach_pct": 53.63,
-            "win_if_reached_pct": 62.48,
-            "overall_win_pct": 33.51
+            "reach_pct": 53.62,
+            "win_if_reached_pct": 62.79,
+            "overall_win_pct": 33.67
           },
           {
             "name": "Sweden",
-            "reach_pct": 32.3,
-            "win_if_reached_pct": 40.31,
-            "overall_win_pct": 13.02
+            "reach_pct": 32.58,
+            "win_if_reached_pct": 39.87,
+            "overall_win_pct": 12.99
           }
         ],
         "label": "1st-C vs 2nd-F",
@@ -1467,19 +1461,19 @@
       {
         "match": 77,
         "likely_winner": "France",
-        "predicted_score": "France 3-0 Scotland (40.73%)",
+        "predicted_score": "France 3-0 Scotland (41.21%)",
         "teams": [
           {
             "name": "France",
-            "reach_pct": 58.91,
-            "win_if_reached_pct": 69.14,
-            "overall_win_pct": 40.73
+            "reach_pct": 59.32,
+            "win_if_reached_pct": 69.47,
+            "overall_win_pct": 41.21
           },
           {
             "name": "Scotland",
-            "reach_pct": 22.28,
-            "win_if_reached_pct": 33.57,
-            "overall_win_pct": 7.48
+            "reach_pct": 21.37,
+            "win_if_reached_pct": 34.3,
+            "overall_win_pct": 7.33
           }
         ],
         "label": "1st-I vs 3rd (C/D/F/G/H)",
@@ -1487,20 +1481,20 @@
       },
       {
         "match": 78,
-        "likely_winner": "Senegal",
-        "predicted_score": "Senegal 4-1 Ivory Coast (20.35%)",
+        "likely_winner": "Norway",
+        "predicted_score": "Norway 2-3 Ivory Coast (20.32%)",
         "teams": [
           {
-            "name": "Ivory Coast",
-            "reach_pct": 31.82,
-            "win_if_reached_pct": 34.48,
-            "overall_win_pct": 10.97
+            "name": "Norway",
+            "reach_pct": 31.52,
+            "win_if_reached_pct": 64.47,
+            "overall_win_pct": 20.32
           },
           {
-            "name": "Senegal",
-            "reach_pct": 31.17,
-            "win_if_reached_pct": 65.29,
-            "overall_win_pct": 20.35
+            "name": "Ivory Coast",
+            "reach_pct": 31.48,
+            "win_if_reached_pct": 35.8,
+            "overall_win_pct": 11.27
           }
         ],
         "label": "2nd-E vs 2nd-I",
@@ -1509,19 +1503,19 @@
       {
         "match": 79,
         "likely_winner": "Mexico",
-        "predicted_score": "Mexico 4-1 Ecuador (34.69%)",
+        "predicted_score": "Mexico 2-1 Ecuador (34.97%)",
         "teams": [
           {
             "name": "Mexico",
-            "reach_pct": 50.62,
-            "win_if_reached_pct": 68.53,
-            "overall_win_pct": 34.69
+            "reach_pct": 51.13,
+            "win_if_reached_pct": 68.39,
+            "overall_win_pct": 34.97
           },
           {
             "name": "Ecuador",
-            "reach_pct": 20.16,
-            "win_if_reached_pct": 34.33,
-            "overall_win_pct": 6.92
+            "reach_pct": 20.53,
+            "win_if_reached_pct": 33.8,
+            "overall_win_pct": 6.94
           }
         ],
         "label": "1st-A vs 3rd (C/E/F/H/I)",
@@ -1530,46 +1524,40 @@
       {
         "match": 80,
         "likely_winner": "England",
-        "predicted_score": "England 2-1 Croatia (30.38%)",
+        "predicted_score": "England 2-0 Croatia (30.46%)",
         "teams": [
           {
             "name": "England",
-            "reach_pct": 45.63,
-            "win_if_reached_pct": 66.58,
-            "overall_win_pct": 30.38
+            "reach_pct": 45.84,
+            "win_if_reached_pct": 66.45,
+            "overall_win_pct": 30.46
           },
           {
             "name": "Croatia",
-            "reach_pct": 40.53,
-            "win_if_reached_pct": 65.43,
-            "overall_win_pct": 26.52
+            "reach_pct": 39.49,
+            "win_if_reached_pct": 67.0,
+            "overall_win_pct": 26.46
           }
         ],
-        "score_90": "1-1",
-        "score_120": "2-1",
-        "went_to_et": true,
-        "went_to_penalties": false,
-        "et_lambda_home": 0.4325,
-        "et_lambda_away": 0.4079,
         "label": "1st-L vs 3rd (E/H/I/J/K)",
         "city": "Atlanta"
       },
       {
         "match": 81,
         "likely_winner": "USA",
-        "predicted_score": "USA 2-1 T\u00fcrkiye (28.65%)",
+        "predicted_score": "USA 4-0 T\u00fcrkiye (28.44%)",
         "teams": [
           {
             "name": "USA",
-            "reach_pct": 43.16,
-            "win_if_reached_pct": 66.38,
-            "overall_win_pct": 28.65
+            "reach_pct": 43.13,
+            "win_if_reached_pct": 65.94,
+            "overall_win_pct": 28.44
           },
           {
             "name": "T\u00fcrkiye",
-            "reach_pct": 25.39,
-            "win_if_reached_pct": 56.4,
-            "overall_win_pct": 14.32
+            "reach_pct": 24.49,
+            "win_if_reached_pct": 56.43,
+            "overall_win_pct": 13.82
           }
         ],
         "label": "1st-D vs 3rd (B/E/F/I/J)",
@@ -1578,61 +1566,73 @@
       {
         "match": 82,
         "likely_winner": "Belgium",
-        "predicted_score": "Belgium 2-1 Egypt (34.78%)",
+        "predicted_score": "Belgium 2-3 Egypt (35.45%)",
         "teams": [
           {
             "name": "Belgium",
-            "reach_pct": 56.92,
-            "win_if_reached_pct": 61.1,
-            "overall_win_pct": 34.78
+            "reach_pct": 57.19,
+            "win_if_reached_pct": 61.99,
+            "overall_win_pct": 35.45
           },
           {
             "name": "Egypt",
-            "reach_pct": 22.82,
-            "win_if_reached_pct": 45.09,
-            "overall_win_pct": 10.29
+            "reach_pct": 22.64,
+            "win_if_reached_pct": 48.06,
+            "overall_win_pct": 10.88
           }
         ],
+        "score_90": "2-2",
+        "score_120": "2-3",
+        "went_to_et": true,
+        "went_to_penalties": false,
+        "et_lambda_home": 0.6006,
+        "et_lambda_away": 0.2937,
         "label": "1st-G vs 3rd (A/E/H/I/J)",
         "city": "Seattle"
       },
       {
         "match": 83,
         "likely_winner": "Colombia",
-        "predicted_score": "Colombia 2-0 Ghana (20.61%)",
+        "predicted_score": "Colombia 2-0 Congo DR (19.38%)",
         "teams": [
           {
             "name": "Colombia",
-            "reach_pct": 38.65,
-            "win_if_reached_pct": 53.32,
-            "overall_win_pct": 20.61
+            "reach_pct": 38.2,
+            "win_if_reached_pct": 50.73,
+            "overall_win_pct": 19.38
           },
           {
-            "name": "Ghana",
-            "reach_pct": 17.74,
-            "win_if_reached_pct": 45.43,
-            "overall_win_pct": 8.06
+            "name": "Congo DR",
+            "reach_pct": 17.2,
+            "win_if_reached_pct": 33.66,
+            "overall_win_pct": 5.79
           }
         ],
+        "score_90": "0-0",
+        "score_120": "2-0",
+        "went_to_et": true,
+        "went_to_penalties": false,
+        "et_lambda_home": 0.745,
+        "et_lambda_away": 0.2368,
         "label": "2nd-K vs 2nd-L",
         "city": "Toronto"
       },
       {
         "match": 84,
         "likely_winner": "Spain",
-        "predicted_score": "Spain 6-2 Austria (51.02%)",
+        "predicted_score": "Spain 4-1 Austria (50.92%)",
         "teams": [
           {
             "name": "Spain",
-            "reach_pct": 68.91,
-            "win_if_reached_pct": 74.04,
-            "overall_win_pct": 51.02
+            "reach_pct": 68.8,
+            "win_if_reached_pct": 74.01,
+            "overall_win_pct": 50.92
           },
           {
             "name": "Austria",
-            "reach_pct": 40.03,
-            "win_if_reached_pct": 33.9,
-            "overall_win_pct": 13.57
+            "reach_pct": 40.4,
+            "win_if_reached_pct": 33.69,
+            "overall_win_pct": 13.61
           }
         ],
         "label": "1st-H vs 2nd-J",
@@ -1641,19 +1641,19 @@
       {
         "match": 85,
         "likely_winner": "Switzerland",
-        "predicted_score": "Switzerland 2-1 Bosnia-Herzegovina (28.38%)",
+        "predicted_score": "Switzerland 2-1 Bosnia-Herzegovina (27.64%)",
         "teams": [
           {
             "name": "Switzerland",
-            "reach_pct": 48.27,
-            "win_if_reached_pct": 58.79,
-            "overall_win_pct": 28.38
+            "reach_pct": 47.93,
+            "win_if_reached_pct": 57.67,
+            "overall_win_pct": 27.64
           },
           {
             "name": "Bosnia-Herzegovina",
-            "reach_pct": 16.68,
-            "win_if_reached_pct": 48.74,
-            "overall_win_pct": 8.13
+            "reach_pct": 16.33,
+            "win_if_reached_pct": 48.62,
+            "overall_win_pct": 7.94
           }
         ],
         "label": "1st-B vs 3rd (E/F/G/I/J)",
@@ -1662,40 +1662,46 @@
       {
         "match": 86,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 2-0 Uruguay (47.7%)",
+        "predicted_score": "Argentina 2-2 Uruguay (48.41%)",
         "teams": [
           {
             "name": "Argentina",
-            "reach_pct": 69.17,
-            "win_if_reached_pct": 68.96,
-            "overall_win_pct": 47.7
+            "reach_pct": 70.15,
+            "win_if_reached_pct": 69.01,
+            "overall_win_pct": 48.41
           },
           {
             "name": "Uruguay",
-            "reach_pct": 42.06,
-            "win_if_reached_pct": 39.18,
-            "overall_win_pct": 16.48
+            "reach_pct": 42.21,
+            "win_if_reached_pct": 38.9,
+            "overall_win_pct": 16.42
           }
         ],
+        "score_90": "2-2",
+        "score_120": "2-2",
+        "went_to_et": true,
+        "went_to_penalties": true,
+        "et_lambda_home": 0.6411,
+        "et_lambda_away": 0.2752,
         "label": "1st-J vs 2nd-H",
         "city": "Miami"
       },
       {
         "match": 87,
         "likely_winner": "Portugal",
-        "predicted_score": "Portugal 6-1 Panama (38.09%)",
+        "predicted_score": "Portugal 4-0 Ghana (38.51%)",
         "teams": [
           {
             "name": "Portugal",
-            "reach_pct": 56.62,
-            "win_if_reached_pct": 67.27,
-            "overall_win_pct": 38.09
+            "reach_pct": 56.61,
+            "win_if_reached_pct": 68.03,
+            "overall_win_pct": 38.51
           },
           {
-            "name": "Panama",
-            "reach_pct": 20.26,
-            "win_if_reached_pct": 30.7,
-            "overall_win_pct": 6.22
+            "name": "Ghana",
+            "reach_pct": 21.06,
+            "win_if_reached_pct": 31.29,
+            "overall_win_pct": 6.59
           }
         ],
         "label": "1st-K vs 3rd (D/E/I/J/L)",
@@ -1703,22 +1709,28 @@
       },
       {
         "match": 88,
-        "likely_winner": "Australia",
-        "predicted_score": "Australia 1-0 Iran (15.46%)",
+        "likely_winner": "Iran",
+        "predicted_score": "Iran 4-5 Australia (14.83%)",
         "teams": [
           {
             "name": "Iran",
-            "reach_pct": 31.57,
-            "win_if_reached_pct": 46.34,
-            "overall_win_pct": 14.63
+            "reach_pct": 32.32,
+            "win_if_reached_pct": 45.88,
+            "overall_win_pct": 14.83
           },
           {
             "name": "Australia",
-            "reach_pct": 28.43,
-            "win_if_reached_pct": 54.38,
-            "overall_win_pct": 15.46
+            "reach_pct": 27.14,
+            "win_if_reached_pct": 54.57,
+            "overall_win_pct": 14.81
           }
         ],
+        "score_90": "4-4",
+        "score_120": "4-5",
+        "went_to_et": true,
+        "went_to_penalties": false,
+        "et_lambda_home": 0.4166,
+        "et_lambda_away": 0.4234,
         "label": "2nd-D vs 2nd-G",
         "city": "Dallas"
       }
@@ -1727,94 +1739,94 @@
       {
         "match": 89,
         "likely_winner": "Germany",
-        "predicted_score": "Germany 0-1 France (25.64%)",
+        "predicted_score": "Germany 0-2 France (26.12%)",
         "teams": [
           {
             "name": "Germany",
-            "reach_pct": 48.72,
-            "win_if_reached_pct": 52.63,
-            "overall_win_pct": 25.64
+            "reach_pct": 49.39,
+            "win_if_reached_pct": 52.89,
+            "overall_win_pct": 26.12
           },
           {
             "name": "France",
-            "reach_pct": 40.73,
-            "win_if_reached_pct": 58.63,
-            "overall_win_pct": 23.88
+            "reach_pct": 41.21,
+            "win_if_reached_pct": 59.86,
+            "overall_win_pct": 24.67
           }
         ]
       },
       {
         "match": 90,
         "likely_winner": "Netherlands",
-        "predicted_score": "Netherlands 3-0 Mexico (32.4%)",
+        "predicted_score": "Netherlands 0-1 Mexico (32.55%)",
         "teams": [
           {
             "name": "Netherlands",
-            "reach_pct": 44.22,
-            "win_if_reached_pct": 73.27,
-            "overall_win_pct": 32.4
+            "reach_pct": 43.5,
+            "win_if_reached_pct": 74.83,
+            "overall_win_pct": 32.55
           },
           {
             "name": "Mexico",
-            "reach_pct": 16.62,
-            "win_if_reached_pct": 39.11,
-            "overall_win_pct": 6.5
+            "reach_pct": 16.21,
+            "win_if_reached_pct": 37.08,
+            "overall_win_pct": 6.01
           }
         ]
       },
       {
         "match": 91,
         "likely_winner": "Brazil",
-        "predicted_score": "Brazil 2-1 Senegal (21.74%)",
+        "predicted_score": "Brazil 2-4 Norway (21.66%)",
         "teams": [
           {
             "name": "Brazil",
-            "reach_pct": 33.51,
-            "win_if_reached_pct": 64.88,
-            "overall_win_pct": 21.74
+            "reach_pct": 33.67,
+            "win_if_reached_pct": 64.33,
+            "overall_win_pct": 21.66
           },
           {
-            "name": "Senegal",
-            "reach_pct": 20.35,
-            "win_if_reached_pct": 40.49,
-            "overall_win_pct": 8.24
+            "name": "Norway",
+            "reach_pct": 20.32,
+            "win_if_reached_pct": 40.65,
+            "overall_win_pct": 8.26
           }
         ]
       },
       {
         "match": 92,
-        "likely_winner": "Mexico",
-        "predicted_score": "Mexico 0-3 England (18.33%)",
+        "likely_winner": "England",
+        "predicted_score": "England 3-0 Mexico (18.08%)",
         "teams": [
           {
             "name": "Mexico",
-            "reach_pct": 34.69,
-            "win_if_reached_pct": 52.84,
-            "overall_win_pct": 18.33
+            "reach_pct": 34.97,
+            "win_if_reached_pct": 51.42,
+            "overall_win_pct": 17.98
           },
           {
             "name": "England",
-            "reach_pct": 30.38,
-            "win_if_reached_pct": 59.91,
-            "overall_win_pct": 18.2
+            "reach_pct": 30.46,
+            "win_if_reached_pct": 59.36,
+            "overall_win_pct": 18.08
           }
         ]
       },
       {
         "match": 93,
         "likely_winner": "Spain",
-        "predicted_score": "Spain 4-1 Colombia (35.49%)",
+        "predicted_score": "Spain 2-4 Croatia (35.9%)",
         "teams": [
           {
             "name": "Spain",
-            "reach_pct": 51.02,
-            "win_if_reached_pct": 69.56,
-            "overall_win_pct": 35.49
+            "reach_pct": 50.92,
+            "win_if_reached_pct": 70.5,
+            "overall_win_pct": 35.9
           },
           {
-            "name": "Colombia",
-            "reach_pct": 20.61,
-            "win_if_reached_pct": 40.27,
+            "name": "Croatia",
+            "reach_pct": 20.48,
+            "win_if_reached_pct": 40.53,
             "overall_win_pct": 8.3
           }
         ]
@@ -1822,56 +1834,56 @@
       {
         "match": 94,
         "likely_winner": "Belgium",
-        "predicted_score": "Belgium 0-2 USA (18.68%)",
+        "predicted_score": "Belgium 0-1 USA (18.94%)",
         "teams": [
           {
             "name": "Belgium",
-            "reach_pct": 34.78,
-            "win_if_reached_pct": 53.71,
-            "overall_win_pct": 18.68
+            "reach_pct": 35.45,
+            "win_if_reached_pct": 53.43,
+            "overall_win_pct": 18.94
           },
           {
             "name": "USA",
-            "reach_pct": 31.32,
-            "win_if_reached_pct": 57.89,
-            "overall_win_pct": 18.13
+            "reach_pct": 31.18,
+            "win_if_reached_pct": 58.08,
+            "overall_win_pct": 18.11
           }
         ]
       },
       {
         "match": 95,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 3-0 Uruguay (34.51%)",
+        "predicted_score": "Argentina 2-0 Uruguay (34.64%)",
         "teams": [
           {
             "name": "Argentina",
-            "reach_pct": 47.7,
-            "win_if_reached_pct": 72.35,
-            "overall_win_pct": 34.51
+            "reach_pct": 48.41,
+            "win_if_reached_pct": 71.56,
+            "overall_win_pct": 34.64
           },
           {
             "name": "Uruguay",
-            "reach_pct": 16.48,
-            "win_if_reached_pct": 68.39,
-            "overall_win_pct": 11.27
+            "reach_pct": 16.42,
+            "win_if_reached_pct": 68.27,
+            "overall_win_pct": 11.21
           }
         ]
       },
       {
         "match": 96,
         "likely_winner": "Portugal",
-        "predicted_score": "Portugal 2-1 Colombia (25.97%)",
+        "predicted_score": "Portugal 0-1 Colombia (26.45%)",
         "teams": [
           {
             "name": "Portugal",
-            "reach_pct": 41.35,
-            "win_if_reached_pct": 62.81,
-            "overall_win_pct": 25.97
+            "reach_pct": 41.78,
+            "win_if_reached_pct": 63.31,
+            "overall_win_pct": 26.45
           },
           {
             "name": "Colombia",
-            "reach_pct": 30.27,
-            "win_if_reached_pct": 60.62,
+            "reach_pct": 29.94,
+            "win_if_reached_pct": 61.29,
             "overall_win_pct": 18.35
           }
         ]
@@ -1881,82 +1893,82 @@
       {
         "match": 97,
         "likely_winner": "Netherlands",
-        "predicted_score": "Netherlands 3-3 Germany (17.22%)",
+        "predicted_score": "Netherlands 2-1 Germany (17.14%)",
         "teams": [
           {
             "name": "Netherlands",
-            "reach_pct": 32.67,
-            "win_if_reached_pct": 52.71,
-            "overall_win_pct": 17.22
+            "reach_pct": 32.73,
+            "win_if_reached_pct": 52.37,
+            "overall_win_pct": 17.14
           },
           {
             "name": "Germany",
-            "reach_pct": 25.64,
-            "win_if_reached_pct": 57.49,
-            "overall_win_pct": 14.74
-          }
-        ],
-        "score_90": "2-2",
-        "score_120": "3-3",
-        "went_to_et": true,
-        "went_to_penalties": true,
-        "et_lambda_home": 0.4291,
-        "et_lambda_away": 0.4111
-      },
-      {
-        "match": 98,
-        "likely_winner": "Spain",
-        "predicted_score": "Spain 1-0 Belgium (25.5%)",
-        "teams": [
-          {
-            "name": "Spain",
-            "reach_pct": 35.49,
-            "win_if_reached_pct": 71.85,
-            "overall_win_pct": 25.5
-          },
-          {
-            "name": "Belgium",
-            "reach_pct": 18.68,
-            "win_if_reached_pct": 34.48,
-            "overall_win_pct": 6.44
+            "reach_pct": 26.12,
+            "win_if_reached_pct": 56.74,
+            "overall_win_pct": 14.82
           }
         ]
       },
       {
+        "match": 98,
+        "likely_winner": "Spain",
+        "predicted_score": "Spain 2-2 Belgium (25.88%)",
+        "teams": [
+          {
+            "name": "Spain",
+            "reach_pct": 35.9,
+            "win_if_reached_pct": 72.09,
+            "overall_win_pct": 25.88
+          },
+          {
+            "name": "Belgium",
+            "reach_pct": 18.94,
+            "win_if_reached_pct": 35.69,
+            "overall_win_pct": 6.76
+          }
+        ],
+        "score_90": "2-2",
+        "score_120": "2-2",
+        "went_to_et": true,
+        "went_to_penalties": true,
+        "et_lambda_home": 0.5375,
+        "et_lambda_away": 0.3282
+      },
+      {
         "match": 99,
         "likely_winner": "Brazil",
-        "predicted_score": "Brazil 4-0 Mexico (12.59%)",
+        "predicted_score": "Brazil 3-0 England (11.93%)",
         "teams": [
           {
             "name": "Brazil",
-            "reach_pct": 21.74,
-            "win_if_reached_pct": 57.91,
-            "overall_win_pct": 12.59
+            "reach_pct": 21.66,
+            "win_if_reached_pct": 55.08,
+            "overall_win_pct": 11.93
           },
           {
-            "name": "Mexico",
-            "reach_pct": 18.33,
-            "win_if_reached_pct": 51.01,
-            "overall_win_pct": 9.35
+            "name": "England",
+            "reach_pct": 18.08,
+            "win_if_reached_pct": 50.66,
+            "overall_win_pct": 9.16
           }
         ]
       },
       {
         "match": 100,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 4-0 Portugal (22.07%)",
+        "predicted_score": "Argentina 0-1 Portugal (21.85%)",
         "teams": [
           {
             "name": "Argentina",
-            "reach_pct": 34.63,
-            "win_if_reached_pct": 63.73,
-            "overall_win_pct": 22.07
+            "reach_pct": 34.78,
+            "win_if_reached_pct": 62.82,
+            "overall_win_pct": 21.85
           },
           {
             "name": "Portugal",
-            "reach_pct": 25.97,
-            "win_if_reached_pct": 46.48,
-            "overall_win_pct": 12.07
+            "reach_pct": 26.45,
+            "win_if_reached_pct": 47.03,
+            "overall_win_pct": 12.44
           }
         ]
       }
@@ -1965,44 +1977,38 @@
       {
         "match": 101,
         "likely_winner": "Spain",
-        "predicted_score": "Spain 2-1 Netherlands (13.23%)",
+        "predicted_score": "Spain 2-3 Netherlands (14.01%)",
         "teams": [
           {
             "name": "Spain",
-            "reach_pct": 25.5,
-            "win_if_reached_pct": 51.88,
-            "overall_win_pct": 13.23
+            "reach_pct": 25.88,
+            "win_if_reached_pct": 54.13,
+            "overall_win_pct": 14.01
           },
           {
             "name": "Netherlands",
-            "reach_pct": 17.63,
-            "win_if_reached_pct": 55.7,
-            "overall_win_pct": 9.82
+            "reach_pct": 17.56,
+            "win_if_reached_pct": 56.78,
+            "overall_win_pct": 9.97
           }
-        ],
-        "score_90": "1-1",
-        "score_120": "2-1",
-        "went_to_et": true,
-        "went_to_penalties": false,
-        "et_lambda_home": 0.4708,
-        "et_lambda_away": 0.3747
+        ]
       },
       {
         "match": 102,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 1-5 Brazil (12.3%)",
+        "predicted_score": "Argentina 2-1 Portugal (12.31%)",
         "teams": [
           {
             "name": "Argentina",
-            "reach_pct": 22.21,
-            "win_if_reached_pct": 55.38,
-            "overall_win_pct": 12.3
+            "reach_pct": 22.01,
+            "win_if_reached_pct": 55.93,
+            "overall_win_pct": 12.31
           },
           {
-            "name": "Brazil",
-            "reach_pct": 12.59,
-            "win_if_reached_pct": 49.56,
-            "overall_win_pct": 6.24
+            "name": "Portugal",
+            "reach_pct": 12.47,
+            "win_if_reached_pct": 54.53,
+            "overall_win_pct": 6.8
           }
         ]
       }
@@ -2010,19 +2016,19 @@
     "third_place_match": {
       "match": 103,
       "likely_winner": "Spain",
-      "predicted_score": "Spain 0-1 Argentina (8.28%)",
+      "predicted_score": "Spain 6-1 Argentina (7.98%)",
       "teams": [
         {
           "name": "Spain",
-          "reach_pct": 14.82,
-          "win_if_reached_pct": 55.87,
-          "overall_win_pct": 8.28
+          "reach_pct": 13.85,
+          "win_if_reached_pct": 57.62,
+          "overall_win_pct": 7.98
         },
         {
           "name": "Argentina",
-          "reach_pct": 11.82,
-          "win_if_reached_pct": 51.44,
-          "overall_win_pct": 6.08
+          "reach_pct": 11.53,
+          "win_if_reached_pct": 52.99,
+          "overall_win_pct": 6.11
         }
       ]
     },
@@ -2030,38 +2036,38 @@
       "match": 103,
       "city": "Miami",
       "likely_winner": "Netherlands",
-      "predicted_score": "Netherlands 0-1 Brazil (5.53%)",
+      "predicted_score": "Netherlands 0-2 France (5.39%)",
       "teams": [
         {
           "name": "Netherlands",
-          "reach_pct": 9.7,
-          "win_if_reached_pct": 57.01,
-          "overall_win_pct": 5.53
+          "reach_pct": 9.68,
+          "win_if_reached_pct": 55.68,
+          "overall_win_pct": 5.39
         },
         {
-          "name": "Brazil",
-          "reach_pct": 8.86,
-          "win_if_reached_pct": 52.71,
-          "overall_win_pct": 4.67
+          "name": "France",
+          "reach_pct": 8.36,
+          "win_if_reached_pct": 54.31,
+          "overall_win_pct": 4.54
         }
       ]
     },
     "final": {
       "match": 104,
       "likely_winner": "Spain",
-      "predicted_score": "Spain 4-1 Argentina (9.63%)",
+      "predicted_score": "Spain 3-4 Argentina (9.83%)",
       "teams": [
         {
           "name": "Spain",
-          "reach_pct": 16.25,
-          "win_if_reached_pct": 59.26,
-          "overall_win_pct": 9.63
+          "reach_pct": 17.26,
+          "win_if_reached_pct": 56.95,
+          "overall_win_pct": 9.83
         },
         {
           "name": "Argentina",
-          "reach_pct": 14.18,
-          "win_if_reached_pct": 49.15,
-          "overall_win_pct": 6.97
+          "reach_pct": 14.17,
+          "win_if_reached_pct": 48.84,
+          "overall_win_pct": 6.92
         }
       ]
     }
@@ -2070,89 +2076,89 @@
     {
       "player": "Mikel Oyarzabal",
       "team": "Spain",
-      "golden_boot_pct": 18.29,
-      "mean_goals": 8.34,
-      "expected_matches": 5.66,
+      "golden_boot_pct": 18.77,
+      "mean_goals": 8.38,
+      "expected_matches": 5.64,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Lautaro Mart\u00ednez",
       "team": "Argentina",
-      "golden_boot_pct": 10.21,
-      "mean_goals": 6.89,
-      "expected_matches": 5.47,
+      "golden_boot_pct": 10.14,
+      "mean_goals": 6.92,
+      "expected_matches": 5.46,
       "is_penalty_taker": false,
       "is_proxy": false
     },
     {
       "player": "Kylian Mbapp\u00e9",
       "team": "France",
-      "golden_boot_pct": 7.75,
-      "mean_goals": 6.52,
-      "expected_matches": 5.22,
+      "golden_boot_pct": 7.22,
+      "mean_goals": 6.5,
+      "expected_matches": 5.23,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Germany (squad avg)",
       "team": "Germany",
-      "golden_boot_pct": 6.64,
-      "mean_goals": 6.49,
-      "expected_matches": 5.23,
+      "golden_boot_pct": 6.91,
+      "mean_goals": 6.54,
+      "expected_matches": 5.24,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
-      "player": "X. Simons",
-      "team": "Netherlands",
-      "golden_boot_pct": 5.5,
-      "mean_goals": 6.06,
-      "expected_matches": 5.36,
+      "player": "Keito Nakamura",
+      "team": "Japan",
+      "golden_boot_pct": 5.35,
+      "mean_goals": 5.16,
+      "expected_matches": 4.02,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
-      "player": "Keito Nakamura",
-      "team": "Japan",
-      "golden_boot_pct": 4.92,
-      "mean_goals": 5.11,
-      "expected_matches": 4.0,
+      "player": "X. Simons",
+      "team": "Netherlands",
+      "golden_boot_pct": 5.23,
+      "mean_goals": 5.99,
+      "expected_matches": 5.36,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Mexico (squad avg)",
       "team": "Mexico",
-      "golden_boot_pct": 3.53,
-      "mean_goals": 5.49,
-      "expected_matches": 5.0,
+      "golden_boot_pct": 3.46,
+      "mean_goals": 5.5,
+      "expected_matches": 4.99,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
       "player": "Colombia (squad avg)",
       "team": "Colombia",
-      "golden_boot_pct": 3.3,
-      "mean_goals": 5.32,
-      "expected_matches": 4.92,
+      "golden_boot_pct": 3.38,
+      "mean_goals": 5.24,
+      "expected_matches": 4.87,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
       "player": "L. Trossard",
       "team": "Belgium",
-      "golden_boot_pct": 3.16,
-      "mean_goals": 5.45,
-      "expected_matches": 4.85,
+      "golden_boot_pct": 2.95,
+      "mean_goals": 5.42,
+      "expected_matches": 4.86,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "USA (squad avg)",
       "team": "USA",
-      "golden_boot_pct": 2.92,
-      "mean_goals": 5.11,
+      "golden_boot_pct": 2.76,
+      "mean_goals": 5.09,
       "expected_matches": 4.85,
       "is_penalty_taker": true,
       "is_proxy": true
@@ -2160,89 +2166,89 @@
     {
       "player": "A. Budimir",
       "team": "Croatia",
-      "golden_boot_pct": 2.31,
-      "mean_goals": 4.96,
-      "expected_matches": 4.95,
-      "is_penalty_taker": true,
-      "is_proxy": false
-    },
-    {
-      "player": "Switzerland (squad avg)",
-      "team": "Switzerland",
-      "golden_boot_pct": 2.11,
-      "mean_goals": 4.89,
-      "expected_matches": 4.66,
-      "is_penalty_taker": true,
-      "is_proxy": true
-    },
-    {
-      "player": "Endrick",
-      "team": "Brazil",
-      "golden_boot_pct": 2.05,
-      "mean_goals": 4.76,
-      "expected_matches": 5.07,
+      "golden_boot_pct": 2.29,
+      "mean_goals": 4.91,
+      "expected_matches": 4.96,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Youssef En-Nesyri",
       "team": "Morocco",
-      "golden_boot_pct": 2.02,
-      "mean_goals": 4.49,
-      "expected_matches": 4.74,
+      "golden_boot_pct": 2.27,
+      "mean_goals": 4.52,
+      "expected_matches": 4.78,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
-      "player": "Darwin Nunez",
-      "team": "Uruguay",
-      "golden_boot_pct": 1.88,
-      "mean_goals": 4.24,
+      "player": "Austria (squad avg)",
+      "team": "Austria",
+      "golden_boot_pct": 2.08,
+      "mean_goals": 4.29,
+      "expected_matches": 4.47,
+      "is_penalty_taker": true,
+      "is_proxy": true
+    },
+    {
+      "player": "Switzerland (squad avg)",
+      "team": "Switzerland",
+      "golden_boot_pct": 1.83,
+      "mean_goals": 4.84,
       "expected_matches": 4.63,
       "is_penalty_taker": true,
-      "is_proxy": false
+      "is_proxy": true
     },
     {
       "player": "T. Reijnders",
       "team": "Netherlands",
-      "golden_boot_pct": 1.86,
+      "golden_boot_pct": 1.81,
       "mean_goals": 4.88,
       "expected_matches": 5.36,
       "is_penalty_taker": false,
       "is_proxy": false
     },
     {
-      "player": "Austria (squad avg)",
-      "team": "Austria",
-      "golden_boot_pct": 1.79,
-      "mean_goals": 4.25,
-      "expected_matches": 4.46,
+      "player": "Endrick",
+      "team": "Brazil",
+      "golden_boot_pct": 1.74,
+      "mean_goals": 4.66,
+      "expected_matches": 5.05,
       "is_penalty_taker": true,
-      "is_proxy": true
+      "is_proxy": false
     },
     {
       "player": "Norway (squad avg)",
       "team": "Norway",
-      "golden_boot_pct": 1.61,
-      "mean_goals": 4.2,
-      "expected_matches": 4.48,
+      "golden_boot_pct": 1.57,
+      "mean_goals": 4.19,
+      "expected_matches": 4.5,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
+      "player": "Darwin Nunez",
+      "team": "Uruguay",
+      "golden_boot_pct": 1.57,
+      "mean_goals": 4.2,
+      "expected_matches": 4.63,
+      "is_penalty_taker": true,
+      "is_proxy": false
+    },
+    {
       "player": "J. Bellingham",
       "team": "England",
-      "golden_boot_pct": 1.57,
-      "mean_goals": 4.64,
-      "expected_matches": 5.01,
+      "golden_boot_pct": 1.55,
+      "mean_goals": 4.67,
+      "expected_matches": 5.05,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Sweden (squad avg)",
       "team": "Sweden",
-      "golden_boot_pct": 1.46,
-      "mean_goals": 3.93,
+      "golden_boot_pct": 1.31,
+      "mean_goals": 3.92,
       "expected_matches": 4.34,
       "is_penalty_taker": true,
       "is_proxy": true
