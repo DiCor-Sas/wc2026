@@ -421,15 +421,59 @@ def _ko_bracket_key(num):
     return None
 
 
-def _resolve_ko_slot(label, bracket):
+def _third_place_pool_team(match_num, bracket):
+    """Resolve a '3RD PLACE (POOL)' slot to a real team, but only when the
+    assignment is provably forced by elimination — never by heuristic.
+    Returns the team name, or None if any ambiguity remains."""
+    advancing = {}  # group letter -> team name
+    for i in range(1, 9):
+        slot = bracket.get(f"3rd Place Best {i}")
+        if not slot or slot.get("status") != "CONFIRMED":
+            return None
+        m = re.search(r"\(Group (\w)\)", slot.get("qualified_via", ""))
+        if not m:
+            return None
+        advancing[m.group(1)] = slot["team"]
+
+    remaining = dict(advancing)
+    unresolved = []
+    for mn in THIRD_PLACE_POOLS:
+        slot = bracket.get(_ko_bracket_key(mn))
+        if slot and slot.get("status") == "CONFIRMED":
+            # consumed group = whichever participant was a third-place advancer
+            participants = {slot.get("team"), slot.get("loser")}
+            for g, team in list(remaining.items()):
+                if team in participants:
+                    del remaining[g]
+        else:
+            unresolved.append(mn)
+
+    # Constraint propagation: assign any slot whose pool intersects exactly
+    # one remaining group, remove it, repeat until stable.
+    assignments = {}
+    changed = True
+    while changed and remaining:
+        changed = False
+        for mn in list(unresolved):
+            cands = THIRD_PLACE_POOLS[mn] & set(remaining)
+            if len(cands) == 1:
+                g = cands.pop()
+                assignments[mn] = remaining.pop(g)
+                unresolved.remove(mn)
+                changed = True
+    return assignments.get(match_num)
+
+
+def _resolve_ko_slot(label, bracket, match_num=None):
     """Resolve a knockout fixture slot label to a confirmed real team name.
 
     Returns (display_name, confirmed). Slots of the form "1ST GROUP A" /
     "2ND GROUP A" resolve via bracket_state.json once that group position is
     CONFIRMED. "WINNER M.."/"LOSER M.." slots resolve via the knockout slot
     confirmed by update_bracket_state() once that match has been played.
-    "3RD PLACE (POOL)" can't be resolved without the FIFA allocation table
-    and stays PROJECTED. Anything else is assumed to be a real team name.
+    "3RD PLACE (POOL)" resolves via _third_place_pool_team() when the pool
+    assignment is provably forced by elimination; otherwise it stays
+    PROJECTED. Anything else is assumed to be a real team name.
     """
     parts = label.split()
     if len(parts) == 3 and parts[1] == "GROUP" and parts[0] in ("1ST", "2ND"):
@@ -449,6 +493,10 @@ def _resolve_ko_slot(label, bracket):
                 return _norm(team), True
         return label, False
     if label == "3RD PLACE (POOL)":
+        if match_num is not None:
+            team = _third_place_pool_team(match_num, bracket)
+            if team:
+                return _norm(team), True
         return label, False
     return label, True
 
@@ -480,6 +528,14 @@ CONF_TOOLTIPS = {
 
 KO_ROUND_LABELS = {"R32": "ROUND OF 32", "R16": "ROUND OF 16", "QF": "QUARTERFINAL",
                    "SF": "SEMIFINAL", "3P": "THIRD PLACE", "F": "FINAL"}
+
+# Allowed third-place groups per 1v3 R32 match. Mirrors THIRD_PLACE_POOLS in
+# engine/schedule.py (duplicated because this module must stay stdlib-only
+# for notify.yml, which never pip-installs).
+THIRD_PLACE_POOLS = {
+    74: set("ABCDF"), 77: set("CDFGH"), 79: set("CEFHI"), 80: set("EHIJK"),
+    81: set("BEFIJ"), 82: set("AEHIJ"), 85: set("EFGIJ"), 87: set("DEIJL"),
+}
 
 R32_MATCHES = [
     {"num": 73,  "date": "Jun 28", "city": "Los Angeles",   "home": "2nd Group A", "away": "2nd Group B"},
@@ -613,8 +669,8 @@ def _upcoming_matches(data):
         kickoff_utc_iso = (ko_col + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         if match_num:
-            t1_disp, t1_confirmed = _resolve_ko_slot(t1_raw, bracket)
-            t2_disp, t2_confirmed = _resolve_ko_slot(t2_raw, bracket)
+            t1_disp, t1_confirmed = _resolve_ko_slot(t1_raw, bracket, match_num)
+            t2_disp, t2_confirmed = _resolve_ko_slot(t2_raw, bracket, match_num)
             confirmed = t1_confirmed and t2_confirmed
             ko_entry = ko_index.get(match_num)
 

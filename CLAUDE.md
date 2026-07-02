@@ -644,6 +644,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   the engine's priority heuristic — self-corrects automatically once
   M82's real result is ingested. M81=Bosnia-Herzegovina and M87=Ghana are
   provably forced by the pool constraints.
+- **3RD PLACE (POOL) slot resolver (2026-07-02)**: `_resolve_ko_slot()`
+  previously returned unconfirmed=False for all 3RD PLACE (POOL) labels,
+  leaving M85 (Switzerland vs Algeria) and M87 (Colombia vs Ghana) as dead
+  cards despite real probabilities existing in predictions.json. Fixed by
+  adding `_third_place_pool_team()` which uses constraint propagation on
+  bracket_state.json's confirmed best-third-place slots and
+  `THIRD_PLACE_POOLS` (duplicated from engine/schedule.py as a stdlib-only
+  module constant) to resolve pool assignments only when provably forced by
+  elimination, never by heuristic. After M82 Belgium vs Senegal completed,
+  Algeria (Group J) and Ghana (Group L) were the only two unassigned
+  advancers; M85 pool allows J but not L, forcing Algeria into M85 and Ghana
+  into M87 by propagation. Fix timed before M85 kickoff (22:00 COT July 2)
+  and the 21:40 Telegram reminder.
 
 ## 8. DASHBOARD STRUCTURE
 
