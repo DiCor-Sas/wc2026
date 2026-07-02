@@ -1,12 +1,23 @@
-"""LOO form-FIELD comparison: SOT-only (current production modifier) vs
-SOT + totalShots + possessionPct (the two matchday-2 survivors).
+"""LOO form-FIELD comparison. Originally SOT-only (current production
+modifier) vs SOT + totalShots + possessionPct (NO-GO, FRAGILE, 2026-06-25).
+
+Extended 2026-07-02 to a three-way comparison with a goals-based arm:
+  A) SOT-only (production)
+  B) SOT + goals
+  C) goals-only
+where "goals" is a strict-LOO form modifier built from actual WC2026 goals
+scored/conceded in wc2026_results.json (decay-weighted, divided by the
+strictly-prior tournament average goals per team per match, clamped
+[0.85,1.15] — the exact pattern of the SOT modifier, with real goals as the
+stat). Shootout-decided knockout matches contribute their stored 120-min
+score.
 
 Standalone, read-only — a sibling of backtest_ensemble.py. Touches NO
 production file and does NOT import or alter _form_modifiers(). It reimplements
 the strict-LOO modifier locally (byte-identical to backtest_ensemble.py for the
-SOT-only arm) and adds a generalized multi-field version. The two arms run the
-same prequential loop and differ ONLY in which stat fields feed the form
-modifier, so any Brier/RPS gap is attributable to the added fields alone.
+SOT-only arm) and adds a generalized multi-field version. All arms run the
+same prequential loop and differ ONLY in which stats feed the form
+modifier, so any Brier/RPS gap is attributable to the changed inputs alone.
 
 Run: python3 backtest_form_fields.py
 """
@@ -83,7 +94,41 @@ def field_form_mod(team, before_date, field, stats_by_pair, canon):
     return atk, dfn
 
 
-def combined_form_mod(team, before_date, fields, stats_by_pair, canon):
+def goals_form_mod(team, before_date, goal_matches):
+    """Strict-LOO goals-based form modifier from wc2026_results.json scores.
+    Same decay/average/clamp pattern as field_form_mod, with actual goals
+    scored/conceded as the stat. The normalizing average is goals per team
+    per match over strictly-prior matches only (converges to the ~1.47
+    tournament baseline; a fixed 1.47 would leak future information into
+    the LOO). Shootout matches contribute their stored 120-min score.
+    Returns (atk, def) clamped [0.85,1.15]; neutral with no prior data."""
+    recs = []
+    pool = []
+    for dt, t1, t2, hs, as_ in goal_matches:
+        if not dt or dt >= before_date:
+            continue
+        pool.append(hs)
+        pool.append(as_)
+        if t1 == team:
+            recs.append((dt, hs, as_))
+        elif t2 == team:
+            recs.append((dt, as_, hs))
+    if not recs or not pool or sum(pool) == 0:
+        return 1.0, 1.0
+    recs.sort(key=lambda r: r[0])
+    n = len(recs)
+    w = [0.5 ** (n - 1 - i) for i in range(n)]
+    ws = sum(w)
+    g_for = sum(wi * r[1] for wi, r in zip(w, recs)) / ws
+    g_ag  = sum(wi * r[2] for wi, r in zip(w, recs)) / ws
+    avg = sum(pool) / len(pool)
+    atk = max(0.85, min(1.15, g_for / avg))
+    dfn = max(0.85, min(1.15, g_ag  / avg))
+    return atk, dfn
+
+
+def combined_form_mod(team, before_date, fields, stats_by_pair, canon,
+                      goal_matches=None):
     """Average the per-field clamped (atk,def) across `fields`. The mean of
     values each in [0.85,1.15] is itself in [0.85,1.15] — identical adjustment
     envelope to the SOT-only modifier, so the ONLY thing that varies between
@@ -97,7 +142,10 @@ def combined_form_mod(team, before_date, fields, stats_by_pair, canon):
     pattern for a clean A/B, but a possession-driven result deserves caution."""
     atks, dfns = [], []
     for f in fields:
-        a, d = field_form_mod(team, before_date, f, stats_by_pair, canon)
+        if f == "goals":
+            a, d = goals_form_mod(team, before_date, goal_matches or [])
+        else:
+            a, d = field_form_mod(team, before_date, f, stats_by_pair, canon)
         atks.append(a)
         dfns.append(d)
     return sum(atks) / len(atks), sum(dfns) / len(dfns)
@@ -147,8 +195,10 @@ def run_arm(fields, results, fixtures, strength, stats):
         s2 = strength.get(t2, {}).get("final_strength", 1600.0)
         lh, la = ens.strength_lambdas(s1, s2)
 
-        atk1, def1 = combined_form_mod(t1, dt, fields, stats_by_pair, canon)
-        atk2, def2 = combined_form_mod(t2, dt, fields, stats_by_pair, canon)
+        atk1, def1 = combined_form_mod(t1, dt, fields, stats_by_pair, canon,
+                                       goal_matches=matches)
+        atk2, def2 = combined_form_mod(t2, dt, fields, stats_by_pair, canon,
+                                       goal_matches=matches)
         active = (atk1, def1, atk2, def2) != (1.0, 1.0, 1.0, 1.0)
         if active:
             loo_active += 1
@@ -175,20 +225,21 @@ def run_arm(fields, results, fixtures, strength, stats):
                 loo_active=loo_active, rows=rows, weights=weights)
 
 
-def sensitivity_report(a, b):
+def sensitivity_report(a, b, arm_name="3-field"):
     """LEAVE-ONE-ACTIVE-MATCH-OUT sensitivity on the whole-set delta.
 
-    The whole-set delta (positive = 3-field better) is driven entirely by the
-    LOO-active matches: every inactive match scores identically under both arms
-    and contributes exactly 0 to the delta. So neutralizing one active match
-    ('as if its modifier had never differed from neutral') simply drops that
-    match's (SOT - 3field) difference from the delta, keeping the whole-set
-    denominator N. If neutralizing any single match flips the sign of EITHER
-    metric's delta, the headline result rests on that one match — and since the
-    GO rule needs both metrics positive, a flip on either breaks the verdict.
+    The whole-set delta (positive = challenger arm better) is driven entirely
+    by the LOO-active matches: every inactive match scores identically under
+    both arms and contributes exactly 0 to the delta. So neutralizing one
+    active match ('as if its modifier had never differed from neutral') simply
+    drops that match's (baseline - challenger) difference from the delta,
+    keeping the whole-set denominator N. If neutralizing any single match flips
+    the sign of EITHER metric's delta, the headline result rests on that one
+    match — and since the GO rule needs both metrics positive, a flip on either
+    breaks the verdict.
     """
     N = len(a['base_b'])
-    full_db = (sum(a['base_b']) - sum(b['base_b'])) / N   # + => 3-field better
+    full_db = (sum(a['base_b']) - sum(b['base_b'])) / N   # + => challenger better
     full_dr = (sum(a['base_r']) - sum(b['base_r'])) / N
 
     # each active match's share of the full delta (label, brier_share, rps_share)
@@ -207,8 +258,9 @@ def sensitivity_report(a, b):
     rmin, rmax = min(excl_r, key=lambda x: x[1]), max(excl_r, key=lambda x: x[1])
 
     print("\n" + "-" * 72)
-    print("SINGLE-MATCH SENSITIVITY (leave-one-active-match-out on whole-set delta)")
-    print(f"  Full delta (positive = 3-field better): "
+    print(f"SINGLE-MATCH SENSITIVITY — {arm_name} vs SOT-only "
+          "(leave-one-active-match-out on whole-set delta)")
+    print(f"  Full delta (positive = {arm_name} better): "
           f"Brier {full_db:+.4f}  RPS {full_dr:+.4f}  over {len(active)} active matches")
     print(f"  Brier delta range: min {bmin[1]:+.4f} (drop {bmin[0]})  ..  "
           f"max {bmax[1]:+.4f} (drop {bmax[0]})")
@@ -238,45 +290,57 @@ def main():
     strength = _load("team_strength.json")
     stats    = _load("match_stats.json")
 
-    SOT_ONLY = ["shotsOnTarget"]
-    THREE    = ["shotsOnTarget", "totalShots", "possessionPct"]
+    SOT_ONLY  = ["shotsOnTarget"]
+    SOT_GOALS = ["shotsOnTarget", "goals"]
+    GOALS     = ["goals"]
 
-    a = run_arm(SOT_ONLY, results, fixtures, strength, stats)
-    b = run_arm(THREE,    results, fixtures, strength, stats)
+    a = run_arm(SOT_ONLY,  results, fixtures, strength, stats)
+    b = run_arm(SOT_GOALS, results, fixtures, strength, stats)
+    c = run_arm(GOALS,     results, fixtures, strength, stats)
 
     def mean(x): return sum(x) / len(x)
 
-    print(f"\nForm-field LOO comparison | {len(a['rows'])} matches | "
-          f"LOO-active rows: SOT-only={a['loo_active']}, 3-field={b['loo_active']}\n")
+    print(f"\nForm LOO three-way comparison | {len(a['rows'])} matches | "
+          f"LOO-active rows: SOT-only={a['loo_active']}, "
+          f"SOT+goals={b['loo_active']}, goals-only={c['loo_active']}\n")
 
-    # focused view: only the matches where the modifier is non-neutral, where
-    # the two arms can possibly differ
+    # focused view: only the matches where some arm's modifier is non-neutral,
+    # where the arms can possibly differ
     print("LOO-active matches only (baseline Skellam Brier under each arm):")
-    print(f"{'date':11s} {'match':30s} {'res':5s} {'BS_SOT':>8s} {'BS_3fld':>8s} {'delta':>8s}")
-    for (dt, t1, t2, res, bb_a, *_a, act_a), (_, _, _, _, bb_b, *_b, act_b) in zip(a['rows'], b['rows']):
-        if act_a or act_b:
-            d = bb_b - bb_a   # negative => 3-field lower Brier => better
+    print(f"{'date':11s} {'match':30s} {'res':5s} {'BS_SOT':>8s} "
+          f"{'BS_S+G':>8s} {'BS_G':>8s} {'dS+G':>8s} {'dG':>8s}")
+    for ra, rb, rc in zip(a['rows'], b['rows'], c['rows']):
+        dt, t1, t2, res, bb_a, *_x, act_a = ra
+        bb_b, act_b = rb[4], rb[8]
+        bb_c, act_c = rc[4], rc[8]
+        if act_a or act_b or act_c:
+            # negative => challenger lower Brier => better
             print(f"{dt:11s} {t1[:14]+' v '+t2[:11]:30s} {res:5s} "
-                  f"{bb_a:8.4f} {bb_b:8.4f} {d:+8.4f}")
+                  f"{bb_a:8.4f} {bb_b:8.4f} {bb_c:8.4f} "
+                  f"{bb_b-bb_a:+8.4f} {bb_c-bb_a:+8.4f}")
 
     print("-" * 72)
     print(f"WHOLE-SET MEANS (all {len(a['rows'])} matches):")
-    print(f"  Baseline Skellam  SOT-only : Brier={mean(a['base_b']):.4f}  RPS={mean(a['base_r']):.4f}")
-    print(f"  Baseline Skellam  3-field  : Brier={mean(b['base_b']):.4f}  RPS={mean(b['base_r']):.4f}")
-    db = mean(a['base_b']) - mean(b['base_b'])
-    dr = mean(a['base_r']) - mean(b['base_r'])
-    print(f"  -> delta (positive = 3-field better): Brier {db:+.4f}  RPS {dr:+.4f}")
-    print(f"  Ensemble (DC+NB+BVP) SOT-only: Brier={mean(a['ens_b']):.4f}  RPS={mean(a['ens_r']):.4f}")
-    print(f"  Ensemble (DC+NB+BVP) 3-field : Brier={mean(b['ens_b']):.4f}  RPS={mean(b['ens_r']):.4f}")
+    print(f"  Baseline Skellam  SOT-only  : Brier={mean(a['base_b']):.4f}  RPS={mean(a['base_r']):.4f}")
+    print(f"  Baseline Skellam  SOT+goals : Brier={mean(b['base_b']):.4f}  RPS={mean(b['base_r']):.4f}")
+    print(f"  Baseline Skellam  goals-only: Brier={mean(c['base_b']):.4f}  RPS={mean(c['base_r']):.4f}")
+    for name, arm in (("SOT+goals", b), ("goals-only", c)):
+        db = mean(a['base_b']) - mean(arm['base_b'])
+        dr = mean(a['base_r']) - mean(arm['base_r'])
+        print(f"  -> delta (positive = {name} better): Brier {db:+.4f}  RPS {dr:+.4f}")
 
-    print("\nVERDICT (production baseline):",
-          "3-field >= SOT-only on both metrics — candidate worth deeper testing"
-          if db >= 0 and dr >= 0 else
-          "3-field does NOT beat SOT-only — keep production SOT-only modifier")
-    print("\nNOTE: only the LOO-active matches above can differ between arms; with",
-          f"{a['loo_active']} active of {len(a['rows'])}, this is directional, not conclusive.")
+    print("\nVERDICTS vs production SOT-only (aggregate only; GO also requires "
+          "STABLE below):")
+    for name, arm in (("SOT+goals", b), ("goals-only", c)):
+        db = mean(a['base_b']) - mean(arm['base_b'])
+        dr = mean(a['base_r']) - mean(arm['base_r'])
+        print(f"  {name:10s}:",
+              "beats SOT-only on both metrics — candidate worth deeper testing"
+              if db > 0 and dr > 0 else
+              "does NOT beat SOT-only — keep production SOT-only modifier")
 
-    sensitivity_report(a, b)
+    sensitivity_report(a, b, arm_name="SOT+goals")
+    sensitivity_report(a, c, arm_name="goals-only")
 
 
 if __name__ == "__main__":

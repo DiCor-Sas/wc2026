@@ -919,6 +919,41 @@ If anything in Decision 3 fails, fix it before ending the session — this is th
   departure: confirm cron-job.org backup is enabled on its dashboard, and
   optionally fire one production workflow_dispatch from his phone via
   MANUAL_TRIGGER.md (local `gh` CLI is not installed).
+- **Goals-form backtest, first STABLE pass and production GO (2026-07-02)**:
+  `backtest_form_fields.py` extended to a three-way strict-LOO comparison —
+  production SOT-only vs SOT+goals vs goals-only, where "goals" is a
+  decay-weighted (0.5x) goals-scored/conceded modifier built from
+  `wc2026_results.json`, normalized by the strictly-prior tournament average
+  goals per team per match (not the fixed end-of-sample 1.47, which would
+  leak future data into the LOO) and clamped [0.85, 1.15]. On 83 matches /
+  59 LOO-active (5x the June 25 sample): goals-only Brier 0.4875 vs SOT-only
+  0.4991 (+0.0116) and RPS 0.1459 vs 0.1490 (+0.0031), with the single-match
+  sensitivity check reporting **STABLE for the first time in this project's
+  history** — the sign survives removal of any single active match (worst
+  case Türkiye 3-2 USA, the goals arm's biggest miss). SOT+goals also passes
+  but weaker (+0.0087 Brier) — SOT dilutes the goals signal. A fourth
+  neutral (no-modifier) arm revealed the production SOT-only modifier never
+  actually beat no-modifier on Brier (−0.0013; RPS +0.0012 — a wash), while
+  goals-only beats neutral on both (+0.0103 / +0.0043, STABLE). Gains
+  concentrate in draws (Germany-Paraguay 1-1, Paraguay-Australia 0-0,
+  Egypt-Iran 1-1, Algeria-Austria 3-3): decay-weighted goals calibrate
+  low-scoring teams' lambdas — and hence draw probability — better than SOT.
+  Per the 2026-06-22 rule (GO requires STABLE, not just passing aggregates),
+  this is the first legitimate GO. Deployed 2026-07-02: goals-only modifier
+  wired into `run_predictions.py`'s final_strength Dixon-Coles lambda paths
+  (`_poisson_most_probable_score()` and `_extra_time_score()`, via a shared
+  `_dc_lambdas()` helper and a `_GOALS_FORM_MODS` table computed once per
+  pipeline run as a pure function of `wc2026_results.json`). Deliberately
+  NOT applied to: the engine Monte Carlo (win probabilities already absorb
+  real goals through dynamic off/def rank updates in the ForcedModeledMatch
+  replay — applying it there would double-count), the group-stage Skellam
+  path (group stage complete), and `generate_index.py`'s SOT modifier (its
+  group-stage display surface is gone; left as-is rather than churned).
+  Decay-weighting note observed at deploy time: a team's modifier reflects
+  recent matches far more than season totals — e.g. Croatia (5 GA total but
+  sequence 4-0-1 oldest→newest) gets def=0.85, not >1, because the decayed
+  weighted GA is 1.14 vs the 1.47 average. This is by design and is exactly
+  what the backtest validated.
 
 ## 10. WORKING AGREEMENT
 

@@ -328,6 +328,84 @@ total = sum(winners.values())
 _TEAM_STRENGTH = json.load(
     open(_ROOT / "team_strength.json")
 )
+
+
+# ── Goals-based form modifier (2026-07-02, backtest-validated STABLE) ────────
+# Decay-weighted (0.5x) goals scored/conceded per team from all completed WC
+# matches, normalized by the tournament average goals per team per match,
+# clamped [0.85, 1.15]. Pure function of wc2026_results.json, computed once
+# per pipeline run. Applied ONLY to the final_strength Dixon-Coles lambda
+# paths below — never to the engine Monte Carlo, whose dynamic off/def ranks
+# already absorb real goals via the ForcedModeledMatch replay.
+
+def _build_goals_form_modifiers():
+    canon, ko_dates = {}, {}
+    try:
+        for fx in json.load(open(_ROOT / "fixtures.json")):
+            if fx.get("home") and fx.get("away"):
+                canon[frozenset({fx["home"], fx["away"]})] = fx.get("date")
+            if fx.get("match_num"):
+                ko_dates[fx["match_num"]] = fx.get("date")
+    except Exception:
+        pass
+
+    dated = []
+    for rec in _REAL_RESULTS:
+        if rec.get("match_num"):
+            dt = ko_dates.get(rec["match_num"]) or rec.get("date")
+        else:
+            dt = canon.get(frozenset({rec["team1"], rec["team2"]})) or rec.get("date")
+        if dt:
+            dated.append((dt, rec["team1"], rec["team2"],
+                          rec["home_score"], rec["away_score"]))
+    if not dated:
+        return {}
+    dated.sort(key=lambda m: m[0])
+
+    # Tournament average goals per team per match (~1.47 at time of writing)
+    avg = sum(hs + as_ for _, _, _, hs, as_ in dated) / (2 * len(dated))
+    if avg <= 0:
+        return {}
+
+    per_team = {}
+    for dt, t1, t2, hs, as_ in dated:
+        per_team.setdefault(t1, []).append((dt, hs, as_))
+        per_team.setdefault(t2, []).append((dt, as_, hs))
+
+    mods = {}
+    for team, recs in per_team.items():
+        recs.sort(key=lambda r: r[0])  # oldest first
+        n = len(recs)
+        w = [0.5 ** (n - 1 - i) for i in range(n)]
+        ws = sum(w)
+        g_for = sum(wi * r[1] for wi, r in zip(w, recs)) / ws
+        g_ag  = sum(wi * r[2] for wi, r in zip(w, recs)) / ws
+        mods[team] = (max(0.85, min(1.15, g_for / avg)),
+                      max(0.85, min(1.15, g_ag  / avg)))
+    return mods
+
+
+_GOALS_FORM_MODS = _build_goals_form_modifiers()
+
+
+def _goals_form_mod(team):
+    """(atk, def) goals-form modifier; neutral for teams with no completed matches."""
+    return _GOALS_FORM_MODS.get(team, (1.0, 1.0))
+
+
+def _dc_lambdas(team1_name, team2_name):
+    """final_strength Dixon-Coles lambdas with the goals-form modifier applied."""
+    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
+    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
+    lh = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
+    la = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+    atk1, def1 = _goals_form_mod(team1_name)
+    atk2, def2 = _goals_form_mod(team2_name)
+    lh = max(0.3, min(3.5, lh * atk1 * def2))
+    la = max(0.3, min(3.5, la * atk2 * def1))
+    return lh, la
+
+
 def _poisson_pmf(lam, k):
     return (lam ** k) * math.exp(-lam) / math.factorial(k)
 
@@ -347,10 +425,7 @@ def _poisson_most_probable_score(team1_name, team2_name, max_goals=7):
     Score is sampled from the corrected distribution.
     1-1 override applied after sampling: if win-prob diff > 15pp, pick 2nd most probable.
     """
-    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
-    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
-    lh = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
-    la = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+    lh, la = _dc_lambdas(team1_name, team2_name)
 
     goals = list(range(max_goals + 1))
     h_pmf = sp_poisson.pmf(goals, lh)
@@ -384,10 +459,7 @@ def _extra_time_score(team1_name, team2_name):
     total ET goals per 30 min vs ~2.5 over 90 min), ET goals capped 0-3 per
     team. Score is sampled from the resulting Poisson distribution.
     """
-    s1 = _TEAM_STRENGTH.get(team1_name, {}).get("final_strength", 1600.0)
-    s2 = _TEAM_STRENGTH.get(team2_name, {}).get("final_strength", 1600.0)
-    lh = max(0.3, min(3.5, 1.5 * (s1 / s2) ** 2.0))
-    la = max(0.3, min(3.5, 1.5 * (s2 / s1) ** 2.0))
+    lh, la = _dc_lambdas(team1_name, team2_name)
     et_lh = round(lh * 0.28, 4)
     et_la = round(la * 0.28, 4)
 
