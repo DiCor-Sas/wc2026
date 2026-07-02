@@ -606,14 +606,44 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   instead of GROUP R32; the ambiguous code "F" is resolved by `match_num`
   presence so group-F results keep their GROUP F label. RC-4b: Knockout
   results now look up their real kickoff time by `match_num` instead of
-  defaulting to 15:00. URGENT REMAINING ITEM: `run_predictions.py`
-  re-simulation must be conditioned on real confirmed results — it
-  currently re-simulates the entire tournament from scratch ignoring
+  defaulting to 15:00. URGENT REMAINING ITEM (resolved later the same day —
+  see the run_predictions.py conditioning fix bullet below):
+  `run_predictions.py` re-simulation must be conditioned on real confirmed
+  results — it re-simulated the entire tournament from scratch ignoring
   `bracket_state.json` and `wc2026_results.json` entirely (verified: its
-  only live inputs are `team_strength.json` and `fixtures.json`; the
-  `engine/` package never reads results), so R32/R16 prediction cards show
-  stale or wrong probabilities until this is fixed. R16 starts July 4 —
-  this is the immediate next session.
+  only live inputs were `team_strength.json` and `fixtures.json`; the
+  `engine/` package never reads results), so R32/R16 prediction cards
+  showed stale or wrong probabilities until this was fixed.
+- **run_predictions.py conditioning fix (2026-07-01)**: The Monte Carlo
+  simulation previously re-simulated the entire tournament from scratch on
+  every run, ignoring `wc2026_results.json` and `bracket_state.json`
+  entirely (only live inputs were `team_strength.json` and
+  `fixtures.json`). This produced wrong R32 matchups (e.g. M74 showing
+  Germany vs Czechia when Paraguay beat Germany on penalties; M83 showing
+  Colombia vs Ghana when the real fixture is Portugal vs Croatia) and
+  stale/wrong probabilities on all knockout cards. Fixed by conditioning
+  the simulation on real results: `ForcedModeledMatch` replays completed
+  matches using their real scores (`wc2026_results.json`) instead of
+  sampling from the model, with shootout winners correctly propagated via
+  `get_winner()`/`get_loser()` overrides per §7 (the stored 120-min score
+  stays 1-1 for Golden Boot goal tracking, but the shootout winner
+  advances and the rank update counts it as a full win);
+  `ConditionedCompetition` overrides `build_round_of_32()` to use real
+  teams for played R32 matches and real standings for unplayed slots, with
+  pool allocation excluding already-consumed third-place groups; a
+  pre-flight assertion verifies the engine reproduces confirmed group
+  standings before the 10,000-iteration loop starts, failing loudly rather
+  than silently shipping garbage if a data-integrity issue exists.
+  Supporting refactor: the dynamic-rank-update tail of
+  `ModeledMatch.play()` was factored into
+  `ModeledMatch._apply_rank_updates(home_result=None)` in
+  `engine/match.py` (behavior-identical; the optional `home_result`
+  override is what lets forced shootout results count as full wins).
+  Remaining known approximation: until M82 is played, the third-place
+  opponents of M82/M85 (Senegal/Algeria in some order) are allocated by
+  the engine's priority heuristic — self-corrects automatically once
+  M82's real result is ingested. M81=Bosnia-Herzegovina and M87=Ghana are
+  provably forced by the pool constraints.
 
 ## 8. DASHBOARD STRUCTURE
 

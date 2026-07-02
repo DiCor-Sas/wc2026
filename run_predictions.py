@@ -36,14 +36,233 @@ KNOCKOUT_STAGES = [
     STAGE.FINAL,
 ]
 
+# ── Conditioning on real results (2026-07-01) ───────────────────────────────
+# The Monte Carlo previously re-simulated the whole tournament from scratch,
+# ignoring wc2026_results.json and bracket_state.json entirely. Every
+# simulation now replays real completed results and only samples matches
+# that have not been played yet.
+
+_REAL_RESULTS = json.load(open(_ROOT / "wc2026_results.json"))
+_BRACKET_STATE = json.load(open(_ROOT / "bracket_state.json"))
+
+# Group results keyed by unordered team pair; knockout results by match_num
+# (engine match numbers 73-104 are identical to fixtures.json match_num).
+FORCED_GROUP = {}
+FORCED_KO = {}
+for _rec in _REAL_RESULTS:
+    if _rec.get("match_num"):
+        FORCED_KO[_rec["match_num"]] = _rec
+    else:
+        FORCED_GROUP[frozenset({_rec["team1"], _rec["team2"]})] = _rec
+
+
+def _forced_winner_loser(rec):
+    """(winner_name, loser_name) for a completed knockout record.
+
+    CLAUDE.md §7: the stored score is the 120-minute score; when a
+    'shootout' schema is present the shootout winner is the match winner
+    regardless of the (level) stored score. Penalties never change the
+    stored score.
+    """
+    shootout = rec.get("shootout")
+    if shootout:
+        w = shootout["winner"]
+        return (w, rec["team2"] if w == rec["team1"] else rec["team1"])
+    if rec["home_score"] > rec["away_score"]:
+        return rec["team1"], rec["team2"]
+    if rec["away_score"] > rec["home_score"]:
+        return rec["team2"], rec["team1"]
+    raise ValueError(
+        f"Knockout match {rec.get('match_num')} is level "
+        f"{rec['home_score']}-{rec['away_score']} with no shootout schema"
+    )
+
+
+class ForcedModeledMatch(ModeledMatch):
+    """ModeledMatch that replays real completed results instead of sampling.
+
+    Group matches are matched by unordered team pair, knockout matches by
+    match number. Forced matches skip model sampling but still apply the
+    dynamic rank updates so later simulated matches see ranks shaped by
+    the real results. Shootout-decided matches keep their real 120-minute
+    score (for Golden Boot goal tracking) while get_winner()/get_loser()
+    return the real shootout winner/loser.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._forced_winner = None
+        self._forced_loser = None
+
+    def _lookup_forced(self):
+        if self.stage == STAGE.GROUP_STAGE:
+            if self.home_team is None or self.away_team is None:
+                return None
+            return FORCED_GROUP.get(
+                frozenset({self.home_team.name, self.away_team.name}))
+        return FORCED_KO.get(self.number)
+
+    def play(self):
+        rec = self._lookup_forced()
+        if rec is None:
+            return super().play()
+
+        names = {self.home_team.name, self.away_team.name}
+        assert names == {rec["team1"], rec["team2"]}, (
+            f"Match {self.number}: engine teams {names} do not match "
+            f"real result teams {{{rec['team1']!r}, {rec['team2']!r}}}"
+        )
+
+        # Orient the real 120-minute score to the engine's home/away order.
+        # For M74/M75 this stores the real 1-1, NOT a winner-adjusted score.
+        if rec["team1"] == self.home_team.name:
+            self.home_score, self.away_score = rec["home_score"], rec["away_score"]
+        else:
+            self.home_score, self.away_score = rec["away_score"], rec["home_score"]
+
+        home_result = None
+        if self.stage != STAGE.GROUP_STAGE:
+            w_name, l_name = _forced_winner_loser(rec)
+            self._forced_winner = (self.home_team
+                                   if self.home_team.name == w_name
+                                   else self.away_team)
+            self._forced_loser = (self.home_team
+                                  if self.home_team.name == l_name
+                                  else self.away_team)
+            # §7: a shootout win counts as a full win for rating updates
+            home_result = 1.0 if self._forced_winner == self.home_team else 0.0
+
+        self._apply_rank_updates(home_result=home_result)
+        return self.home_score, self.away_score
+
+    def get_winner(self):
+        # Forced knockout matches: real winner, incl. shootout.winner for a
+        # level 120-minute score (M74 -> Paraguay, M75 -> Morocco). Without
+        # this override a forced 1-1 would return None and break bracket
+        # propagation into the Round of 16.
+        if self._forced_winner is not None:
+            return self._forced_winner
+        return super().get_winner()
+
+    def get_loser(self):
+        # M74 -> Germany, M75 -> Netherlands
+        if self._forced_loser is not None:
+            return self._forced_loser
+        return super().get_loser()
+
+
+class ConditionedCompetition(Competition):
+    """Competition whose Round-of-32 build is conditioned on real results.
+
+    Played R32 matches get their real team assignments from
+    wc2026_results.json. Unplayed 1v2/2v2 slots come from the (real,
+    forced) group standings. Unplayed 1v3 slots are allocated from the
+    FIFA pool minus the third-place groups reality has already consumed —
+    otherwise the engine's simplified alphabetical allocator would hand an
+    already-eliminated third-place team (e.g. Sweden, real M77 loser) to a
+    second slot and duplicate teams across the bracket.
+    """
+
+    def build_round_of_32(self):
+        standings = self.get_group_standings()
+        team_by_name = {t.name: t for t in self.teams}
+        matches = []
+
+        # Third-place groups already consumed by real played 1v3 matches
+        used_third_place = set()
+        for match_num, (_, pairing_type, _, _) in ROUND_OF_32_BRACKET.items():
+            rec = FORCED_KO.get(match_num)
+            if rec is not None and pairing_type == "1v3":
+                for name in (rec["team1"], rec["team2"]):
+                    team = team_by_name[name]
+                    if team in self.advancing_third_place:
+                        used_third_place.add(team.group.name)
+
+        for match_num in sorted(ROUND_OF_32_BRACKET.keys()):
+            city_name, pairing_type, source1, source2 = ROUND_OF_32_BRACKET[match_num]
+            city = self._get_venue(city_name)
+            match = self._create_match(match_num, STAGE.ROUND_OF_32, city)
+
+            rec = FORCED_KO.get(match_num)
+            if rec is not None:
+                # Real played match: real teams in real home/away order
+                team1 = team_by_name[rec["team1"]]
+                team2 = team_by_name[rec["team2"]]
+            elif pairing_type in ("2v2", "1v2"):
+                team1 = self._get_team_from_source(source1, standings)
+                team2 = self._get_team_from_source(source2, standings)
+            elif pairing_type == "1v3":
+                team1 = self._get_team_from_source(source1, standings)
+                team2 = self._get_third_place_for_match_with_tracking(
+                    match_num, used_third_place)
+            else:
+                raise ValueError(f"Unknown pairing type: {pairing_type}")
+
+            match.assign_teams(team1, team2)
+            matches.append(match)
+
+        self.knockout_matches[STAGE.ROUND_OF_32] = matches
+        self.match_counter = 88
+        return matches
+
+
+def _preflight_verify_conditioning():
+    """Replay the real group results once and assert the engine reproduces
+    the CONFIRMED standings in bracket_state.json exactly, so a divergence
+    can never silently ship garbage predictions."""
+    print(f"Conditioning on real results: {len(FORCED_GROUP)} group matches, "
+          f"{len(FORCED_KO)} knockout matches (match_nums {sorted(FORCED_KO)})")
+
+    comp = ConditionedCompetition.from_json_file(
+        str(_ROOT / "fifa-wc-2026-simulation" / "data" / "wc_2026_teams.json"),
+        match_class=ForcedModeledMatch,
+    )
+    comp.setup_group_matches()
+    comp.play_group_stage()
+
+    if len(FORCED_GROUP) < 72:
+        print(f"  group stage incomplete ({len(FORCED_GROUP)}/72) — "
+              f"skipping standings verification")
+        return
+
+    standings = comp.get_group_standings()
+    for gname in sorted(comp.groups):
+        for pos, slot in ((0, "1st"), (1, "2nd")):
+            state = _BRACKET_STATE.get(f"Group {gname} {slot}", {})
+            if state.get("status") != "CONFIRMED":
+                continue
+            engine_team = standings[gname][pos].name
+            assert engine_team == state["team"], (
+                f"Group {gname} {slot}: engine standings give {engine_team!r} "
+                f"but bracket_state confirms {state['team']!r} — aborting"
+            )
+
+    comp.rank_third_place_teams()
+    real_best8 = {
+        _BRACKET_STATE[f"3rd Place Best {i}"]["team"]
+        for i in range(1, 9)
+        if _BRACKET_STATE.get(f"3rd Place Best {i}", {}).get("status") == "CONFIRMED"
+    }
+    if len(real_best8) == 8:
+        engine_best8 = {t.name for t in comp.advancing_third_place}
+        assert engine_best8 == real_best8, (
+            f"Advancing third-place mismatch: engine {sorted(engine_best8)} "
+            f"vs bracket_state {sorted(real_best8)}"
+        )
+    print("✓ Pre-flight: engine reproduces confirmed group standings and "
+          "advancing third-place teams")
+
+
+_preflight_verify_conditioning()
+
 print(f"Running {NUM_SIMULATIONS:,} simulations...")
 for i in range(NUM_SIMULATIONS):
     if (i + 1) % 1000 == 0:
         print(f"  {i + 1:,}/{NUM_SIMULATIONS:,} done...")
 
-    comp = Competition.from_json_file(
+    comp = ConditionedCompetition.from_json_file(
         str(_ROOT / "fifa-wc-2026-simulation" / "data" / "wc_2026_teams.json"),
-        match_class=ModeledMatch,
+        match_class=ForcedModeledMatch,
     )
     comp.simulate()
 

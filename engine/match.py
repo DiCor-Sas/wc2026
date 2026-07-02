@@ -327,17 +327,32 @@ class ModeledMatch(Match):
         self.home_score = sampled_index // _MAX_GOALS
         self.away_score = sampled_index % _MAX_GOALS
 
-        # Update dynamic ranks for both teams
+        self._apply_rank_updates()
+
+        return self.home_score, self.away_score
+
+    def _apply_rank_updates(self, home_result=None):
+        """Apply post-match dynamic rank updates for both teams.
+
+        home_result: optional override for the home team's result value
+        (1.0 win / 0.5 draw / 0.0 loss). When None it is derived from the
+        stored score. Callers replaying real shootout-decided knockout
+        results pass an explicit 1.0/0.0 so a shootout win counts as a
+        full win for rating purposes (CLAUDE.md §7).
+        """
+        artifact = _load_expanded_model()
+        pp = artifact["preprocess_params"]
+
         # Snapshot opponent ranks at kickoff before any updates
         home_opp_cur_rank = self.away_team.current_rank
         away_opp_cur_rank = self.home_team.current_rank
 
-        home_result = (1.0 if self.home_score > self.away_score
-                       else 0.0 if self.home_score < self.away_score
-                       else 0.5)
+        if home_result is None:
+            home_result = (1.0 if self.home_score > self.away_score
+                           else 0.0 if self.home_score < self.away_score
+                           else 0.5)
         away_result = 1.0 - home_result
 
-        pp = artifact["preprocess_params"]
         self._update_ranks(
             self.home_team, home_opp_cur_rank,
             goals_scored=self.home_score,
@@ -350,5 +365,3 @@ class ModeledMatch(Match):
             goals_conceded=self.home_score,
             result=away_result, pp=pp,
         )
-
-        return self.home_score, self.away_score
