@@ -657,6 +657,19 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   advancers; M85 pool allows J but not L, forcing Algeria into M85 and Ghana
   into M87 by propagation. Fix timed before M85 kickoff (22:00 COT July 2)
   and the 21:40 Telegram reminder.
+- **Predicted score argmax fix (2026-07-02)**:
+  `_poisson_most_probable_score()` and `_extra_time_score()` in
+  `run_predictions.py` were sampling a score from the DC-corrected joint
+  distribution rather than returning the mode. This produced extreme
+  scorelines (e.g. 7-0 Argentina vs Cabo Verde, 0-0 with 84% win probability
+  for France vs Paraguay) that changed on every pipeline run and
+  misrepresented the model. The distribution and probabilities were
+  correctly calibrated throughout. Fixed by replacing `np.random.choice`
+  with argmax in both functions. Three docstring lines updated to reflect
+  mode/argmax semantics instead of sampling. The 1-1 override logic is
+  unchanged and still fires correctly under argmax semantics, verified on
+  Spain vs Portugal (argmax genuinely 1-1, override fires to 1-0) and
+  Argentina vs Cabo Verde (argmax 2-0, override not entered).
 
 ## 8. DASHBOARD STRUCTURE
 

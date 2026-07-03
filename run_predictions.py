@@ -422,8 +422,8 @@ def _poisson_most_probable_score(team1_name, team2_name, max_goals=7):
     """
     lambda = 1.5 * (s_attack / s_defend) ^ 2.0, capped [0.3, 3.5].
     Joint probability matrix corrected via Dixon-Coles tau for low-scoring cells.
-    Score is sampled from the corrected distribution.
-    1-1 override applied after sampling: if win-prob diff > 15pp, pick 2nd most probable.
+    Score is the mode (argmax) of the corrected distribution.
+    1-1 override applied after argmax: if win-prob diff > 15pp, pick 2nd most probable.
     """
     lh, la = _dc_lambdas(team1_name, team2_name)
 
@@ -437,9 +437,8 @@ def _poisson_most_probable_score(team1_name, team2_name, max_goals=7):
     total_p = sum(raw)
     probs = [p / total_p for p in raw]
 
-    # Sample score from corrected distribution
-    idx = np.random.choice(len(scores), p=probs)
-    best_s = scores[idx]
+    # Most probable score: mode of the corrected distribution
+    best_s = scores[max(range(len(scores)), key=lambda i: probs[i])]
 
     # 1-1 override: if sampled (1,1) but one team has a clear win advantage
     if best_s == (1, 1):
@@ -457,7 +456,7 @@ def _extra_time_score(team1_name, team2_name):
     Simulate extra time for a knockout match level after 90 minutes.
     Lambdas are reduced to 28% of the 90-minute lambdas (reflects ~0.3-0.4
     total ET goals per 30 min vs ~2.5 over 90 min), ET goals capped 0-3 per
-    team. Score is sampled from the resulting Poisson distribution.
+    team. Score is the mode (argmax) of the resulting Poisson distribution.
     """
     lh, la = _dc_lambdas(team1_name, team2_name)
     et_lh = round(lh * 0.28, 4)
@@ -470,7 +469,7 @@ def _extra_time_score(team1_name, team2_name):
     raw = [h_pmf[g1] * a_pmf[g2] for g1, g2 in scores]
     total_p = sum(raw)
     probs = [p / total_p for p in raw]
-    et_g1, et_g2 = scores[np.random.choice(len(scores), p=probs)]
+    et_g1, et_g2 = scores[max(range(len(scores)), key=lambda i: probs[i])]
     return et_g1, et_g2, et_lh, et_la
 
 
