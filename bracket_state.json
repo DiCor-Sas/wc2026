@@ -745,16 +745,17 @@
   },
   "R16 M89": {
     "slot": "R16 M89",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "France",
-    "probability": 0.8532,
-    "qualified_via": "Round of 16",
-    "result": "France 2-0 Paraguay (85.32%)",
+    "loser": "Paraguay",
+    "probability": 1.0,
+    "qualified_via": "Won M89",
+    "result": "Paraguay 0-1 France",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 85.3%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "R16 M90": {
@@ -776,13 +777,13 @@
     "slot": "R16 M91",
     "status": "PROJECTED",
     "team": "Brazil",
-    "probability": 0.6769,
+    "probability": 0.6834,
     "qualified_via": "Round of 16",
-    "result": "Brazil 2-1 Norway (67.69%)",
+    "result": "Brazil 2-1 Norway (68.34%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 67.7%",
+      "label": "PROJECTED 68.3%",
       "style": "muted"
     }
   },
@@ -790,13 +791,13 @@
     "slot": "R16 M92",
     "status": "PROJECTED",
     "team": "Mexico",
-    "probability": 0.6791,
+    "probability": 0.673,
     "qualified_via": "Round of 16",
-    "result": "Mexico 0-1 England (67.91%)",
+    "result": "Mexico 0-1 England (67.3%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 67.9%",
+      "label": "PROJECTED 67.3%",
       "style": "muted"
     }
   },
@@ -804,13 +805,13 @@
     "slot": "R16 M93",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.6649,
+    "probability": 0.6705,
     "qualified_via": "Round of 16",
-    "result": "Spain 1-0 Portugal (66.49%)",
+    "result": "Spain 1-0 Portugal (67.05%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 66.5%",
+      "label": "PROJECTED 67.0%",
       "style": "muted"
     }
   },
@@ -818,13 +819,13 @@
     "slot": "R16 M94",
     "status": "PROJECTED",
     "team": "USA",
-    "probability": 0.5421,
+    "probability": 0.5504,
     "qualified_via": "Round of 16",
-    "result": "USA 1-2 Belgium (54.21%)",
+    "result": "USA 1-2 Belgium (55.04%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 54.2%",
+      "label": "PROJECTED 55.0%",
       "style": "muted"
     }
   },
@@ -832,13 +833,13 @@
     "slot": "R16 M95",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.7637,
+    "probability": 0.7662,
     "qualified_via": "Round of 16",
-    "result": "Argentina 2-0 Egypt (76.37%)",
+    "result": "Argentina 2-0 Egypt (76.62%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 76.4%",
+      "label": "PROJECTED 76.6%",
       "style": "muted"
     }
   },
@@ -846,13 +847,13 @@
     "slot": "R16 M96",
     "status": "PROJECTED",
     "team": "Colombia",
-    "probability": 0.608,
+    "probability": 0.6073,
     "qualified_via": "Round of 16",
-    "result": "Colombia 1-1 Switzerland (60.8%)",
+    "result": "Colombia 1-1 Switzerland (60.73%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 60.8%",
+      "label": "PROJECTED 60.7%",
       "style": "muted"
     }
   },
@@ -860,9 +861,9 @@
     "slot": "QF M97",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.5619,
+    "probability": 0.5625,
     "qualified_via": "Quarter-final",
-    "result": "France 1-0 Morocco (56.19%)",
+    "result": "France 1-0 Morocco (56.25%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -874,13 +875,13 @@
     "slot": "QF M98",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.5117,
+    "probability": 0.5229,
     "qualified_via": "Quarter-final",
-    "result": "Spain 2-0 USA (51.17%)",
+    "result": "Spain 2-0 USA (52.29%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 51.2%",
+      "label": "PROJECTED 52.3%",
       "style": "muted"
     }
   },
@@ -888,9 +889,9 @@
     "slot": "QF M99",
     "status": "PROJECTED",
     "team": "Mexico",
-    "probability": 0.3813,
+    "probability": 0.3812,
     "qualified_via": "Quarter-final",
-    "result": "Mexico 0-1 Brazil (38.13%)",
+    "result": "Mexico 0-1 Brazil (38.12%)",
     "display": {
       "color": "projected",
       "icon": "~",
@@ -902,13 +903,13 @@
     "slot": "QF M100",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.4479,
+    "probability": 0.4546,
     "qualified_via": "Quarter-final",
-    "result": "Argentina 1-0 Colombia (44.79%)",
+    "result": "Argentina 1-0 Colombia (45.46%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 44.8%",
+      "label": "PROJECTED 45.5%",
       "style": "muted"
     }
   },
@@ -916,13 +917,13 @@
     "slot": "SF M101",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.3048,
+    "probability": 0.3002,
     "qualified_via": "Semi-final",
-    "result": "France 0-1 Spain (30.48%)",
+    "result": "France 0-1 Spain (30.02%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 30.5%",
+      "label": "PROJECTED 30.0%",
       "style": "muted"
     }
   },
@@ -930,27 +931,27 @@
     "slot": "SF M102",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.2186,
+    "probability": 0.2251,
     "qualified_via": "Semi-final",
-    "result": "Argentina 2-1 Mexico (21.86%)",
+    "result": "Argentina 2-1 Mexico (22.51%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 21.9%",
+      "label": "PROJECTED 22.5%",
       "style": "muted"
     }
   },
   "Final Winner": {
     "slot": "Final Winner",
     "status": "PROJECTED",
-    "team": "France",
-    "probability": 0.1443,
+    "team": "Spain",
+    "probability": 0.1487,
     "qualified_via": "Final",
-    "result": "France 0-1 Spain (14.43%)",
+    "result": "Spain 1-0 France (14.87%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 14.4%",
+      "label": "PROJECTED 14.9%",
       "style": "muted"
     }
   }
