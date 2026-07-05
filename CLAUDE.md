@@ -670,6 +670,24 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   unchanged and still fires correctly under argmax semantics, verified on
   Spain vs Portugal (argmax genuinely 1-1, override fires to 1-0) and
   Argentina vs Cabo Verde (argmax 2-0, override not entered).
+- **MC modal score fix (2026-07-05)**: knockout prediction cards previously
+  showed a win probability from the engine Monte Carlo and a predicted score
+  from the DC/ELO path, which could point to different winners (e.g. M92
+  showed Mexico 67.82% win probability alongside 0-1 England predicted
+  score). Fixed by reading the modal (most frequent) scoreline from the
+  already-populated ko_score_tracker in run_predictions.py instead of
+  calling _knockout_score(). Both displayed values now come from the same
+  tournament-conditioned Monte Carlo model. Silent fallback to the DC/ELO
+  path preserved when the tracker has no entries for a winner. Win
+  probabilities, schema, and all other dashboard surfaces are
+  byte-identical. run_predictions.py is not in the CI FILES list so no
+  automation pause required. Side effects: completed knockout matches now
+  show their real score on bracket cards instead of a DC-fabricated one,
+  and the optional score_90/score_120/went_to_et/went_to_penalties fields
+  are only emitted on the (never-expected) DC fallback path — the engine
+  samples decisive knockout scores only, so the MAY GO TO PENALTIES /
+  INCL. EXTRA TIME labels no longer appear (all consumers read these
+  fields via .get() with safe defaults).
 
 ## 8. DASHBOARD STRUCTURE
 

@@ -519,6 +519,20 @@ def format_team_list(counter, top_n=None):
         items = items[:top_n]
     return [{"team": t, "count": c, "probability": pct(c, total)} for t, c in items]
 
+def _mc_modal_score(match_num, winner_name):
+    """Most frequent (winner_goals, loser_goals) scoreline among the Monte
+    Carlo iterations in which winner_name won this match, read from
+    ko_score_tracker. Returns None when no such iteration exists, in which
+    case the caller silently falls back to the DC/ELO score path.
+    """
+    scores = Counter()
+    for (w, w_g, l_g), n in ko_score_tracker[match_num].items():
+        if w == winner_name:
+            scores[(w_g, l_g)] += n
+    if not scores:
+        return None
+    return scores.most_common(1)[0][0]
+
 def format_ko_match(match_num, team_pool=None):
     """
     Build match display data for match_num.
@@ -550,9 +564,16 @@ def format_ko_match(match_num, team_pool=None):
         likely_winner = max(teams_out, key=lambda x: x["overall_win_pct"])["name"]
         likely_loser = next((t["name"] for t in teams_out if t["name"] != likely_winner), "?")
 
-        # Fix 3 + ET fix: Poisson most-probable score, with fatigue-adjusted
-        # extra time if level after 90 minutes
-        score_info = _knockout_score(likely_winner, likely_loser)
+        # Modal MC scoreline conditioned on the likely winner, so the
+        # displayed score and win probability come from the same
+        # (tournament-conditioned) model. Silent fallback to the DC path
+        # when the tracker has no entries for this winner; only that
+        # fallback can produce the score_90/ET fields below.
+        modal = _mc_modal_score(match_num, likely_winner)
+        if modal is not None:
+            score_info = {"display_score": modal}
+        else:
+            score_info = _knockout_score(likely_winner, likely_loser)
         w_g, l_g = score_info["display_score"]
         win_pct = max(teams_out, key=lambda x: x["overall_win_pct"])["overall_win_pct"]
         predicted_score = f"{likely_winner} {w_g}-{l_g} {likely_loser} ({win_pct}%)"
@@ -775,8 +796,13 @@ tp_t1, tp_t2 = m103_entry(m103_top[0]), m103_entry(m103_top[1])
 tp_winner = max([tp_t1, tp_t2], key=lambda t: t["overall_win_pct"])["name"]
 tp_loser = tp_t2["name"] if tp_winner == tp_t1["name"] else tp_t1["name"]
 
-# Poisson-based predicted score for 3rd-place match (+ ET fix)
-tp_score_info = _knockout_score(tp_winner, tp_loser)
+# Modal MC scoreline for the 3rd-place match, same silent DC fallback
+# as format_ko_match()
+tp_modal = _mc_modal_score(103, tp_winner)
+if tp_modal is not None:
+    tp_score_info = {"display_score": tp_modal}
+else:
+    tp_score_info = _knockout_score(tp_winner, tp_loser)
 tp_wg, tp_lg = tp_score_info["display_score"]
 tp_wp = max(tp_t1, tp_t2, key=lambda t: t["overall_win_pct"])["overall_win_pct"]
 tp_predicted_score = f"{tp_winner} {tp_wg}-{tp_lg} {tp_loser} ({tp_wp}%)"
