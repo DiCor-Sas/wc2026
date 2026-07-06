@@ -805,16 +805,17 @@
   },
   "R16 M93": {
     "slot": "R16 M93",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "Spain",
-    "probability": 0.6654,
-    "qualified_via": "Round of 16",
-    "result": "Spain 1-0 Portugal (66.54%)",
+    "loser": "Portugal",
+    "probability": 1.0,
+    "qualified_via": "Won M93",
+    "result": "Portugal 0-1 Spain",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 66.5%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "R16 M94": {
