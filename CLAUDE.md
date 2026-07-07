@@ -688,6 +688,16 @@ column as COT (cross-checked against ARG/URU = COT+2). Used to correct all
   samples decisive knockout scores only, so the MAY GO TO PENALTIES /
   INCL. EXTRA TIME labels no longer appear (all consumers read these
   fields via .get() with safe defaults).
+- **Upcoming cards 48h backfill fix (2026-07-07)**: `_upcoming_matches()` in
+  `generate_index.py` only showed fixtures within a 48h window, which left
+  the upcoming section empty or sparse during multi-day gaps between
+  knockout rounds (e.g. all four quarterfinals fell 4.7+ hours outside the
+  window on July 7). Fixed by collecting beyond-window future fixtures into
+  a separate list and backfilling up to 4 total cards when the primary
+  window yields fewer than 4. Backfilled cards go through the same resolver,
+  predictions lookup, and rendering logic as normal upcoming cards. No
+  automation pause required since `generate_index.py` is not in the CI
+  FILES list.
 
 ## 8. DASHBOARD STRUCTURE
 

@@ -648,6 +648,7 @@ def _upcoming_matches(data):
     cutoff = (now_col + timedelta(hours=48)) if tournament_started else None
 
     upcoming = []
+    beyond_window = []
     for entry in _load_fixtures():
         date_str, hour, minute, t1, t2, group, round_label, match_num = entry
         ko_col = datetime(
@@ -657,11 +658,18 @@ def _upcoming_matches(data):
         if ko_col < now_col - timedelta(minutes=180):
             continue
         if cutoff is not None and ko_col > cutoff:
+            beyond_window.append((date_str, ko_col, t1, t2, group, round_label, match_num))
             continue
         upcoming.append((date_str, ko_col, t1, t2, group, round_label, match_num))
 
     if not tournament_started:
         upcoming = upcoming[:6]
+    elif len(upcoming) < 4:
+        # Knockout rounds have multi-day gaps, so the 48h window can go
+        # sparse or empty between rounds. Backfill with the next future
+        # fixtures beyond the window (already in kickoff order via
+        # _load_fixtures) so the section always shows at least 4 cards.
+        upcoming.extend(beyond_window[:4 - len(upcoming)])
 
     results = []
     for date_str, ko_col, t1_raw, t2_raw, group, round_label, match_num in upcoming:
