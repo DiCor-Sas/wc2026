@@ -1,140 +1,140 @@
 {
   "simulations": 10000,
   "predicted_winner": "France",
-  "predicted_winner_probability_pct": 24.57,
+  "predicted_winner_probability_pct": 23.9,
   "all_teams": [
     {
       "team": "France",
-      "count": 2457,
-      "probability": 24.57,
-      "ci_low": 24.0223,
-      "ci_high": 25.1261
+      "count": 2390,
+      "probability": 23.9,
+      "ci_low": 23.3576,
+      "ci_high": 24.451
     },
     {
       "team": "Spain",
-      "count": 2256,
-      "probability": 22.56,
-      "ci_low": 22.0287,
-      "ci_high": 23.1003
-    },
-    {
-      "team": "Norway",
-      "count": 1362,
-      "probability": 13.62,
-      "ci_low": 13.1862,
-      "ci_high": 14.0657
-    },
-    {
-      "team": "Argentina",
-      "count": 1347,
-      "probability": 13.47,
-      "ci_low": 13.0383,
-      "ci_high": 13.9137
+      "count": 2225,
+      "probability": 22.25,
+      "ci_low": 21.7214,
+      "ci_high": 22.7878
     },
     {
       "team": "England",
+      "count": 1402,
+      "probability": 14.02,
+      "ci_low": 13.5808,
+      "ci_high": 14.471
+    },
+    {
+      "team": "Argentina",
       "count": 1325,
       "probability": 13.25,
       "ci_low": 12.8214,
       "ci_high": 13.6907
     },
     {
+      "team": "Norway",
+      "count": 1311,
+      "probability": 13.11,
+      "ci_low": 12.6834,
+      "ci_high": 13.5488
+    },
+    {
       "team": "Switzerland",
-      "count": 795,
-      "probability": 7.95,
-      "ci_low": 7.6101,
-      "ci_high": 8.3038
+      "count": 912,
+      "probability": 9.12,
+      "ci_low": 8.7576,
+      "ci_high": 9.4958
     },
     {
       "team": "Belgium",
-      "count": 458,
-      "probability": 4.58,
-      "ci_low": 4.3194,
-      "ci_high": 4.8555
+      "count": 435,
+      "probability": 4.35,
+      "ci_low": 4.0959,
+      "ci_high": 4.6191
     }
   ],
   "runners_up": [
     {
       "team": "Argentina",
-      "count": 2270,
-      "probability": 22.7
+      "count": 2239,
+      "probability": 22.39
     },
     {
       "team": "Spain",
-      "count": 1811,
-      "probability": 18.11
+      "count": 1910,
+      "probability": 19.1
     },
     {
       "team": "Switzerland",
-      "count": 1235,
-      "probability": 12.35
+      "count": 1251,
+      "probability": 12.51
     },
     {
       "team": "Norway",
-      "count": 915,
-      "probability": 9.15
+      "count": 850,
+      "probability": 8.5
     },
     {
       "team": "England",
-      "count": 751,
-      "probability": 7.51
+      "count": 710,
+      "probability": 7.1
     },
     {
       "team": "Belgium",
-      "count": 362,
-      "probability": 3.62
+      "count": 342,
+      "probability": 3.42
     }
   ],
   "third_place": [
     {
       "team": "Spain",
-      "count": 1949,
-      "probability": 19.49
+      "count": 1924,
+      "probability": 19.24
     },
     {
       "team": "Norway",
-      "count": 1534,
-      "probability": 15.34
+      "count": 1560,
+      "probability": 15.6
     },
     {
       "team": "England",
-      "count": 1278,
-      "probability": 12.78
+      "count": 1351,
+      "probability": 13.51
     },
     {
       "team": "Argentina",
-      "count": 1145,
-      "probability": 11.45
+      "count": 1159,
+      "probability": 11.59
     },
     {
       "team": "Belgium",
-      "count": 706,
-      "probability": 7.06
+      "count": 690,
+      "probability": 6.9
     },
     {
       "team": "Switzerland",
-      "count": 576,
-      "probability": 5.76
+      "count": 556,
+      "probability": 5.56
     }
   ],
   "match_probabilities": [
     {
       "home": "Mexico",
       "away": "South Africa",
-      "lambda_home": 2.0273,
-      "lambda_away": 1.1099,
-      "skellam_win": 0.585645,
-      "skellam_draw": 0.211859,
-      "skellam_loss": 0.202496
+      "lambda_home": 2.0274,
+      "lambda_away": 1.1098,
+      "skellam_win": 0.585675,
+      "skellam_draw": 0.21185,
+      "skellam_loss": 0.202475
     },
     {
       "home": "South Korea",
       "away": "Czechia",
-      "lambda_home": 1.5389,
-      "lambda_away": 1.4621,
-      "skellam_win": 0.395514,
-      "skellam_draw": 0.242761,
-      "skellam_loss": 0.361725
+      "lambda_home": 1.5387,
+      "lambda_away": 1.4623,
+      "skellam_win": 0.395417,
+      "skellam_draw": 0.242764,
+      "skellam_loss": 0.361819
     },
     {
       "home": "Canada",
@@ -150,27 +150,27 @@
       "away": "Paraguay",
       "lambda_home": 1.7721,
       "lambda_away": 1.2697,
-      "skellam_win": 0.492227,
-      "skellam_draw": 0.233055,
-      "skellam_loss": 0.274718
+      "skellam_win": 0.492221,
+      "skellam_draw": 0.233056,
+      "skellam_loss": 0.274723
     },
     {
       "home": "Qatar",
       "away": "Switzerland",
-      "lambda_home": 1.0172,
-      "lambda_away": 2.212,
-      "skellam_win": 0.162205,
-      "skellam_draw": 0.193233,
-      "skellam_loss": 0.644562
+      "lambda_home": 1.0174,
+      "lambda_away": 2.2116,
+      "skellam_win": 0.162287,
+      "skellam_draw": 0.193277,
+      "skellam_loss": 0.644436
     },
     {
       "home": "Brazil",
       "away": "Morocco",
-      "lambda_home": 1.9489,
-      "lambda_away": 1.1545,
-      "skellam_win": 0.558409,
-      "skellam_draw": 0.219134,
-      "skellam_loss": 0.222457
+      "lambda_home": 1.9493,
+      "lambda_away": 1.1543,
+      "skellam_win": 0.558554,
+      "skellam_draw": 0.219097,
+      "skellam_loss": 0.222349
     },
     {
       "home": "Haiti",
@@ -184,29 +184,29 @@
     {
       "home": "Australia",
       "away": "T\u00fcrkiye",
-      "lambda_home": 1.4983,
-      "lambda_away": 1.5017,
-      "skellam_win": 0.377747,
+      "lambda_home": 1.4982,
+      "lambda_away": 1.5018,
+      "skellam_win": 0.377713,
       "skellam_draw": 0.243,
-      "skellam_loss": 0.379253
+      "skellam_loss": 0.379287
     },
     {
       "home": "Germany",
       "away": "Cura\u00e7ao",
       "lambda_home": 3.5,
       "lambda_away": 0.5008,
-      "skellam_win": 0.907957,
-      "skellam_draw": 0.067497,
-      "skellam_loss": 0.024545
+      "skellam_win": 0.907963,
+      "skellam_draw": 0.067495,
+      "skellam_loss": 0.024543
     },
     {
       "home": "Netherlands",
       "away": "Japan",
-      "lambda_home": 2.3438,
+      "lambda_home": 2.3437,
       "lambda_away": 0.96,
-      "skellam_win": 0.682226,
-      "skellam_draw": 0.179341,
-      "skellam_loss": 0.138433
+      "skellam_win": 0.682206,
+      "skellam_draw": 0.179349,
+      "skellam_loss": 0.138445
     },
     {
       "home": "Ivory Coast",
@@ -220,92 +220,92 @@
     {
       "home": "Sweden",
       "away": "Tunisia",
-      "lambda_home": 1.6386,
+      "lambda_home": 1.6385,
       "lambda_away": 1.3732,
-      "skellam_win": 0.438016,
+      "skellam_win": 0.438014,
       "skellam_draw": 0.24017,
-      "skellam_loss": 0.321814
+      "skellam_loss": 0.321815
     },
     {
       "home": "Spain",
       "away": "Cabo Verde",
-      "lambda_home": 3.1781,
-      "lambda_away": 0.708,
-      "skellam_win": 0.848796,
-      "skellam_draw": 0.100184,
-      "skellam_loss": 0.051019
+      "lambda_home": 3.1784,
+      "lambda_away": 0.7079,
+      "skellam_win": 0.848845,
+      "skellam_draw": 0.100157,
+      "skellam_loss": 0.050998
     },
     {
       "home": "Belgium",
       "away": "Egypt",
       "lambda_home": 2.1506,
       "lambda_away": 1.0462,
-      "skellam_win": 0.625798,
-      "skellam_draw": 0.199583,
-      "skellam_loss": 0.174618
+      "skellam_win": 0.625776,
+      "skellam_draw": 0.199591,
+      "skellam_loss": 0.174633
     },
     {
       "home": "Saudi Arabia",
       "away": "Uruguay",
-      "lambda_home": 1.1746,
-      "lambda_away": 1.9155,
-      "skellam_win": 0.231529,
-      "skellam_draw": 0.22206,
-      "skellam_loss": 0.546412
+      "lambda_home": 1.1747,
+      "lambda_away": 1.9154,
+      "skellam_win": 0.231539,
+      "skellam_draw": 0.222063,
+      "skellam_loss": 0.546399
     },
     {
       "home": "Iran",
       "away": "New Zealand",
-      "lambda_home": 2.1711,
-      "lambda_away": 1.0363,
-      "skellam_win": 0.632148,
-      "skellam_draw": 0.197477,
-      "skellam_loss": 0.170374
+      "lambda_home": 2.1713,
+      "lambda_away": 1.0362,
+      "skellam_win": 0.632216,
+      "skellam_draw": 0.197455,
+      "skellam_loss": 0.170329
     },
     {
       "home": "France",
       "away": "Senegal",
-      "lambda_home": 2.3069,
-      "lambda_away": 0.9753,
-      "skellam_win": 0.672046,
-      "skellam_draw": 0.183245,
-      "skellam_loss": 0.144709
+      "lambda_home": 2.3065,
+      "lambda_away": 0.9755,
+      "skellam_win": 0.671943,
+      "skellam_draw": 0.183284,
+      "skellam_loss": 0.144773
     },
     {
       "home": "Iraq",
       "away": "Norway",
-      "lambda_home": 1.121,
-      "lambda_away": 2.0071,
-      "skellam_win": 0.20747,
-      "skellam_draw": 0.213783,
-      "skellam_loss": 0.578746
+      "lambda_home": 1.1213,
+      "lambda_away": 2.0066,
+      "skellam_win": 0.20758,
+      "skellam_draw": 0.213825,
+      "skellam_loss": 0.578595
     },
     {
       "home": "Argentina",
       "away": "Algeria",
-      "lambda_home": 2.5247,
-      "lambda_away": 0.8912,
-      "skellam_win": 0.728299,
-      "skellam_draw": 0.160318,
-      "skellam_loss": 0.111384
+      "lambda_home": 2.5248,
+      "lambda_away": 0.8911,
+      "skellam_win": 0.728329,
+      "skellam_draw": 0.160304,
+      "skellam_loss": 0.111366
     },
     {
       "home": "Austria",
       "away": "Jordan",
-      "lambda_home": 2.182,
+      "lambda_home": 2.1819,
       "lambda_away": 1.0312,
-      "skellam_win": 0.635492,
-      "skellam_draw": 0.196351,
-      "skellam_loss": 0.168157
+      "skellam_win": 0.635477,
+      "skellam_draw": 0.196356,
+      "skellam_loss": 0.168167
     },
     {
       "home": "Portugal",
       "away": "Congo DR",
-      "lambda_home": 2.8086,
-      "lambda_away": 0.8011,
-      "skellam_win": 0.788666,
-      "skellam_draw": 0.132074,
-      "skellam_loss": 0.07926
+      "lambda_home": 2.8088,
+      "lambda_away": 0.801,
+      "skellam_win": 0.788715,
+      "skellam_draw": 0.13205,
+      "skellam_loss": 0.079236
     },
     {
       "home": "England",
@@ -319,11 +319,11 @@
     {
       "home": "Ghana",
       "away": "Panama",
-      "lambda_home": 1.5309,
-      "lambda_away": 1.4698,
-      "skellam_win": 0.392006,
-      "skellam_draw": 0.242849,
-      "skellam_loss": 0.365144
+      "lambda_home": 1.5307,
+      "lambda_away": 1.4699,
+      "skellam_win": 0.391931,
+      "skellam_draw": 0.242851,
+      "skellam_loss": 0.365218
     },
     {
       "home": "Uzbekistan",
@@ -337,29 +337,29 @@
     {
       "home": "Czechia",
       "away": "South Africa",
-      "lambda_home": 1.7497,
-      "lambda_away": 1.2859,
-      "skellam_win": 0.483374,
-      "skellam_draw": 0.234492,
-      "skellam_loss": 0.282134
+      "lambda_home": 1.7501,
+      "lambda_away": 1.2857,
+      "skellam_win": 0.483505,
+      "skellam_draw": 0.234472,
+      "skellam_loss": 0.282024
     },
     {
       "home": "Switzerland",
       "away": "Bosnia-Herzegovina",
-      "lambda_home": 1.9451,
-      "lambda_away": 1.1568,
-      "skellam_win": 0.557067,
-      "skellam_draw": 0.21947,
-      "skellam_loss": 0.223463
+      "lambda_home": 1.9449,
+      "lambda_away": 1.1569,
+      "skellam_win": 0.557008,
+      "skellam_draw": 0.219484,
+      "skellam_loss": 0.223508
     },
     {
       "home": "Canada",
       "away": "Qatar",
-      "lambda_home": 1.7966,
-      "lambda_away": 1.2524,
-      "skellam_win": 0.501769,
-      "skellam_draw": 0.23139,
-      "skellam_loss": 0.266841
+      "lambda_home": 1.7964,
+      "lambda_away": 1.2525,
+      "skellam_win": 0.501696,
+      "skellam_draw": 0.231403,
+      "skellam_loss": 0.266901
     },
     {
       "home": "Mexico",
@@ -373,56 +373,56 @@
     {
       "home": "USA",
       "away": "Australia",
-      "lambda_home": 1.6049,
-      "lambda_away": 1.402,
-      "skellam_win": 0.423828,
-      "skellam_draw": 0.241341,
-      "skellam_loss": 0.334831
+      "lambda_home": 1.6048,
+      "lambda_away": 1.4021,
+      "skellam_win": 0.423794,
+      "skellam_draw": 0.241343,
+      "skellam_loss": 0.334862
     },
     {
       "home": "Scotland",
       "away": "Morocco",
-      "lambda_home": 1.2505,
-      "lambda_away": 1.7993,
-      "skellam_win": 0.265981,
-      "skellam_draw": 0.231199,
-      "skellam_loss": 0.502819
+      "lambda_home": 1.2507,
+      "lambda_away": 1.799,
+      "skellam_win": 0.266058,
+      "skellam_draw": 0.231216,
+      "skellam_loss": 0.502726
     },
     {
       "home": "Brazil",
       "away": "Haiti",
-      "lambda_home": 3.2434,
+      "lambda_home": 3.2437,
       "lambda_away": 0.6937,
-      "skellam_win": 0.857596,
-      "skellam_draw": 0.095194,
-      "skellam_loss": 0.04721
+      "skellam_win": 0.857628,
+      "skellam_draw": 0.095176,
+      "skellam_loss": 0.047196
     },
     {
       "home": "T\u00fcrkiye",
       "away": "Paraguay",
-      "lambda_home": 1.6582,
-      "lambda_away": 1.3569,
-      "skellam_win": 0.446212,
-      "skellam_draw": 0.239359,
-      "skellam_loss": 0.314429
+      "lambda_home": 1.6584,
+      "lambda_away": 1.3567,
+      "skellam_win": 0.446276,
+      "skellam_draw": 0.239352,
+      "skellam_loss": 0.314372
     },
     {
       "home": "Netherlands",
       "away": "Sweden",
-      "lambda_home": 2.2799,
-      "lambda_away": 0.9869,
-      "skellam_win": 0.664404,
-      "skellam_draw": 0.186103,
-      "skellam_loss": 0.149492
+      "lambda_home": 2.2797,
+      "lambda_away": 0.987,
+      "skellam_win": 0.66435,
+      "skellam_draw": 0.186123,
+      "skellam_loss": 0.149526
     },
     {
       "home": "Germany",
       "away": "Ivory Coast",
-      "lambda_home": 2.4542,
-      "lambda_away": 0.9168,
-      "skellam_win": 0.711084,
-      "skellam_draw": 0.167684,
-      "skellam_loss": 0.121232
+      "lambda_home": 2.4544,
+      "lambda_away": 0.9167,
+      "skellam_win": 0.711129,
+      "skellam_draw": 0.167665,
+      "skellam_loss": 0.121206
     },
     {
       "home": "Ecuador",
@@ -437,172 +437,172 @@
       "home": "Tunisia",
       "away": "Japan",
       "lambda_home": 1.4117,
-      "lambda_away": 1.5939,
-      "skellam_win": 0.339189,
-      "skellam_draw": 0.241661,
-      "skellam_loss": 0.41915
+      "lambda_away": 1.5938,
+      "skellam_win": 0.339223,
+      "skellam_draw": 0.241663,
+      "skellam_loss": 0.419114
     },
     {
       "home": "Spain",
       "away": "Saudi Arabia",
-      "lambda_home": 3.1012,
-      "lambda_away": 0.7255,
-      "skellam_win": 0.837793,
-      "skellam_draw": 0.106306,
-      "skellam_loss": 0.055901
+      "lambda_home": 3.1011,
+      "lambda_away": 0.7256,
+      "skellam_win": 0.837771,
+      "skellam_draw": 0.106318,
+      "skellam_loss": 0.055911
     },
     {
       "home": "Belgium",
       "away": "Iran",
-      "lambda_home": 2.0553,
-      "lambda_away": 1.0947,
-      "skellam_win": 0.595069,
-      "skellam_draw": 0.209141,
-      "skellam_loss": 0.195789
+      "lambda_home": 2.0552,
+      "lambda_away": 1.0948,
+      "skellam_win": 0.59502,
+      "skellam_draw": 0.209156,
+      "skellam_loss": 0.195824
     },
     {
       "home": "Uruguay",
       "away": "Cabo Verde",
-      "lambda_home": 1.9629,
-      "lambda_away": 1.1462,
-      "skellam_win": 0.563397,
-      "skellam_draw": 0.217867,
-      "skellam_loss": 0.218736
+      "lambda_home": 1.9632,
+      "lambda_away": 1.1461,
+      "skellam_win": 0.563492,
+      "skellam_draw": 0.217842,
+      "skellam_loss": 0.218666
     },
     {
       "home": "New Zealand",
       "away": "Egypt",
-      "lambda_home": 1.0844,
-      "lambda_away": 2.0749,
-      "skellam_win": 0.191244,
-      "skellam_draw": 0.207217,
-      "skellam_loss": 0.601539
+      "lambda_home": 1.0843,
+      "lambda_away": 2.075,
+      "skellam_win": 0.191214,
+      "skellam_draw": 0.207204,
+      "skellam_loss": 0.601582
     },
     {
       "home": "Argentina",
       "away": "Austria",
-      "lambda_home": 2.4099,
-      "lambda_away": 0.9336,
-      "skellam_win": 0.699797,
-      "skellam_draw": 0.172347,
-      "skellam_loss": 0.127856
+      "lambda_home": 2.4097,
+      "lambda_away": 0.9337,
+      "skellam_win": 0.699748,
+      "skellam_draw": 0.172367,
+      "skellam_loss": 0.127885
     },
     {
       "home": "France",
       "away": "Iraq",
-      "lambda_home": 2.9442,
-      "lambda_away": 0.7642,
-      "skellam_win": 0.81294,
-      "skellam_draw": 0.119658,
-      "skellam_loss": 0.067402
+      "lambda_home": 2.944,
+      "lambda_away": 0.7643,
+      "skellam_win": 0.812903,
+      "skellam_draw": 0.119677,
+      "skellam_loss": 0.06742
     },
     {
       "home": "Norway",
       "away": "Senegal",
-      "lambda_home": 1.5726,
-      "lambda_away": 1.4308,
-      "skellam_win": 0.410061,
-      "skellam_draw": 0.242187,
-      "skellam_loss": 0.347752
+      "lambda_home": 1.5721,
+      "lambda_away": 1.4312,
+      "skellam_win": 0.409855,
+      "skellam_draw": 0.242198,
+      "skellam_loss": 0.347947
     },
     {
       "home": "Jordan",
       "away": "Algeria",
-      "lambda_home": 1.0803,
-      "lambda_away": 2.0828,
-      "skellam_win": 0.189448,
-      "skellam_draw": 0.206438,
-      "skellam_loss": 0.604113
+      "lambda_home": 1.0805,
+      "lambda_away": 2.0825,
+      "skellam_win": 0.189521,
+      "skellam_draw": 0.20647,
+      "skellam_loss": 0.604009
     },
     {
       "home": "Portugal",
       "away": "Uzbekistan",
-      "lambda_home": 3.051,
-      "lambda_away": 0.7375,
-      "skellam_win": 0.830198,
-      "skellam_draw": 0.110455,
-      "skellam_loss": 0.059346
+      "lambda_home": 3.0511,
+      "lambda_away": 0.7374,
+      "skellam_win": 0.830213,
+      "skellam_draw": 0.110447,
+      "skellam_loss": 0.059339
     },
     {
       "home": "England",
       "away": "Ghana",
-      "lambda_home": 2.5829,
+      "lambda_home": 2.5831,
       "lambda_away": 0.8711,
-      "skellam_win": 0.741812,
-      "skellam_draw": 0.154321,
-      "skellam_loss": 0.103867
+      "skellam_win": 0.741846,
+      "skellam_draw": 0.154306,
+      "skellam_loss": 0.103849
     },
     {
       "home": "Panama",
       "away": "Croatia",
       "lambda_home": 0.8887,
-      "lambda_away": 2.5319,
-      "skellam_win": 0.110433,
-      "skellam_draw": 0.159578,
-      "skellam_loss": 0.729989
+      "lambda_away": 2.5317,
+      "skellam_win": 0.110452,
+      "skellam_draw": 0.159593,
+      "skellam_loss": 0.729955
     },
     {
       "home": "Colombia",
       "away": "Congo DR",
-      "lambda_home": 2.6621,
-      "lambda_away": 0.8452,
-      "skellam_win": 0.759233,
-      "skellam_draw": 0.146313,
-      "skellam_loss": 0.094455
+      "lambda_home": 2.6623,
+      "lambda_away": 0.8451,
+      "skellam_win": 0.759266,
+      "skellam_draw": 0.146297,
+      "skellam_loss": 0.094437
     },
     {
       "home": "Switzerland",
       "away": "Canada",
-      "lambda_home": 1.8468,
-      "lambda_away": 1.2183,
-      "skellam_win": 0.520997,
-      "skellam_draw": 0.227678,
-      "skellam_loss": 0.251325
+      "lambda_home": 1.8467,
+      "lambda_away": 1.2184,
+      "skellam_win": 0.520938,
+      "skellam_draw": 0.22769,
+      "skellam_loss": 0.251372
     },
     {
       "home": "Bosnia-Herzegovina",
       "away": "Qatar",
-      "lambda_home": 1.7058,
-      "lambda_away": 1.319,
-      "skellam_win": 0.465737,
-      "skellam_draw": 0.237041,
-      "skellam_loss": 0.297222
+      "lambda_home": 1.7056,
+      "lambda_away": 1.3192,
+      "skellam_win": 0.465665,
+      "skellam_draw": 0.23705,
+      "skellam_loss": 0.297285
     },
     {
       "home": "Scotland",
       "away": "Brazil",
-      "lambda_home": 0.9625,
-      "lambda_away": 2.3377,
-      "skellam_win": 0.139449,
-      "skellam_draw": 0.179985,
-      "skellam_loss": 0.680566
+      "lambda_home": 0.9624,
+      "lambda_away": 2.3379,
+      "skellam_win": 0.139419,
+      "skellam_draw": 0.179967,
+      "skellam_loss": 0.680614
     },
     {
       "home": "Morocco",
       "away": "Haiti",
-      "lambda_home": 2.4964,
-      "lambda_away": 0.9013,
-      "skellam_win": 0.721502,
-      "skellam_draw": 0.163263,
-      "skellam_loss": 0.115235
+      "lambda_home": 2.4961,
+      "lambda_away": 0.9014,
+      "skellam_win": 0.721421,
+      "skellam_draw": 0.163297,
+      "skellam_loss": 0.115282
     },
     {
       "home": "Czechia",
       "away": "Mexico",
-      "lambda_home": 1.2946,
-      "lambda_away": 1.7379,
-      "skellam_win": 0.286109,
-      "skellam_draw": 0.235212,
-      "skellam_loss": 0.478679
+      "lambda_home": 1.2948,
+      "lambda_away": 1.7377,
+      "skellam_win": 0.286195,
+      "skellam_draw": 0.235227,
+      "skellam_loss": 0.478578
     },
     {
       "home": "South Africa",
       "away": "South Korea",
-      "lambda_home": 1.2534,
-      "lambda_away": 1.7951,
-      "skellam_win": 0.267303,
-      "skellam_draw": 0.231492,
-      "skellam_loss": 0.501205
+      "lambda_home": 1.2533,
+      "lambda_away": 1.7952,
+      "skellam_win": 0.267279,
+      "skellam_draw": 0.231486,
+      "skellam_loss": 0.501235
     },
     {
       "home": "Cura\u00e7ao",
@@ -616,155 +616,155 @@
     {
       "home": "Ecuador",
       "away": "Germany",
-      "lambda_home": 0.9013,
-      "lambda_away": 2.4965,
-      "skellam_win": 0.115222,
-      "skellam_draw": 0.163252,
-      "skellam_loss": 0.721526
+      "lambda_home": 0.9012,
+      "lambda_away": 2.4967,
+      "skellam_win": 0.115196,
+      "skellam_draw": 0.163233,
+      "skellam_loss": 0.721571
     },
     {
       "home": "Japan",
       "away": "Sweden",
-      "lambda_home": 1.4591,
+      "lambda_home": 1.459,
       "lambda_away": 1.5421,
-      "skellam_win": 0.360399,
-      "skellam_draw": 0.242722,
-      "skellam_loss": 0.396879
+      "skellam_win": 0.360366,
+      "skellam_draw": 0.242721,
+      "skellam_loss": 0.396913
     },
     {
       "home": "Tunisia",
       "away": "Netherlands",
       "lambda_home": 0.9035,
-      "lambda_away": 2.4904,
-      "skellam_win": 0.116064,
-      "skellam_draw": 0.163885,
-      "skellam_loss": 0.72005
+      "lambda_away": 2.4902,
+      "skellam_win": 0.116094,
+      "skellam_draw": 0.163908,
+      "skellam_loss": 0.719998
     },
     {
       "home": "T\u00fcrkiye",
       "away": "USA",
-      "lambda_home": 1.4036,
-      "lambda_away": 1.603,
-      "skellam_win": 0.335551,
-      "skellam_draw": 0.241396,
-      "skellam_loss": 0.423052
+      "lambda_home": 1.4037,
+      "lambda_away": 1.6029,
+      "skellam_win": 0.335616,
+      "skellam_draw": 0.241401,
+      "skellam_loss": 0.422983
     },
     {
       "home": "Paraguay",
       "away": "Australia",
       "lambda_home": 1.3584,
-      "lambda_away": 1.6563,
-      "skellam_win": 0.315132,
-      "skellam_draw": 0.239441,
-      "skellam_loss": 0.445428
+      "lambda_away": 1.6564,
+      "skellam_win": 0.315106,
+      "skellam_draw": 0.239438,
+      "skellam_loss": 0.445456
     },
     {
       "home": "Norway",
       "away": "France",
-      "lambda_home": 1.0225,
-      "lambda_away": 2.2004,
-      "skellam_win": 0.164476,
-      "skellam_draw": 0.194439,
-      "skellam_loss": 0.641085
+      "lambda_home": 1.0224,
+      "lambda_away": 2.2007,
+      "skellam_win": 0.164413,
+      "skellam_draw": 0.194406,
+      "skellam_loss": 0.641181
     },
     {
       "home": "Senegal",
       "away": "Iraq",
-      "lambda_home": 1.9144,
-      "lambda_away": 1.1753,
-      "skellam_win": 0.546021,
-      "skellam_draw": 0.222152,
-      "skellam_loss": 0.231827
+      "lambda_home": 1.9146,
+      "lambda_away": 1.1752,
+      "skellam_win": 0.54608,
+      "skellam_draw": 0.222138,
+      "skellam_loss": 0.231782
     },
     {
       "home": "Cabo Verde",
       "away": "Saudi Arabia",
-      "lambda_home": 1.4637,
-      "lambda_away": 1.5372,
-      "skellam_win": 0.362463,
-      "skellam_draw": 0.242782,
-      "skellam_loss": 0.394755
+      "lambda_home": 1.4635,
+      "lambda_away": 1.5374,
+      "skellam_win": 0.362361,
+      "skellam_draw": 0.242779,
+      "skellam_loss": 0.39486
     },
     {
       "home": "Uruguay",
       "away": "Spain",
       "lambda_home": 0.9265,
-      "lambda_away": 2.4286,
-      "skellam_win": 0.125022,
-      "skellam_draw": 0.17038,
-      "skellam_loss": 0.704598
+      "lambda_away": 2.4285,
+      "skellam_win": 0.125032,
+      "skellam_draw": 0.170387,
+      "skellam_loss": 0.704581
     },
     {
       "home": "Egypt",
       "away": "Iran",
       "lambda_home": 1.4335,
-      "lambda_away": 1.5695,
-      "skellam_win": 0.349004,
-      "skellam_draw": 0.242253,
-      "skellam_loss": 0.408743
+      "lambda_away": 1.5696,
+      "skellam_win": 0.348979,
+      "skellam_draw": 0.242252,
+      "skellam_loss": 0.408769
     },
     {
       "home": "New Zealand",
       "away": "Belgium",
       "lambda_home": 0.7563,
-      "lambda_away": 2.9749,
-      "skellam_win": 0.06498,
-      "skellam_draw": 0.11696,
-      "skellam_loss": 0.81806
+      "lambda_away": 2.975,
+      "skellam_win": 0.064973,
+      "skellam_draw": 0.116953,
+      "skellam_loss": 0.818075
     },
     {
       "home": "Panama",
       "away": "England",
-      "lambda_home": 0.8535,
-      "lambda_away": 2.6361,
-      "skellam_win": 0.097454,
-      "skellam_draw": 0.148927,
-      "skellam_loss": 0.753619
+      "lambda_home": 0.8536,
+      "lambda_away": 2.6359,
+      "skellam_win": 0.097471,
+      "skellam_draw": 0.148942,
+      "skellam_loss": 0.753586
     },
     {
       "home": "Croatia",
       "away": "Ghana",
-      "lambda_home": 2.4808,
-      "lambda_away": 0.907,
-      "skellam_win": 0.717697,
-      "skellam_draw": 0.164891,
-      "skellam_loss": 0.117413
+      "lambda_home": 2.481,
+      "lambda_away": 0.9069,
+      "skellam_win": 0.717731,
+      "skellam_draw": 0.164876,
+      "skellam_loss": 0.117393
     },
     {
       "home": "Colombia",
       "away": "Portugal",
-      "lambda_home": 1.4218,
-      "lambda_away": 1.5825,
-      "skellam_win": 0.34373,
-      "skellam_draw": 0.241957,
-      "skellam_loss": 0.414313
+      "lambda_home": 1.4217,
+      "lambda_away": 1.5826,
+      "skellam_win": 0.343709,
+      "skellam_draw": 0.241956,
+      "skellam_loss": 0.414335
     },
     {
       "home": "Congo DR",
       "away": "Uzbekistan",
-      "lambda_home": 1.6295,
-      "lambda_away": 1.3808,
-      "skellam_win": 0.434206,
-      "skellam_draw": 0.240514,
-      "skellam_loss": 0.32528
+      "lambda_home": 1.6294,
+      "lambda_away": 1.3809,
+      "skellam_win": 0.434165,
+      "skellam_draw": 0.240517,
+      "skellam_loss": 0.325317
     },
     {
       "home": "Algeria",
       "away": "Austria",
-      "lambda_home": 1.4318,
-      "lambda_away": 1.5715,
-      "skellam_win": 0.348216,
-      "skellam_draw": 0.242212,
-      "skellam_loss": 0.409572
+      "lambda_home": 1.4316,
+      "lambda_away": 1.5717,
+      "skellam_win": 0.348133,
+      "skellam_draw": 0.242208,
+      "skellam_loss": 0.409659
     },
     {
       "home": "Jordan",
       "away": "Argentina",
-      "lambda_home": 0.6418,
+      "lambda_home": 0.6419,
       "lambda_away": 3.5,
-      "skellam_win": 0.034766,
-      "skellam_draw": 0.077424,
-      "skellam_loss": 0.88781
+      "skellam_win": 0.034772,
+      "skellam_draw": 0.077428,
+      "skellam_loss": 0.8878
     },
     {
       "home": "2ND GROUP A",
@@ -1571,57 +1571,57 @@
       {
         "match": 98,
         "likely_winner": "Spain",
-        "predicted_score": "Spain 1-0 Belgium (78.04%)",
+        "predicted_score": "Spain 1-0 Belgium (78.88%)",
         "teams": [
           {
             "name": "Spain",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 78.04,
-            "overall_win_pct": 78.04
+            "win_if_reached_pct": 78.88,
+            "overall_win_pct": 78.88
           },
           {
             "name": "Belgium",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 21.96,
-            "overall_win_pct": 21.96
+            "win_if_reached_pct": 21.12,
+            "overall_win_pct": 21.12
           }
         ]
       },
       {
         "match": 99,
         "likely_winner": "Norway",
-        "predicted_score": "Norway 2-1 England (54.24%)",
+        "predicted_score": "Norway 2-1 England (52.83%)",
         "teams": [
           {
             "name": "Norway",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 54.24,
-            "overall_win_pct": 54.24
+            "win_if_reached_pct": 52.83,
+            "overall_win_pct": 52.83
           },
           {
             "name": "England",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 45.76,
-            "overall_win_pct": 45.76
+            "win_if_reached_pct": 47.17,
+            "overall_win_pct": 47.17
           }
         ]
       },
       {
         "match": 100,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 2-1 Switzerland (65.67%)",
+        "predicted_score": "Argentina 2-1 Switzerland (65.01%)",
         "teams": [
           {
             "name": "Argentina",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 65.67,
-            "overall_win_pct": 65.67
+            "win_if_reached_pct": 65.01,
+            "overall_win_pct": 65.01
           },
           {
             "name": "Switzerland",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 34.33,
-            "overall_win_pct": 34.33
+            "win_if_reached_pct": 34.99,
+            "overall_win_pct": 34.99
           }
         ]
       }
@@ -1630,38 +1630,38 @@
       {
         "match": 101,
         "likely_winner": "France",
-        "predicted_score": "France 1-0 Spain (51.13%)",
+        "predicted_score": "France 1-0 Spain (50.88%)",
         "teams": [
           {
             "name": "France",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 51.13,
-            "overall_win_pct": 51.13
+            "win_if_reached_pct": 50.88,
+            "overall_win_pct": 50.88
           },
           {
             "name": "Spain",
-            "reach_pct": 78.04,
-            "win_if_reached_pct": 52.11,
-            "overall_win_pct": 40.67
+            "reach_pct": 78.88,
+            "win_if_reached_pct": 52.42,
+            "overall_win_pct": 41.35
           }
         ]
       },
       {
         "match": 102,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 2-1 Norway (36.17%)",
+        "predicted_score": "Argentina 2-1 Norway (35.64%)",
         "teams": [
           {
             "name": "Argentina",
-            "reach_pct": 65.67,
-            "win_if_reached_pct": 55.08,
-            "overall_win_pct": 36.17
+            "reach_pct": 65.01,
+            "win_if_reached_pct": 54.82,
+            "overall_win_pct": 35.64
           },
           {
             "name": "Norway",
-            "reach_pct": 54.24,
-            "win_if_reached_pct": 41.98,
-            "overall_win_pct": 22.77
+            "reach_pct": 52.83,
+            "win_if_reached_pct": 40.9,
+            "overall_win_pct": 21.61
           }
         ]
       }
@@ -1669,19 +1669,19 @@
     "third_place_match": {
       "match": 103,
       "likely_winner": "France",
-      "predicted_score": "France 1-0 Spain (28.12%)",
+      "predicted_score": "France 1-0 Spain (27.6%)",
       "teams": [
         {
           "name": "France",
-          "reach_pct": 48.87,
-          "win_if_reached_pct": 57.54,
-          "overall_win_pct": 28.12
+          "reach_pct": 49.12,
+          "win_if_reached_pct": 56.19,
+          "overall_win_pct": 27.6
         },
         {
           "name": "Spain",
-          "reach_pct": 37.37,
-          "win_if_reached_pct": 52.15,
-          "overall_win_pct": 19.49
+          "reach_pct": 37.53,
+          "win_if_reached_pct": 51.27,
+          "overall_win_pct": 19.24
         }
       ]
     },
@@ -1689,38 +1689,38 @@
       "match": 103,
       "city": "Miami",
       "likely_winner": "Norway",
-      "predicted_score": "Norway 1-0 Argentina (15.34%)",
+      "predicted_score": "Norway 1-0 Argentina (15.6%)",
       "teams": [
         {
           "name": "Norway",
-          "reach_pct": 31.47,
-          "win_if_reached_pct": 48.74,
-          "overall_win_pct": 15.34
+          "reach_pct": 31.22,
+          "win_if_reached_pct": 49.97,
+          "overall_win_pct": 15.6
         },
         {
           "name": "Argentina",
-          "reach_pct": 29.5,
-          "win_if_reached_pct": 38.81,
-          "overall_win_pct": 11.45
+          "reach_pct": 29.37,
+          "win_if_reached_pct": 39.46,
+          "overall_win_pct": 11.59
         }
       ]
     },
     "final": {
       "match": 104,
       "likely_winner": "France",
-      "predicted_score": "France 1-0 Spain (24.57%)",
+      "predicted_score": "France 1-0 Spain (23.9%)",
       "teams": [
         {
           "name": "France",
-          "reach_pct": 51.13,
-          "win_if_reached_pct": 48.05,
-          "overall_win_pct": 24.57
+          "reach_pct": 50.88,
+          "win_if_reached_pct": 46.97,
+          "overall_win_pct": 23.9
         },
         {
           "name": "Spain",
-          "reach_pct": 40.67,
-          "win_if_reached_pct": 55.47,
-          "overall_win_pct": 22.56
+          "reach_pct": 41.35,
+          "win_if_reached_pct": 53.81,
+          "overall_win_pct": 22.25
         }
       ]
     }
@@ -1729,8 +1729,8 @@
     {
       "player": "Kylian Mbapp\u00e9",
       "team": "France",
-      "golden_boot_pct": 41.93,
-      "mean_goals": 12.86,
+      "golden_boot_pct": 41.94,
+      "mean_goals": 12.84,
       "expected_matches": 8.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1738,89 +1738,71 @@
     {
       "player": "Lautaro Mart\u00ednez",
       "team": "Argentina",
-      "golden_boot_pct": 27.51,
-      "mean_goals": 11.95,
-      "expected_matches": 7.31,
+      "golden_boot_pct": 27.84,
+      "mean_goals": 11.93,
+      "expected_matches": 7.3,
       "is_penalty_taker": false,
       "is_proxy": false
     },
     {
       "player": "Norway (squad avg)",
       "team": "Norway",
-      "golden_boot_pct": 10.54,
-      "mean_goals": 10.02,
-      "expected_matches": 7.08,
+      "golden_boot_pct": 10.9,
+      "mean_goals": 10.03,
+      "expected_matches": 7.06,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
       "player": "Mikel Oyarzabal",
       "team": "Spain",
-      "golden_boot_pct": 8.72,
-      "mean_goals": 9.83,
-      "expected_matches": 7.56,
+      "golden_boot_pct": 8.76,
+      "mean_goals": 9.8,
+      "expected_matches": 7.58,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "L. Trossard",
       "team": "Belgium",
-      "golden_boot_pct": 5.28,
-      "mean_goals": 9.39,
-      "expected_matches": 6.44,
-      "is_penalty_taker": true,
-      "is_proxy": false
-    },
-    {
-      "player": "J. Bellingham",
-      "team": "England",
-      "golden_boot_pct": 2.48,
-      "mean_goals": 7.67,
-      "expected_matches": 6.92,
+      "golden_boot_pct": 5.13,
+      "mean_goals": 9.36,
+      "expected_matches": 6.42,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "Switzerland (squad avg)",
       "team": "Switzerland",
-      "golden_boot_pct": 2.37,
-      "mean_goals": 7.65,
-      "expected_matches": 6.69,
+      "golden_boot_pct": 2.36,
+      "mean_goals": 7.66,
+      "expected_matches": 6.7,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
+      "player": "J. Bellingham",
+      "team": "England",
+      "golden_boot_pct": 2.18,
+      "mean_goals": 7.66,
+      "expected_matches": 6.94,
+      "is_penalty_taker": true,
+      "is_proxy": false
+    },
+    {
       "player": "L. Messi",
       "team": "Argentina",
-      "golden_boot_pct": 0.48,
-      "mean_goals": 6.07,
-      "expected_matches": 7.31,
+      "golden_boot_pct": 0.37,
+      "mean_goals": 6.08,
+      "expected_matches": 7.3,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
       "player": "USA (squad avg)",
       "team": "USA",
-      "golden_boot_pct": 0.26,
-      "mean_goals": 7.25,
-      "expected_matches": 5.0,
-      "is_penalty_taker": true,
-      "is_proxy": true
-    },
-    {
-      "player": "Youssef En-Nesyri",
-      "team": "Morocco",
-      "golden_boot_pct": 0.12,
-      "mean_goals": 6.3,
-      "expected_matches": 6.0,
-      "is_penalty_taker": true,
-      "is_proxy": false
-    },
-    {
-      "player": "Mexico (squad avg)",
-      "team": "Mexico",
-      "golden_boot_pct": 0.1,
-      "mean_goals": 6.67,
+      "golden_boot_pct": 0.19,
+      "mean_goals": 7.24,
       "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": true
@@ -1828,8 +1810,35 @@
     {
       "player": "Keito Nakamura",
       "team": "Japan",
-      "golden_boot_pct": 0.06,
-      "mean_goals": 8.65,
+      "golden_boot_pct": 0.07,
+      "mean_goals": 8.66,
+      "expected_matches": 4.0,
+      "is_penalty_taker": true,
+      "is_proxy": false
+    },
+    {
+      "player": "Mexico (squad avg)",
+      "team": "Mexico",
+      "golden_boot_pct": 0.07,
+      "mean_goals": 6.7,
+      "expected_matches": 5.0,
+      "is_penalty_taker": true,
+      "is_proxy": true
+    },
+    {
+      "player": "Youssef En-Nesyri",
+      "team": "Morocco",
+      "golden_boot_pct": 0.04,
+      "mean_goals": 6.33,
+      "expected_matches": 6.0,
+      "is_penalty_taker": true,
+      "is_proxy": false
+    },
+    {
+      "player": "X. Simons",
+      "team": "Netherlands",
+      "golden_boot_pct": 0.04,
+      "mean_goals": 6.3,
       "expected_matches": 4.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1837,65 +1846,65 @@
     {
       "player": "D. Rice",
       "team": "England",
-      "golden_boot_pct": 0.04,
-      "mean_goals": 4.58,
-      "expected_matches": 6.92,
+      "golden_boot_pct": 0.03,
+      "mean_goals": 4.64,
+      "expected_matches": 6.94,
       "is_penalty_taker": false,
       "is_proxy": false
     },
     {
       "player": "Norway (squad avg)",
       "team": "Norway",
-      "golden_boot_pct": 0.03,
-      "mean_goals": 4.43,
-      "expected_matches": 7.08,
+      "golden_boot_pct": 0.02,
+      "mean_goals": 4.42,
+      "expected_matches": 7.06,
       "is_penalty_taker": false,
       "is_proxy": true
     },
     {
-      "player": "B. Barcola",
-      "team": "France",
-      "golden_boot_pct": 0.02,
-      "mean_goals": 3.68,
-      "expected_matches": 8.0,
-      "is_penalty_taker": false,
-      "is_proxy": false
-    },
-    {
-      "player": "X. Simons",
-      "team": "Netherlands",
-      "golden_boot_pct": 0.02,
-      "mean_goals": 6.31,
-      "expected_matches": 4.0,
-      "is_penalty_taker": true,
-      "is_proxy": false
-    },
-    {
       "player": "Endrick",
       "team": "Brazil",
-      "golden_boot_pct": 0.01,
-      "mean_goals": 5.39,
+      "golden_boot_pct": 0.02,
+      "mean_goals": 5.41,
       "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
-      "player": "Germany (squad avg)",
-      "team": "Germany",
+      "player": "A. Rabiot",
+      "team": "France",
+      "golden_boot_pct": 0.02,
+      "mean_goals": 3.72,
+      "expected_matches": 8.0,
+      "is_penalty_taker": false,
+      "is_proxy": false
+    },
+    {
+      "player": "B. Barcola",
+      "team": "France",
       "golden_boot_pct": 0.01,
-      "mean_goals": 6.43,
-      "expected_matches": 4.0,
+      "mean_goals": 3.7,
+      "expected_matches": 8.0,
+      "is_penalty_taker": false,
+      "is_proxy": false
+    },
+    {
+      "player": "Canada (squad avg)",
+      "team": "Canada",
+      "golden_boot_pct": 0.01,
+      "mean_goals": 5.81,
+      "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": true
     },
     {
-      "player": "Sadio Mane",
-      "team": "Senegal",
+      "player": "Germany (squad avg)",
+      "team": "Germany",
       "golden_boot_pct": 0.0,
-      "mean_goals": 4.85,
+      "mean_goals": 6.44,
       "expected_matches": 4.0,
       "is_penalty_taker": true,
-      "is_proxy": false
+      "is_proxy": true
     }
   ]
 }
