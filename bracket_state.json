@@ -895,29 +895,30 @@
   },
   "QF M99": {
     "slot": "QF M99",
-    "status": "PROJECTED",
-    "team": "Norway",
-    "probability": 0.5426,
-    "qualified_via": "Quarter-final",
-    "result": "Norway 2-1 England (54.26%)",
+    "status": "CONFIRMED",
+    "team": "England",
+    "loser": "Norway",
+    "probability": 1.0,
+    "qualified_via": "Won M99",
+    "result": "Norway 1-2 England",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 54.3%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "QF M100": {
     "slot": "QF M100",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.6568,
+    "probability": 0.6515,
     "qualified_via": "Quarter-final",
-    "result": "Argentina 2-1 Switzerland (65.68%)",
+    "result": "Argentina 2-1 Switzerland (65.15%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 65.7%",
+      "label": "PROJECTED 65.1%",
       "style": "muted"
     }
   },
@@ -925,13 +926,13 @@
     "slot": "SF M101",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.6225,
+    "probability": 0.6161,
     "qualified_via": "Semi-final",
-    "result": "France 1-0 Spain (62.25%)",
+    "result": "France 1-0 Spain (61.61%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 62.3%",
+      "label": "PROJECTED 61.6%",
       "style": "muted"
     }
   },
@@ -939,13 +940,13 @@
     "slot": "SF M102",
     "status": "PROJECTED",
     "team": "Argentina",
-    "probability": 0.3654,
+    "probability": 0.3555,
     "qualified_via": "Semi-final",
-    "result": "Argentina 2-1 Norway (36.54%)",
+    "result": "Argentina 2-1 Norway (35.55%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 36.5%",
+      "label": "PROJECTED 35.5%",
       "style": "muted"
     }
   },
@@ -953,13 +954,13 @@
     "slot": "Final Winner",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.3128,
+    "probability": 0.3051,
     "qualified_via": "Final",
-    "result": "France 1-0 Spain (31.28%)",
+    "result": "France 1-0 Spain (30.51%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 31.3%",
+      "label": "PROJECTED 30.5%",
       "style": "muted"
     }
   }
