@@ -910,29 +910,30 @@
   },
   "QF M100": {
     "slot": "QF M100",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "Argentina",
-    "probability": 0.6485,
-    "qualified_via": "Quarter-final",
-    "result": "Argentina 2-1 Switzerland (64.85%)",
+    "loser": "Switzerland",
+    "probability": 1.0,
+    "qualified_via": "Won M100",
+    "result": "Argentina 3-1 Switzerland",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 64.8%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "SF M101": {
     "slot": "SF M101",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.6162,
+    "probability": 0.6185,
     "qualified_via": "Semi-final",
-    "result": "France 1-0 Spain (61.62%)",
+    "result": "France 1-0 Spain (61.85%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 61.6%",
+      "label": "PROJECTED 61.9%",
       "style": "muted"
     }
   },
@@ -940,13 +941,13 @@
     "slot": "SF M102",
     "status": "PROJECTED",
     "team": "England",
-    "probability": 0.4216,
+    "probability": 0.4091,
     "qualified_via": "Semi-final",
-    "result": "England 1-0 Argentina (42.16%)",
+    "result": "England 2-1 Argentina (40.91%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 42.2%",
+      "label": "PROJECTED 40.9%",
       "style": "muted"
     }
   },
@@ -954,13 +955,13 @@
     "slot": "Final Winner",
     "status": "PROJECTED",
     "team": "France",
-    "probability": 0.3183,
+    "probability": 0.3199,
     "qualified_via": "Final",
-    "result": "France 1-0 England (31.83%)",
+    "result": "France 1-0 England (31.99%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 31.8%",
+      "label": "PROJECTED 32.0%",
       "style": "muted"
     }
   }
