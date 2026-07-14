@@ -1,57 +1,57 @@
 {
   "simulations": 10000,
   "predicted_winner": "Spain",
-  "predicted_winner_probability_pct": 63.11,
+  "predicted_winner_probability_pct": 61.81,
   "all_teams": [
     {
       "team": "Spain",
-      "count": 6311,
-      "probability": 63.11,
-      "ci_low": 62.4893,
-      "ci_high": 63.7264
+      "count": 6181,
+      "probability": 61.81,
+      "ci_low": 61.1852,
+      "ci_high": 62.4309
     },
     {
       "team": "England",
-      "count": 2086,
-      "probability": 20.86,
-      "ci_low": 20.3439,
-      "ci_high": 21.3857
+      "count": 2203,
+      "probability": 22.03,
+      "ci_low": 21.5033,
+      "ci_high": 22.5659
     },
     {
       "team": "Argentina",
-      "count": 1603,
-      "probability": 16.03,
-      "ci_low": 15.5652,
-      "ci_high": 16.5059
+      "count": 1616,
+      "probability": 16.16,
+      "ci_low": 15.6937,
+      "ci_high": 16.6374
     }
   ],
   "runners_up": [
     {
       "team": "Argentina",
-      "count": 4292,
-      "probability": 42.92
+      "count": 4096,
+      "probability": 40.96
     },
     {
       "team": "England",
-      "count": 2019,
-      "probability": 20.19
+      "count": 2085,
+      "probability": 20.85
     }
   ],
   "third_place": [
     {
       "team": "France",
-      "count": 5443,
-      "probability": 54.43
+      "count": 5458,
+      "probability": 54.58
     },
     {
       "team": "England",
-      "count": 3029,
-      "probability": 30.29
+      "count": 2946,
+      "probability": 29.46
     },
     {
       "team": "Argentina",
-      "count": 1528,
-      "probability": 15.28
+      "count": 1596,
+      "probability": 15.96
     }
   ],
   "match_probabilities": [
@@ -1586,19 +1586,19 @@
       {
         "match": 102,
         "likely_winner": "Argentina",
-        "predicted_score": "Argentina 2-1 England (58.95%)",
+        "predicted_score": "Argentina 2-1 England (57.12%)",
         "teams": [
           {
             "name": "England",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 41.05,
-            "overall_win_pct": 41.05
+            "win_if_reached_pct": 42.88,
+            "overall_win_pct": 42.88
           },
           {
             "name": "Argentina",
             "reach_pct": 100.0,
-            "win_if_reached_pct": 58.95,
-            "overall_win_pct": 58.95
+            "win_if_reached_pct": 57.12,
+            "overall_win_pct": 57.12
           }
         ]
       }
@@ -1606,19 +1606,19 @@
     "third_place_match": {
       "match": 103,
       "likely_winner": "France",
-      "predicted_score": "France 1-0 England (54.43%)",
+      "predicted_score": "France 1-0 England (54.58%)",
       "teams": [
         {
           "name": "France",
           "reach_pct": 100.0,
-          "win_if_reached_pct": 54.43,
-          "overall_win_pct": 54.43
+          "win_if_reached_pct": 54.58,
+          "overall_win_pct": 54.58
         },
         {
           "name": "England",
-          "reach_pct": 58.95,
-          "win_if_reached_pct": 51.38,
-          "overall_win_pct": 30.29
+          "reach_pct": 57.12,
+          "win_if_reached_pct": 51.58,
+          "overall_win_pct": 29.46
         }
       ]
     },
@@ -1626,38 +1626,38 @@
       "match": 103,
       "city": "Miami",
       "likely_winner": "France",
-      "predicted_score": "France 1-0 England (54.43%)",
+      "predicted_score": "France 1-0 England (54.58%)",
       "teams": [
         {
           "name": "France",
           "reach_pct": 100.0,
-          "win_if_reached_pct": 54.43,
-          "overall_win_pct": 54.43
+          "win_if_reached_pct": 54.58,
+          "overall_win_pct": 54.58
         },
         {
           "name": "England",
-          "reach_pct": 58.95,
-          "win_if_reached_pct": 51.38,
-          "overall_win_pct": 30.29
+          "reach_pct": 57.12,
+          "win_if_reached_pct": 51.58,
+          "overall_win_pct": 29.46
         }
       ]
     },
     "final": {
       "match": 104,
       "likely_winner": "Spain",
-      "predicted_score": "Spain 1-0 Argentina (63.11%)",
+      "predicted_score": "Spain 1-0 Argentina (61.81%)",
       "teams": [
         {
           "name": "Spain",
           "reach_pct": 100.0,
-          "win_if_reached_pct": 63.11,
-          "overall_win_pct": 63.11
+          "win_if_reached_pct": 61.81,
+          "overall_win_pct": 61.81
         },
         {
           "name": "Argentina",
-          "reach_pct": 58.95,
-          "win_if_reached_pct": 27.19,
-          "overall_win_pct": 16.03
+          "reach_pct": 57.12,
+          "win_if_reached_pct": 28.29,
+          "overall_win_pct": 16.16
         }
       ]
     }
@@ -1666,7 +1666,7 @@
     {
       "player": "Lautaro Mart\u00ednez",
       "team": "Argentina",
-      "golden_boot_pct": 49.51,
+      "golden_boot_pct": 49.76,
       "mean_goals": 13.36,
       "expected_matches": 8.0,
       "is_penalty_taker": false,
@@ -1675,8 +1675,8 @@
     {
       "player": "Kylian Mbapp\u00e9",
       "team": "France",
-      "golden_boot_pct": 29.52,
-      "mean_goals": 12.26,
+      "golden_boot_pct": 28.98,
+      "mean_goals": 12.28,
       "expected_matches": 8.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1684,8 +1684,8 @@
     {
       "player": "Mikel Oyarzabal",
       "team": "Spain",
-      "golden_boot_pct": 13.51,
-      "mean_goals": 11.19,
+      "golden_boot_pct": 13.96,
+      "mean_goals": 11.23,
       "expected_matches": 8.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1693,8 +1693,8 @@
     {
       "player": "J. Bellingham",
       "team": "England",
-      "golden_boot_pct": 3.22,
-      "mean_goals": 8.85,
+      "golden_boot_pct": 3.06,
+      "mean_goals": 8.9,
       "expected_matches": 8.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1702,8 +1702,8 @@
     {
       "player": "L. Trossard",
       "team": "Belgium",
-      "golden_boot_pct": 1.91,
-      "mean_goals": 9.17,
+      "golden_boot_pct": 1.85,
+      "mean_goals": 9.16,
       "expected_matches": 6.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1711,8 +1711,8 @@
     {
       "player": "Norway (squad avg)",
       "team": "Norway",
-      "golden_boot_pct": 1.13,
-      "mean_goals": 8.57,
+      "golden_boot_pct": 1.2,
+      "mean_goals": 8.55,
       "expected_matches": 6.0,
       "is_penalty_taker": true,
       "is_proxy": true
@@ -1720,8 +1720,8 @@
     {
       "player": "L. Messi",
       "team": "Argentina",
-      "golden_boot_pct": 0.84,
-      "mean_goals": 6.81,
+      "golden_boot_pct": 0.78,
+      "mean_goals": 6.75,
       "expected_matches": 8.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1729,7 +1729,7 @@
     {
       "player": "USA (squad avg)",
       "team": "USA",
-      "golden_boot_pct": 0.11,
+      "golden_boot_pct": 0.12,
       "mean_goals": 7.23,
       "expected_matches": 5.0,
       "is_penalty_taker": true,
@@ -1738,9 +1738,18 @@
     {
       "player": "Switzerland (squad avg)",
       "team": "Switzerland",
-      "golden_boot_pct": 0.06,
-      "mean_goals": 6.88,
+      "golden_boot_pct": 0.07,
+      "mean_goals": 6.89,
       "expected_matches": 6.0,
+      "is_penalty_taker": true,
+      "is_proxy": true
+    },
+    {
+      "player": "Mexico (squad avg)",
+      "team": "Mexico",
+      "golden_boot_pct": 0.06,
+      "mean_goals": 6.7,
+      "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": true
     },
@@ -1748,7 +1757,7 @@
       "player": "Youssef En-Nesyri",
       "team": "Morocco",
       "golden_boot_pct": 0.06,
-      "mean_goals": 6.3,
+      "mean_goals": 6.28,
       "expected_matches": 6.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1756,8 +1765,8 @@
     {
       "player": "D. Rice",
       "team": "England",
-      "golden_boot_pct": 0.03,
-      "mean_goals": 5.32,
+      "golden_boot_pct": 0.04,
+      "mean_goals": 5.34,
       "expected_matches": 8.0,
       "is_penalty_taker": false,
       "is_proxy": false
@@ -1766,34 +1775,34 @@
       "player": "Keito Nakamura",
       "team": "Japan",
       "golden_boot_pct": 0.03,
-      "mean_goals": 8.65,
+      "mean_goals": 8.67,
       "expected_matches": 4.0,
       "is_penalty_taker": true,
       "is_proxy": false
     },
     {
-      "player": "Mexico (squad avg)",
-      "team": "Mexico",
-      "golden_boot_pct": 0.03,
-      "mean_goals": 6.69,
-      "expected_matches": 5.0,
-      "is_penalty_taker": true,
-      "is_proxy": true
-    },
-    {
       "player": "X. Simons",
       "team": "Netherlands",
       "golden_boot_pct": 0.02,
-      "mean_goals": 6.31,
+      "mean_goals": 6.29,
       "expected_matches": 4.0,
       "is_penalty_taker": true,
+      "is_proxy": false
+    },
+    {
+      "player": "B. Barcola",
+      "team": "France",
+      "golden_boot_pct": 0.01,
+      "mean_goals": 3.5,
+      "expected_matches": 8.0,
+      "is_penalty_taker": false,
       "is_proxy": false
     },
     {
       "player": "Endrick",
       "team": "Brazil",
       "golden_boot_pct": 0.01,
-      "mean_goals": 5.37,
+      "mean_goals": 5.39,
       "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": false
@@ -1801,20 +1810,11 @@
     {
       "player": "Egypt (squad avg)",
       "team": "Egypt",
-      "golden_boot_pct": 0.0,
-      "mean_goals": 5.58,
+      "golden_boot_pct": 0.01,
+      "mean_goals": 5.54,
       "expected_matches": 5.0,
       "is_penalty_taker": true,
       "is_proxy": true
-    },
-    {
-      "player": "B. Barcola",
-      "team": "France",
-      "golden_boot_pct": 0.0,
-      "mean_goals": 3.49,
-      "expected_matches": 8.0,
-      "is_penalty_taker": false,
-      "is_proxy": false
     },
     {
       "player": "Germany (squad avg)",
