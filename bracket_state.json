@@ -940,29 +940,30 @@
   },
   "SF M102": {
     "slot": "SF M102",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "Argentina",
-    "probability": 0.5816,
-    "qualified_via": "Semi-final",
-    "result": "Argentina 2-1 England (58.16%)",
+    "loser": "England",
+    "probability": 1.0,
+    "qualified_via": "Won M102",
+    "result": "England 1-2 Argentina",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 58.2%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "Final Winner": {
     "slot": "Final Winner",
     "status": "PROJECTED",
     "team": "Spain",
-    "probability": 0.6212,
+    "probability": 0.622,
     "qualified_via": "Final",
-    "result": "Spain 1-0 Argentina (62.12%)",
+    "result": "Spain 1-0 Argentina (62.2%)",
     "display": {
       "color": "projected",
       "icon": "~",
-      "label": "PROJECTED 62.1%",
+      "label": "PROJECTED 62.2%",
       "style": "muted"
     }
   }
