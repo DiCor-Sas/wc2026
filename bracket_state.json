@@ -955,16 +955,17 @@
   },
   "Final Winner": {
     "slot": "Final Winner",
-    "status": "PROJECTED",
+    "status": "CONFIRMED",
     "team": "Spain",
-    "probability": 0.7707,
-    "qualified_via": "Final",
-    "result": "Spain 1-0 Argentina (77.07%)",
+    "loser": "Argentina",
+    "probability": 1.0,
+    "qualified_via": "Won M104",
+    "result": "Spain 1-0 Argentina",
     "display": {
-      "color": "projected",
-      "icon": "~",
-      "label": "PROJECTED 77.1%",
-      "style": "muted"
+      "color": "confirmed",
+      "icon": "\u2713",
+      "label": "CONFIRMED",
+      "style": "solid"
     }
   },
   "3P M103": {
